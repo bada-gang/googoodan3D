@@ -29,7 +29,7 @@ const ENV_INTENSITY = 0.3;
 const indoorColor = new Color();
 
 /** 그림자를 계산하는 범위 (그림자 상자 가운데에서 ±m). 넓을수록 그릴 물체가 많아진다 */
-const SHADOW_RANGE = 9;
+const SHADOW_RANGE = 7;
 /** 그림자 상자를 캐릭터보다 화면 위쪽으로 당기는 거리 (m) */
 const SHADOW_AHEAD = 3;
 

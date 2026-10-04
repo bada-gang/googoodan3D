@@ -1,7 +1,7 @@
 /**
  * 하단 터치 조작. (명세 7, 37)
  * - 왼쪽 아래: 이동 조이스틱 (땅을 톡 쳐서 걸어가기도 된다)
- * - 가운데: 가방 · 꾸미기
+ * - 가운데: 가방 · 꾸미기 (자리 고정 — 행동 버튼이 생기고 사라져도 움직이지 않는다)
  * - 오른쪽 아래: 상황별 행동 버튼
  *
  * 멀티터치·길게 누르기·더블 탭을 필수로 쓰지 않는다.
@@ -20,6 +20,11 @@ const PAD_SIZE = 184;
 const KNOB_SIZE = 84;
 /** 손잡이가 움직일 수 있는 거리 */
 const KNOB_TRAVEL = (PAD_SIZE - KNOB_SIZE) / 2 + 6;
+/**
+ * 가방 · 꾸미기 묶음의 가운데 자리 (화면 너비 대비). 화면 가운데보다 조금 왼쪽.
+ * 왼손 모드는 행동 버튼이 왼쪽에 오므로 좌우를 뒤집는다.
+ */
+const MENU_CENTER = 0.45;
 /** 이보다 조금 밀면 무시한다 (손가락을 얹기만 해도 움직이지 않게) */
 const DEAD_ZONE = 0.18;
 
@@ -171,7 +176,10 @@ export function TouchControls(): React.ReactElement {
       {leftHanded ? actionCluster : moveCluster}
 
       {!inMinigame && !overlay && (
-        <div className="pointer-events-auto flex items-end gap-3">
+        <div
+          className="pointer-events-auto absolute bottom-3 flex -translate-x-1/2 items-end gap-3"
+          style={{ left: `${(leftHanded ? 1 - MENU_CENTER : MENU_CENTER) * 100}%` }}
+        >
           <button
             type="button"
             aria-label="가방"
