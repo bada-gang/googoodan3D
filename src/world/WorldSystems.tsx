@@ -10,6 +10,7 @@ import { gameEvents } from '@/bridge/eventBus';
 import { daylight } from './core/dayNight';
 import { input, player, resetInput } from './core/runtime';
 import { useWorldScene } from './core/scenes';
+import { SUN_OFFSET } from './core/sun';
 import { TEST_FLAGS } from './core/testFlags';
 
 /** 캐릭터에서 카메라까지 (뒤쪽 위). 동물의 숲처럼 비스듬히 내려다본다 */
@@ -90,7 +91,7 @@ export function Sun(): React.ReactElement {
     // 화면에 보이는 땅은 대부분 캐릭터 앞(-z)에 있다
     const p = player.position;
     const cz = p.z - SHADOW_AHEAD;
-    light.current?.position.set(p.x - 8, 14, cz + 6);
+    light.current?.position.set(p.x + SUN_OFFSET.x, SUN_OFFSET.y, cz + SUN_OFFSET.z);
     target.current?.position.set(p.x, 0, cz);
 
     // 밤낮 (core/dayNight). 밤에도 나무 · 동물이 구별되게 너무 어둡게 하지 않는다. 집 안은 조금만
@@ -117,7 +118,7 @@ export function Sun(): React.ReactElement {
         ref={light}
         intensity={SUN_INTENSITY}
         castShadow={!TEST_FLAGS.noShadow}
-        shadow-mapSize={[1024, 1024]}
+        shadow-mapSize={[512, 512]}
         shadow-camera-left={-SHADOW_RANGE}
         shadow-camera-right={SHADOW_RANGE}
         shadow-camera-top={SHADOW_RANGE}

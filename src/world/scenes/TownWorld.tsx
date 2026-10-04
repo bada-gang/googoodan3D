@@ -14,6 +14,7 @@ import { AREA_NAME } from '@/config/strings';
 import { gameEvents } from '@/bridge/eventBus';
 import { FURNITURE_3D } from '@/config/furniture3d';
 import { GltfModel } from '../assets3d';
+import { BakedShadows, StaticShadow } from '../core/bakedShadows';
 import { NightGlow } from '../core/dayNight';
 import { useInteractable } from '../core/interaction';
 import { placePlayer } from '../core/movement';
@@ -46,6 +47,14 @@ const SHOP_LIGHTS: Record<'seed' | 'furniture', [number, number, number, number]
     [-2.15, 2.05, 1.35, 0.9],
     [2.15, 2.05, 1.35, 0.9],
   ],
+};
+
+/** 미리 그리는 그림자를 까는 범위 (그림자는 +x · -z 쪽으로 진다) */
+const TOWN_SHADOW_BOUNDS = {
+  minX: TOWN.bounds.minX - 3,
+  maxX: TOWN.bounds.maxX + 5,
+  minZ: TOWN.bounds.minZ - 5,
+  maxZ: TOWN.bounds.maxZ + 3,
 };
 
 /** 뒤쪽 구석의 나무 (열매 없는 사과나무 모델) */
@@ -99,7 +108,11 @@ export function TownWorld(): React.ReactElement {
       <group position={[(bounds.minX + bounds.maxX) / 2, 0, (bounds.minZ + bounds.maxZ) / 2]}>
         <GrassGround width={width} depth={depth} />
       </group>
-      <Surroundings bounds={bounds} />
+      {/* 시장은 움직이는 것이 캐릭터뿐이라, 건물 · 장식 · 나무 그림자를 모두 미리 그려 둔다 (core/bakedShadows) */}
+      <BakedShadows bounds={TOWN_SHADOW_BOUNDS} />
+      <StaticShadow>
+        <Surroundings bounds={bounds} />
+      </StaticShadow>
 
       {/* 큰길, 가게 문 앞으로 가는 길, 분수 광장 */}
       <PathStrip from={{ x: TOWN.gate.x + 0.4, z: TOWN.gate.z - 0.6 }} to={{ x: TOWN.gate.x + 1.5, z: mainPathZ }} />
@@ -109,37 +122,39 @@ export function TownWorld(): React.ReactElement {
       ))}
       <Plaza />
 
-      <Gate />
-      <Shop
-        id="seed"
-        label="농장 가게"
-        modelKey={MODELS.buildings.seedShop}
-        position={TOWN.seedShop.position}
-        door={TOWN.seedShop.door}
-        half={TOWN.seedShop.half}
-        color={PALETTE.leaf}
-      />
-      <Shop
-        id="furniture"
-        label="가구 가게"
-        modelKey={MODELS.buildings.furnitureShop}
-        position={TOWN.furnitureShop.position}
-        door={TOWN.furnitureShop.door}
-        half={TOWN.furnitureShop.half}
-        color="#f6b98a"
-      />
+      <StaticShadow>
+        <Gate />
+        <Shop
+          id="seed"
+          label="농장 가게"
+          modelKey={MODELS.buildings.seedShop}
+          position={TOWN.seedShop.position}
+          door={TOWN.seedShop.door}
+          half={TOWN.seedShop.half}
+          color={PALETTE.leaf}
+        />
+        <Shop
+          id="furniture"
+          label="가구 가게"
+          modelKey={MODELS.buildings.furnitureShop}
+          position={TOWN.furnitureShop.position}
+          door={TOWN.furnitureShop.door}
+          half={TOWN.furnitureShop.half}
+          color="#f6b98a"
+        />
 
-      {DECOR.map((item, i) => (
-        <group key={i} position={[item.x, 0, item.z]} rotation-y={item.rotation ?? 0} scale={item.scale ?? 1}>
-          <GltfModel modelKey={furnitureModelKey(item.id)} fallback={<FallbackDecor />} />
-          {FURNITURE_3D[item.id]?.glow && <NightGlow y={FURNITURE_3D[item.id].glow!.y} size={FURNITURE_3D[item.id].glow!.size} />}
-        </group>
-      ))}
-      {TREES.map((tree, i) => (
-        <group key={i} position={[tree.x, 0, tree.z]} rotation-y={i * 1.7}>
-          <GltfModel modelKey={MODELS.trees.apple} fallback={<FallbackDecor />} />
-        </group>
-      ))}
+        {DECOR.map((item, i) => (
+          <group key={i} position={[item.x, 0, item.z]} rotation-y={item.rotation ?? 0} scale={item.scale ?? 1}>
+            <GltfModel modelKey={furnitureModelKey(item.id)} fallback={<FallbackDecor />} />
+            {FURNITURE_3D[item.id]?.glow && <NightGlow y={FURNITURE_3D[item.id].glow!.y} size={FURNITURE_3D[item.id].glow!.size} />}
+          </group>
+        ))}
+        {TREES.map((tree, i) => (
+          <group key={i} position={[tree.x, 0, tree.z]} rotation-y={i * 1.7}>
+            <GltfModel modelKey={MODELS.trees.apple} fallback={<FallbackDecor />} />
+          </group>
+        ))}
+      </StaticShadow>
     </group>
   );
 }

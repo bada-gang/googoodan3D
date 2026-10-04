@@ -28,6 +28,7 @@ import { useInteractable } from '../../core/interaction';
 import { obstacles, type Obstacle } from '../../core/runtime';
 import { mergedBoxGeometry, type BoxSpec } from '../../props/mergedBoxes';
 import { SignBoard } from '../../props/SignBoard';
+import { StaticShadow } from '../../core/bakedShadows';
 
 /* ---------------------------------- 배치 ---------------------------------- */
 
@@ -205,19 +206,22 @@ export function AnimalPen(): React.ReactElement {
 
   return (
     <group>
-      <Fence />
-      <group position={[BARN.x, 0, BARN.z]}>
-        <GltfModel modelKey={MODELS.buildings.barn} fallback={<FallbackBarn />} />
-      </group>
-      <group position={[TROUGH.x, 0, TROUGH.z]} rotation-y={Math.PI / 2}>
-        <GltfModel modelKey={MODELS.buildings.trough} fallback={<FallbackTrough />} />
-      </group>
-      {/* 표지판은 울타리와 겹치지 않게 앞쪽 왼쪽 모서리 바깥에 */}
-      {SHOW_AREA_SIGNS.pen && (
-        <group position={[PEN_MIN_X - 0.9, 0, PEN_MAX_Z + 0.9]} rotation-y={0.25}>
-          <SignBoard text={AREA_NAME.pen} width={1.7} />
+      {/* 울타리 · 헛간 · 여물통 · 표지판은 움직이지 않아 그림자를 미리 그려 둔다 (core/bakedShadows) */}
+      <StaticShadow>
+        <Fence />
+        <group position={[BARN.x, 0, BARN.z]}>
+          <GltfModel modelKey={MODELS.buildings.barn} fallback={<FallbackBarn />} />
         </group>
-      )}
+        <group position={[TROUGH.x, 0, TROUGH.z]} rotation-y={Math.PI / 2}>
+          <GltfModel modelKey={MODELS.buildings.trough} fallback={<FallbackTrough />} />
+        </group>
+        {/* 표지판은 울타리와 겹치지 않게 앞쪽 왼쪽 모서리 바깥에 */}
+        {SHOW_AREA_SIGNS.pen && (
+          <group position={[PEN_MIN_X - 0.9, 0, PEN_MAX_Z + 0.9]} rotation-y={0.25}>
+            <SignBoard text={AREA_NAME.pen} width={1.7} />
+          </group>
+        )}
+      </StaticShadow>
       {animals.map((animal, index) => (
         <Animal key={animal.id} animal={animal} index={index} />
       ))}
@@ -351,10 +355,6 @@ function Animal({ animal, index }: { animal: AnimalInstance; index: number }): R
             fallback={<FallbackAnimal species={animal.species} />}
           />
         </group>
-        <mesh rotation-x={-Math.PI / 2} position-y={0.03} renderOrder={2}>
-          <circleGeometry args={[size.radius * 0.9, 20]} />
-          <meshBasicMaterial color="#4a3a2f" transparent opacity={0.16} depthWrite={false} />
-        </mesh>
       </group>
       {produceReady && <Marker follow={() => motion} height={size.marker} />}
     </>

@@ -14,6 +14,7 @@ import { AREA_NAME } from '@/config/strings';
 import { gameEvents } from '@/bridge/eventBus';
 import type { TreeSpeciesId } from '@/types/game';
 import { GltfModel } from '../assets3d';
+import { BakedShadows, StaticShadow } from '../core/bakedShadows';
 import { NightGlow } from '../core/dayNight';
 import { useInteractable } from '../core/interaction';
 import { DecorateSystem, PlacedFurnitureLayer, decorateFloorHover, decorateFloorTap, type DecorateRules } from '../core/decorate';
@@ -24,6 +25,14 @@ import { GrassGround, PathStrip, Surroundings } from '../props/Ground';
 import { SignBoard } from '../props/SignBoard';
 import { AnimalPen } from './yard/AnimalPen';
 import { FarmPlot, plantWithMath } from './yard/FarmPlot';
+
+/** 미리 그리는 그림자를 까는 범위: 걸어 다니는 범위 + 외곽 덤불과 그 그림자 (그림자는 +x · -z 쪽으로 진다) */
+const YARD_SHADOW_BOUNDS = {
+  minX: YARD.bounds.minX - 3,
+  maxX: YARD.bounds.maxX + 5,
+  minZ: YARD.bounds.minZ - 5,
+  maxZ: YARD.bounds.maxZ + 3,
+};
 
 /** 마당 꾸미기: 걸어 다니는 범위 안 어디든, 밭과 집 문 앞만 빼고 */
 const YARD_DECORATE_RULES: DecorateRules = {
@@ -87,7 +96,11 @@ export function YardWorld(): React.ReactElement {
       <group position={[centerX, 0, centerZ]}>
         <GrassGround width={width} depth={depth} />
       </group>
-      <Surroundings bounds={YARD.bounds} />
+      {/* 움직이지 않는 것의 그림자는 미리 그려 둔다 (core/bakedShadows) */}
+      <BakedShadows bounds={YARD_SHADOW_BOUNDS} />
+      <StaticShadow>
+        <Surroundings bounds={YARD.bounds} />
+      </StaticShadow>
 
       {/* 길: 집 문 → 큰길 → 시장 표지판, 큰길에서 밭 사이로 한 줄 */}
       <PathStrip from={door} to={{ x: door.x, z: pathZ }} />
@@ -99,19 +112,25 @@ export function YardWorld(): React.ReactElement {
         width={0.9}
       />
 
-      <House />
+      <StaticShadow>
+        <House />
+      </StaticShadow>
 
       {Array.from({ length: PLOT_COUNT }, (_, index) => (
         <FarmPlot key={index} index={index} />
       ))}
       {SHOW_AREA_SIGNS.farm && (
-        <group position={[firstPlot.x - 2.2, 0, lastPlot.z + 1.6]} rotation-y={0.25}>
-          <SignBoard text={AREA_NAME.farm} width={1.4} />
-        </group>
+        <StaticShadow>
+          <group position={[firstPlot.x - 2.2, 0, lastPlot.z + 1.6]} rotation-y={0.25}>
+            <SignBoard text={AREA_NAME.farm} width={1.4} />
+          </group>
+        </StaticShadow>
       )}
 
       <AnimalPen />
-      <TownGate />
+      <StaticShadow>
+        <TownGate />
+      </StaticShadow>
     </group>
   );
 }

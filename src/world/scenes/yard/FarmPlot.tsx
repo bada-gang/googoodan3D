@@ -22,6 +22,7 @@ import { audio } from '@/audio/sfx';
 import { ArtTexture, GltfModel, ModelParts, type ModelPart } from '../../assets3d';
 import { burstStars, floatText } from '../../core/effects';
 import { spawnParticles } from '../../core/particles';
+import { StaticShadow } from '../../core/bakedShadows';
 import { mergedBoxGeometry } from '../../props/mergedBoxes';
 import { askMath, awardExperience, toast } from '../../core/gameplay';
 import { useInteractable } from '../../core/interaction';
@@ -250,17 +251,20 @@ export function FarmPlot({ index }: { index: number }): React.ReactElement {
   return (
     <>
       <group position={[x, 0, z]}>
-        {/* 흙 */}
-        <mesh position-y={PLOT_HEIGHT / 2} receiveShadow castShadow>
-          <boxGeometry args={[size, PLOT_HEIGHT, size]} />
-          <ArtTexture assetKey={ASSETS.textures.soil} repeat={[1, 1]}>
-            {(map) => <meshStandardMaterial map={map} color={map ? '#ffffff' : PALETTE.soil} roughness={1} />}
-          </ArtTexture>
-        </mesh>
-        {/* 나무 테두리: 판자 4개를 모양 하나로 (그리기 호출을 줄인다) */}
-        <mesh geometry={PLOT_BORDER} castShadow receiveShadow>
-          <meshStandardMaterial color={PALETTE.wood} roughness={0.9} />
-        </mesh>
+        {/* 흙과 나무 테두리는 움직이지 않아 그림자를 미리 그려 둔다 (core/bakedShadows) */}
+        <StaticShadow>
+          {/* 흙 */}
+          <mesh position-y={PLOT_HEIGHT / 2} receiveShadow castShadow>
+            <boxGeometry args={[size, PLOT_HEIGHT, size]} />
+            <ArtTexture assetKey={ASSETS.textures.soil} repeat={[1, 1]}>
+              {(map) => <meshStandardMaterial map={map} color={map ? '#ffffff' : PALETTE.soil} roughness={1} />}
+            </ArtTexture>
+          </mesh>
+          {/* 나무 테두리: 판자 4개를 모양 하나로 (그리기 호출을 줄인다) */}
+          <mesh geometry={PLOT_BORDER} castShadow receiveShadow>
+            <meshStandardMaterial color={PALETTE.wood} roughness={0.9} />
+          </mesh>
+        </StaticShadow>
 
         {plot?.species && <Tree species={plot.species} stage={plot.stage} onCrown={onCrown} />}
         {flying && (
