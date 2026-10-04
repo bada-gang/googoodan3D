@@ -1,0 +1,23 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "googoo3d",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "run",
+        "dev"
+      ],
+      "port": 5173
+    },
+    {
+      "name": "googoo3d-build",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "run",
+        "preview:lan"
+      ],
+      "port": 4173
+    }
+  ]
+}

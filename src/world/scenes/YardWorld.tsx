@@ -1,0 +1,192 @@
+/**
+ * 집 앞 마당 + 농장 + 동물 우리. 게임의 중심 무대다.
+ *
+ * 걸어 다니기, 밭(심기·물 주기·수확), 동물 우리(먹이 주기·생산물 받기), 집 문과 시장 표지판.
+ * 집 안(HomeWorld) · 시장(TownWorld)은 문 · 표지판으로 오간다.
+ */
+import { useEffect } from 'react';
+import type { ThreeEvent } from '@react-three/fiber';
+import { PALETTE } from '@/config/artTokens';
+import { PLOT_COUNT, YARD, plotPosition } from '@/config/layout';
+import { MODELS } from '@/config/models';
+import { SHOW_AREA_SIGNS } from '@/config/features';
+import { AREA_NAME } from '@/config/strings';
+import { gameEvents } from '@/bridge/eventBus';
+import type { TreeSpeciesId } from '@/types/game';
+import { GltfModel } from '../assets3d';
+import { NightGlow } from '../core/dayNight';
+import { useInteractable } from '../core/interaction';
+import { DecorateSystem, PlacedFurnitureLayer, decorateFloorHover, decorateFloorTap, type DecorateRules } from '../core/decorate';
+import { placePlayer } from '../core/movement';
+import { goToScene, useWorldScene, type Spawn } from '../core/scenes';
+import { input, obstacles, walkBounds } from '../core/runtime';
+import { GrassGround, PathStrip, Surroundings } from '../props/Ground';
+import { SignBoard } from '../props/SignBoard';
+import { AnimalPen } from './yard/AnimalPen';
+import { FarmPlot, plantWithMath } from './yard/FarmPlot';
+
+/** 마당 꾸미기: 걸어 다니는 범위 안 어디든, 밭과 집 문 앞만 빼고 */
+const YARD_DECORATE_RULES: DecorateRules = {
+  area: 'yard',
+  bounds: { minX: YARD.bounds.minX + 0.5, maxX: YARD.bounds.maxX - 0.5, minZ: YARD.bounds.minZ + 0.5, maxZ: YARD.bounds.maxZ - 0.3 },
+  blocked: (x, z, radius) => {
+    // 밭 6칸 전체 (밭 사이 길까지)
+    const first = plotPosition(0);
+    const last = plotPosition(PLOT_COUNT - 1);
+    const half = YARD.farm.plotSize / 2;
+    const inFarm =
+      x + radius > first.x - half && x - radius < last.x + half && z + radius > first.z - half && z - radius < last.z + half;
+    // 집 문 앞은 비워 둔다 (집에 못 들어가게 막히지 않게)
+    const atDoor = Math.hypot(x - YARD.house.door.x, z - YARD.house.door.z) < radius + 1.2;
+    return inFarm || atDoor;
+  },
+};
+
+export function YardWorld(): React.ReactElement {
+  useEffect(() => {
+    Object.assign(walkBounds, YARD.bounds);
+    // 집에서 나왔으면 집 문 앞에, 처음이면 길 위에
+    const spawn: Spawn = useWorldScene.getState().spawn ?? YARD.spawn;
+    placePlayer(spawn.x, spawn.z, spawn.facing ?? 0);
+
+    const { house } = YARD;
+    obstacles.set('house', { kind: 'circle', x: house.position.x, z: house.position.z, radius: house.radius });
+
+    // 씨앗을 두 종류 이상 가졌을 때는 React 쪽에서 고르고 돌려준다
+    const offSeed = gameEvents.on('seedpicker:choose', ({ plotId, species }) =>
+      plantWithMath(plotId, species as TreeSpeciesId),
+    );
+
+    return () => {
+      obstacles.delete('house');
+      offSeed();
+    };
+  }, []);
+
+  // 땅을 톡 치면 그 자리로 걸어간다. 끌다가 뗀 것(카메라 보기 등)은 무시한다.
+  // 꾸미기 중이면 들고 있는 물건을 놓는다
+  const onTap = (event: ThreeEvent<MouseEvent>) => {
+    if (event.delta > 10) return;
+    if (decorateFloorTap(event.point.x, event.point.z)) return;
+    input.tapTarget = { x: event.point.x, z: event.point.z };
+  };
+
+  const width = YARD.bounds.maxX - YARD.bounds.minX + 40;
+  const depth = YARD.bounds.maxZ - YARD.bounds.minZ + 40;
+  const centerX = (YARD.bounds.minX + YARD.bounds.maxX) / 2;
+  const centerZ = (YARD.bounds.minZ + YARD.bounds.maxZ) / 2;
+  const { door } = YARD.house;
+  const pathZ = YARD.mainPathZ;
+  const firstPlot = plotPosition(0);
+  const lastPlot = plotPosition(PLOT_COUNT - 1);
+
+  return (
+    <group onClick={onTap} onPointerMove={(event) => decorateFloorHover(event.point.x, event.point.z)}>
+      <DecorateSystem rules={YARD_DECORATE_RULES} />
+      <PlacedFurnitureLayer area="yard" />
+      <group position={[centerX, 0, centerZ]}>
+        <GrassGround width={width} depth={depth} />
+      </group>
+      <Surroundings bounds={YARD.bounds} />
+
+      {/* 길: 집 문 → 큰길 → 시장 표지판, 큰길에서 밭 사이로 한 줄 */}
+      <PathStrip from={door} to={{ x: door.x, z: pathZ }} />
+      <PathStrip from={{ x: door.x, z: pathZ }} to={{ x: YARD.townGate.x - 1.5, z: pathZ }} width={1.9} />
+      <PathStrip from={{ x: YARD.townGate.x - 1.5, z: pathZ }} to={{ x: YARD.townGate.x - 0.4, z: YARD.townGate.z - 0.6 }} />
+      <PathStrip
+        from={{ x: (firstPlot.x + plotPosition(1).x) / 2, z: pathZ }}
+        to={{ x: (firstPlot.x + plotPosition(1).x) / 2, z: firstPlot.z - 0.6 }}
+        width={0.9}
+      />
+
+      <House />
+
+      {Array.from({ length: PLOT_COUNT }, (_, index) => (
+        <FarmPlot key={index} index={index} />
+      ))}
+      {SHOW_AREA_SIGNS.farm && (
+        <group position={[firstPlot.x - 2.2, 0, lastPlot.z + 1.6]} rotation-y={0.25}>
+          <SignBoard text={AREA_NAME.farm} width={1.4} />
+        </group>
+      )}
+
+      <AnimalPen />
+      <TownGate />
+    </group>
+  );
+}
+
+/* ---------------------------------- 집 ---------------------------------- */
+
+/** 집 모델의 앞 창문 자리 (집 중심 기준) */
+const HOUSE_WINDOWS: [number, number, number][] = [
+  [-1.15, 1.62, 1.8],
+  [1.15, 1.62, 1.8],
+];
+
+function House(): React.ReactElement {
+  const { position, door } = YARD.house;
+
+  useInteractable({
+    id: 'house_door',
+    position: () => door,
+    range: 1.7,
+    prompts: () => [{ id: 'enter_home', label: '집에 들어가기', enabled: true }],
+    onAction: () => goToScene('HomeScene'),
+  });
+
+  return (
+    <group position={[position.x, 0, position.z]}>
+      <GltfModel modelKey={MODELS.buildings.house} fallback={<FallbackHouse />} />
+      {/* 밤에 켜지는 창문 불빛 (둥근 창 두 개, 모델을 보고 맞춘 자리) */}
+      {HOUSE_WINDOWS.map(([x, y, z]) => (
+        <group key={x} position={[x, 0, z]}>
+          <NightGlow y={y} size={1.1} />
+        </group>
+      ))}
+      <group position={[-3.2, 0, 2.4]} rotation-y={0.3}>
+        <SignBoard text={AREA_NAME.home} width={1.5} />
+      </group>
+    </group>
+  );
+}
+
+/** 모델이 아직 없을 때의 임시 집 */
+function FallbackHouse(): React.ReactElement {
+  return (
+    <group>
+      <mesh position-y={1.3} castShadow receiveShadow>
+        <boxGeometry args={[4.4, 2.6, 3.6]} />
+        <meshStandardMaterial color={PALETTE.wall} roughness={0.9} />
+      </mesh>
+      <mesh position-y={3.45} rotation-y={Math.PI / 4} castShadow>
+        <coneGeometry args={[3.6, 1.7, 4]} />
+        <meshStandardMaterial color={PALETTE.roof} flatShading roughness={0.8} />
+      </mesh>
+      <mesh position={[0, 0.85, 1.81]}>
+        <boxGeometry args={[1, 1.7, 0.06]} />
+        <meshStandardMaterial color={PALETTE.woodDark} />
+      </mesh>
+    </group>
+  );
+}
+
+/* -------------------------------- 시장 입구 -------------------------------- */
+
+function TownGate(): React.ReactElement {
+  const gate = YARD.townGate;
+
+  useInteractable({
+    id: 'town_gate',
+    position: () => gate,
+    range: 1.9,
+    prompts: () => [{ id: 'go_town', label: `${AREA_NAME.market} 가기`, enabled: true }],
+    onAction: () => goToScene('TownScene'),
+  });
+
+  return (
+    <group position={[gate.x, 0, gate.z]} rotation-y={-0.35}>
+      <SignBoard text={`${AREA_NAME.market} →`} width={1.6} />
+    </group>
+  );
+}

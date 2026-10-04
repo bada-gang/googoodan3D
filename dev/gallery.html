@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>작업물 모아보기</title>
+    <link href="https://fonts.googleapis.com/css2?family=Jua&display=swap" rel="stylesheet" />
+    <style>
+      body { margin: 0; background: #fff6e2; color: #4a3a2f; font-family: 'Jua', sans-serif; }
+      main { max-width: 1180px; margin: 0 auto; padding: 24px 16px 64px; }
+      h1 { font-size: 2.2rem; margin: 0 0 4px; }
+      h2 { font-size: 1.5rem; margin: 40px 0 12px; border-bottom: 3px solid #4a3a2f; padding-bottom: 6px; }
+      p.note { margin: 0 0 12px; color: #6a5445; font-family: sans-serif; font-size: 0.95rem; }
+      .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)); gap: 12px; }
+      figure { margin: 0; background: #fff; border: 3px solid #4a3a2f; border-radius: 16px; padding: 8px; text-align: center; }
+      figure img { width: 100%; aspect-ratio: 1; object-fit: contain; display: block; }
+      figcaption { font-size: 0.85rem; margin-top: 4px; }
+      .textures figure img { object-fit: cover; border-radius: 8px; }
+      .dark figure { background: #3d5a40; color: #fff6e2; }
+      .wide img { width: 100%; border: 3px solid #4a3a2f; border-radius: 16px; display: block; }
+      iframe { width: 100%; height: 420px; border: 3px solid #4a3a2f; border-radius: 16px; background: #e8f6fb; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>구구 마을 3D · 지금까지 만든 것</h1>
+      <p class="note">0단계(뼈대) · 1단계(그림 41장 + 3D 모델 파이프라인). 모두 Codex(ChatGPT 구독)와 이 PC 의 Hunyuan3D 로 무료 생성.</p>
+
+      <h2>3D 모델 · 열매 6종</h2>
+      <p class="note">생성 그림 → Hunyuan3D 3D 변환 → 태블릿용 경량화 (각 삼각형 3,000개 안팎, 44~96KB). 마우스로 돌려 볼 수 있다.</p>
+      <iframe src="./model-preview.html?info=0&src=/assets/models/fruits/apple.glb,/assets/models/fruits/orange.glb,/assets/models/fruits/peach.glb,/assets/models/fruits/cherry.glb,/assets/models/fruits/grape.glb,/assets/models/fruits/persimmon.glb"></iframe>
+
+      <h2>시작 화면 배경</h2>
+      <div class="wide"><img src="/assets/environment/title.webp" alt="" /></div>
+
+      <h2>아이콘 · 29장</h2>
+      <div class="grid" id="icons"></div>
+
+      <h2>질감 · 8장</h2>
+      <p class="note">3D 땅·벽·바닥에 반복해서 입힌다. 벽지·바닥은 게임에서 고른 색을 곱해 칠한다.</p>
+      <div class="grid textures" id="textures"></div>
+
+      <h2>연출 그림 · 3장</h2>
+      <div class="grid dark" id="particles"></div>
+    </main>
+    <script type="module">
+      const label = {
+        avatar_rabbit: '토끼', avatar_bear: '곰', avatar_cat: '고양이', avatar_fox: '여우', avatar_bird: '새', avatar_frog: '개구리',
+        crop_apple: '사과', crop_orange: '오렌지', crop_peach: '복숭아', crop_cherry: '체리', crop_grape: '포도', crop_persimmon: '감',
+        crop_egg: '달걀', crop_goat_milk: '염소젖', crop_wool: '양털', crop_milk: '우유',
+        seedbag_apple: '사과 씨앗', seedbag_orange: '오렌지 씨앗', seedbag_peach: '복숭아 씨앗', seedbag_cherry: '체리 씨앗',
+        seedbag_grape: '포도 씨앗', seedbag_persimmon: '감 씨앗',
+        ui_coin: '돈', ui_star: '별', ui_basket: '가방', ui_water_can: '물뿌리개', ui_feed_bag: '먹이', ui_chest: '상자', ui_chest_open: '열린 상자',
+        tex_grass: '잔디', tex_soil: '밭 흙', tex_path: '흙길', tex_wall: '벽지', tex_wall_star: '별빛 벽지',
+        tex_floor: '나무 바닥', tex_floor_check: '체크 바닥', tex_floor_carpet: '융단 바닥',
+        particle_star: '별', particle_sparkle: '반짝임', particle_leaf: '잎',
+      };
+      const { ASSET_MANIFEST } = await import('/src/config/assets.ts');
+      const add = (id, spec) => {
+        const fig = document.createElement('figure');
+        fig.innerHTML = `<img src="/assets/${spec.path}" alt="" /><figcaption>${label[spec.key] ?? spec.key}</figcaption>`;
+        document.getElementById(id).appendChild(fig);
+      };
+      for (const spec of ASSET_MANIFEST) {
+        if (spec.kind === 'icon') add('icons', spec);
+        if (spec.kind === 'texture') add('textures', spec);
+        if (spec.kind === 'particle') add('particles', spec);
+      }
+    </script>
+  </body>
+</html>
