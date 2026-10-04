@@ -28,6 +28,7 @@ import {
   type Group,
   type Object3D,
 } from 'three';
+import { proxiedMeshes } from '../assets3d';
 import { daylight } from './dayNight';
 import { groundShadowUniforms } from './groundShadow';
 import { SUN_OFFSET } from './sun';
@@ -48,40 +49,45 @@ const SHADOW_COLOR = new Color('#28351f');
 /** 정적 물체가 바뀌었는지 살피는 간격 (초) */
 const CHECK_EVERY = 0.5;
 
-/** 미리 그릴 물체 묶음. StaticShadow 가 넣고 뺀다 */
-const staticRoots = new Set<Object3D>();
+/** 미리 그릴 물체 묶음과, 그 표면이 실시간 그림자를 받을지. StaticShadow 가 넣고 뺀다 */
+const staticRoots = new Map<Object3D, { receive: boolean }>();
 
 /**
  * 이 안의 물체는 그림자를 미리 그린다 (움직이지 않는 것만 넣는다).
  * 원래 그림자를 만들던(castShadow) 물체만 대상이고, 실시간 그림자에서는 빠진다.
+ *
+ * 표면도 실시간 그림자를 받지 않는다(receive 를 주면 받는다). 그림자를 받는 표면은 픽셀마다 그림자 지도를
+ * 읽어야 해서 태블릿에 무겁다. 캐릭터 · 동물 그림자가 집 벽이나 울타리 위에 지는 일은 드물다.
+ * 나무 그림자가 지는 밭 흙처럼 꼭 필요한 곳만 receive 로 둔다.
  */
-export function StaticShadow({ children }: { children: ReactNode }): React.ReactElement {
+export function StaticShadow({ children, receive = false }: { children: ReactNode; receive?: boolean }): React.ReactElement {
   const group = useRef<Group>(null);
   useEffect(() => {
     const root = group.current;
     if (!root) return;
-    staticRoots.add(root);
+    staticRoots.set(root, { receive });
     return () => {
       staticRoots.delete(root);
     };
-  }, []);
+  }, [receive]);
   return <group ref={group}>{children}</group>;
 }
 
 /** 정적 물체를 표시하고(그림자 레이어, 실시간 그림자 끔) 그 수를 센다 */
 function markStaticCasters(): string {
   const ids: number[] = [];
-  for (const root of staticRoots) {
+  for (const [root, { receive }] of staticRoots) {
     root.traverse((node) => {
       const mesh = node as Mesh;
       if (!mesh.isMesh) return;
+      if (!receive) mesh.receiveShadow = false;
       // 그림자 전용 사본(assets3d)은 정적 물체에는 필요 없다. 끄고, 원래 모델로 굽는다
       if (mesh.userData.shadowProxy) {
         mesh.visible = false;
-        const real = mesh.parent as Mesh;
-        if (real?.isMesh) {
+        for (const real of proxiedMeshes(mesh)) {
           real.userData.bakedShadow = true;
           real.layers.enable(BAKE_LAYER);
+          ids.push(real.id);
         }
         return;
       }

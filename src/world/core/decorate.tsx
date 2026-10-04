@@ -337,6 +337,11 @@ function Ghost(): React.ReactElement | null {
       object?.traverse((node) => {
         const mesh = node as Mesh;
         if (!mesh.isMesh) return;
+        // 그림자 사본은 미리보기에 필요 없다 (그림자도 안 만든다)
+        if (mesh.userData.shadowProxy) {
+          mesh.castShadow = false;
+          return;
+        }
         const material = (mesh.userData.ghostMaterial as MeshStandardMaterial | undefined) ??
           ((mesh.material as Material).clone() as MeshStandardMaterial);
         material.transparent = true;

@@ -5,14 +5,14 @@
  * 나무 모양은 3단계에서 생성 모델로 바뀐다. 지금은 코드로 만든 단계별 모양에
  * 열매만 생성 모델(사과·오렌지 …)을 단다.
  */
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { Box3, Matrix4, Quaternion, Vector3, type Group, type InstancedMesh, type Mesh, type Object3D } from 'three';
 import { ASSETS } from '@/config/assets';
 import { PALETTE } from '@/config/artTokens';
 import { MAX_HARVESTS_PER_TREE, STAGE_LABEL } from '@/config/balance';
 import { TREE_SPECIES, seedIdOf } from '@/config/catalog';
-import { YARD, plotPosition } from '@/config/layout';
+import { PLOT_COUNT, YARD, plotPosition } from '@/config/layout';
 import { MODELS } from '@/config/models';
 import { gameEvents } from '@/bridge/eventBus';
 import type { InteractionPrompt } from '@/bridge/events';
@@ -23,7 +23,7 @@ import { ArtTexture, GltfModel, ModelParts, type ModelPart } from '../../assets3
 import { burstStars, floatText } from '../../core/effects';
 import { spawnParticles } from '../../core/particles';
 import { StaticShadow } from '../../core/bakedShadows';
-import { mergedBoxGeometry } from '../../props/mergedBoxes';
+import { mergedBoxGeometry, type BoxSpec } from '../../props/mergedBoxes';
 import { askMath, awardExperience, toast } from '../../core/gameplay';
 import { useInteractable } from '../../core/interaction';
 import { obstacles, player, raisedAreas } from '../../core/runtime';
@@ -32,18 +32,6 @@ const PLOT_HEIGHT = 0.14;
 /** 나무가 서 있으면 걸어서 지나갈 수 없는 반지름 */
 const TREE_RADIUS = 0.45;
 
-/** 밭 테두리 판자 4개를 합친 모양. 모든 밭이 같이 쓴다 */
-const PLOT_BORDER = (() => {
-  const size = YARD.farm.plotSize;
-  const y = PLOT_HEIGHT / 2 + 0.04;
-  const h = PLOT_HEIGHT + 0.08;
-  return mergedBoxGeometry([
-    { x: 0, y, z: size / 2, w: size + 0.16, h, d: 0.16 },
-    { x: 0, y, z: -size / 2, w: size + 0.16, h, d: 0.16 },
-    { x: size / 2, y, z: 0, w: 0.16, h, d: size },
-    { x: -size / 2, y, z: 0, w: 0.16, h, d: size },
-  ]);
-})();
 /** 물방울이 떨어지기 시작하는 높이 (물 주기 전 단계의 나무 크기) */
 const WATER_HEIGHT: Record<TreeStage, number> = { seed: 0.9, sprout: 1.1, sapling: 2.0, mature: 3.1, fruiting: 3.1 };
 
@@ -194,6 +182,51 @@ function handlePlotAction(plotId: string, actionId: string): void {
 
 /* --------------------------------- 그리기 --------------------------------- */
 
+/**
+ * 밭 여섯 칸의 흙과 나무 테두리. 칸마다 그리면 12번이라, 흙끼리 · 테두리끼리 모양 하나로 합쳐 2번에 그린다.
+ * 움직이지 않아 그림자를 미리 그려 두고(core/bakedShadows), 나무 그림자는 흙 위에 지도록 그림자를 받는다.
+ */
+export function PlotBeds(): React.ReactElement {
+  const { soil, border } = useMemo(() => {
+    const size = YARD.farm.plotSize;
+    const y = PLOT_HEIGHT / 2 + 0.04;
+    const h = PLOT_HEIGHT + 0.08;
+    const soilBoxes: BoxSpec[] = [];
+    const borderBoxes: BoxSpec[] = [];
+    for (let i = 0; i < PLOT_COUNT; i += 1) {
+      const { x, z } = plotPosition(i);
+      soilBoxes.push({ x, y: PLOT_HEIGHT / 2, z, w: size, h: PLOT_HEIGHT, d: size });
+      borderBoxes.push(
+        { x, y, z: z + size / 2, w: size + 0.16, h, d: 0.16 },
+        { x, y, z: z - size / 2, w: size + 0.16, h, d: 0.16 },
+        { x: x + size / 2, y, z, w: 0.16, h, d: size },
+        { x: x - size / 2, y, z, w: 0.16, h, d: size },
+      );
+    }
+    return { soil: mergedBoxGeometry(soilBoxes), border: mergedBoxGeometry(borderBoxes) };
+  }, []);
+  useEffect(
+    () => () => {
+      soil.dispose();
+      border.dispose();
+    },
+    [soil, border],
+  );
+
+  return (
+    <StaticShadow receive>
+      <mesh geometry={soil} receiveShadow castShadow>
+        <ArtTexture assetKey={ASSETS.textures.soil} repeat={[1, 1]}>
+          {(map) => <meshStandardMaterial map={map} color={map ? '#ffffff' : PALETTE.soil} roughness={1} />}
+        </ArtTexture>
+      </mesh>
+      <mesh geometry={border} castShadow receiveShadow>
+        <meshStandardMaterial color={PALETTE.wood} roughness={0.9} />
+      </mesh>
+    </StaticShadow>
+  );
+}
+
 export function FarmPlot({ index }: { index: number }): React.ReactElement {
   const plotId = `plot_${index}`;
   const plot = useGameStore((s) => s.plots.find((p) => p.id === plotId));
@@ -251,21 +284,7 @@ export function FarmPlot({ index }: { index: number }): React.ReactElement {
   return (
     <>
       <group position={[x, 0, z]}>
-        {/* 흙과 나무 테두리는 움직이지 않아 그림자를 미리 그려 둔다 (core/bakedShadows) */}
-        <StaticShadow>
-          {/* 흙 */}
-          <mesh position-y={PLOT_HEIGHT / 2} receiveShadow castShadow>
-            <boxGeometry args={[size, PLOT_HEIGHT, size]} />
-            <ArtTexture assetKey={ASSETS.textures.soil} repeat={[1, 1]}>
-              {(map) => <meshStandardMaterial map={map} color={map ? '#ffffff' : PALETTE.soil} roughness={1} />}
-            </ArtTexture>
-          </mesh>
-          {/* 나무 테두리: 판자 4개를 모양 하나로 (그리기 호출을 줄인다) */}
-          <mesh geometry={PLOT_BORDER} castShadow receiveShadow>
-            <meshStandardMaterial color={PALETTE.wood} roughness={0.9} />
-          </mesh>
-        </StaticShadow>
-
+        {/* 흙과 나무 테두리는 밭 여섯 칸을 한 번에 그린다 (PlotBeds) */}
         {plot?.species && <Tree species={plot.species} stage={plot.stage} onCrown={onCrown} />}
         {flying && (
           <FlyingFruits

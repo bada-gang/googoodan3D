@@ -5,6 +5,7 @@ import { useEffect, useLayoutEffect, useMemo, useRef } from 'react';
 import { Color, Matrix4, Shape, ShapeGeometry, Vector2, type InstancedMesh, type Material, type Texture } from 'three';
 import { ASSETS } from '@/config/assets';
 import { PALETTE } from '@/config/artTokens';
+import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { ArtTexture } from '../assets3d';
 import { applyGroundShadow } from '../core/groundShadow';
 import { TEST_FLAGS } from '../core/testFlags';
@@ -34,35 +35,47 @@ export function GrassGround({ width, depth }: { width: number; depth: number }):
  * 무늬는 길마다가 아니라 땅 좌표에 붙인다. 길이 겹치는 곳은 같은 높이의 면 두 장이 겹치는데,
  * 무늬가 서로 다르면 카메라가 움직일 때 두 무늬가 번갈아 보인다. 땅 좌표로 맞추면 두 장이 똑같이 보인다.
  */
-export function PathStrip({
-  from,
-  to,
-  width = 1.6,
-}: {
+export interface PathSegment {
   from: { x: number; z: number };
   to: { x: number; z: number };
+  /** 길 폭 (m). 기본 1.6 */
   width?: number;
-}): React.ReactElement {
+}
+
+/** 길 한 토막의 모양 (끝이 둥근 띠). 무늬 좌표 = 땅 좌표 */
+function pathSegmentGeometry({ from, to, width = 1.6 }: PathSegment): ShapeGeometry {
+  const length = Math.hypot(to.x - from.x, to.z - from.z) || 1e-4;
+  const forward = { x: (to.x - from.x) / length, z: (to.z - from.z) / length };
+  const side = { x: -forward.z, z: forward.x };
+  const radius = width / 2;
+  const points: Vector2[] = [];
+  // 끝 → 반원 → 시작 → 반원. 눕힐 때 (x, y) → (x, 0, -y) 가 되므로 y 에는 -z 를 넣는다
+  const arc = (center: { x: number; z: number }, startAngle: number) => {
+    for (let i = 0; i <= PATH_END_SEGMENTS; i += 1) {
+      const a = startAngle - (Math.PI * i) / PATH_END_SEGMENTS;
+      const x = center.x + radius * (Math.cos(a) * forward.x + Math.sin(a) * side.x);
+      const z = center.z + radius * (Math.cos(a) * forward.z + Math.sin(a) * side.z);
+      points.push(new Vector2(x, -z));
+    }
+  };
+  arc(to, Math.PI / 2);
+  arc(from, -Math.PI / 2);
+  // ShapeGeometry 의 uv 는 모양 좌표 그대로 = 땅 좌표
+  return new ShapeGeometry(new Shape(points));
+}
+
+/**
+ * 장면의 길 전체. 토막들을 모양 하나로 합쳐 한 번에 그린다 (토막마다 그리면 그리기 호출이 토막 수만큼 든다).
+ * 토막이 겹치는 곳은 무늬가 땅 좌표에 붙어 있어 똑같이 보인다.
+ */
+export function PathNetwork({ segments }: { segments: PathSegment[] }): React.ReactElement {
+  const key = JSON.stringify(segments);
   const geometry = useMemo(() => {
-    const length = Math.hypot(to.x - from.x, to.z - from.z) || 1e-4;
-    const forward = { x: (to.x - from.x) / length, z: (to.z - from.z) / length };
-    const side = { x: -forward.z, z: forward.x };
-    const radius = width / 2;
-    const points: Vector2[] = [];
-    // 끝 → 반원 → 시작 → 반원. 눕힐 때 (x, y) → (x, 0, -y) 가 되므로 y 에는 -z 를 넣는다
-    const arc = (center: { x: number; z: number }, startAngle: number) => {
-      for (let i = 0; i <= PATH_END_SEGMENTS; i += 1) {
-        const a = startAngle - (Math.PI * i) / PATH_END_SEGMENTS;
-        const x = center.x + radius * (Math.cos(a) * forward.x + Math.sin(a) * side.x);
-        const z = center.z + radius * (Math.cos(a) * forward.z + Math.sin(a) * side.z);
-        points.push(new Vector2(x, -z));
-      }
-    };
-    arc(to, Math.PI / 2);
-    arc(from, -Math.PI / 2);
-    // ShapeGeometry 의 uv 는 모양 좌표 그대로 = 땅 좌표
-    return new ShapeGeometry(new Shape(points));
-  }, [from.x, from.z, to.x, to.z, width]);
+    const parts = segments.map(pathSegmentGeometry);
+    const merged = mergeGeometries(parts, false);
+    for (const part of parts) part.dispose();
+    return merged;
+  }, [key]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => () => geometry.dispose(), [geometry]);
 
   return (

@@ -20,7 +20,7 @@ import { useInteractable } from '../core/interaction';
 import { placePlayer } from '../core/movement';
 import { input, obstacles, walkBounds, type Obstacle } from '../core/runtime';
 import { goToScene, useWorldScene, type Spawn } from '../core/scenes';
-import { GrassGround, PathStrip, Surroundings } from '../props/Ground';
+import { GrassGround, PathNetwork, Surroundings } from '../props/Ground';
 import { SignBoard } from '../props/SignBoard';
 
 /** 장식: 마당 꾸미기에 쓰는 것과 같은 모델. 광장 분수는 마당 것보다 크게 */
@@ -48,6 +48,9 @@ const SHOP_LIGHTS: Record<'seed' | 'furniture', [number, number, number, number]
     [2.15, 2.05, 1.35, 0.9],
   ],
 };
+
+/** 분수 둘레의 둥근 돌바닥 (넓은 길 토막) */
+const PLAZA = { from: { x: 0, z: -3.6 }, to: { x: 0, z: TOWN.mainPathZ - 0.4 }, width: 4.2 };
 
 /** 미리 그리는 그림자를 까는 범위 (그림자는 +x · -z 쪽으로 진다) */
 const TOWN_SHADOW_BOUNDS = {
@@ -115,12 +118,15 @@ export function TownWorld(): React.ReactElement {
       </StaticShadow>
 
       {/* 큰길, 가게 문 앞으로 가는 길, 분수 광장 */}
-      <PathStrip from={{ x: TOWN.gate.x + 0.4, z: TOWN.gate.z - 0.6 }} to={{ x: TOWN.gate.x + 1.5, z: mainPathZ }} />
-      <PathStrip from={{ x: TOWN.gate.x + 1.5, z: mainPathZ }} to={{ x: bounds.maxX - 1.5, z: mainPathZ }} width={2.2} />
-      {[TOWN.seedShop.door, TOWN.furnitureShop.door].map((door) => (
-        <PathStrip key={door.x} from={{ x: door.x, z: mainPathZ }} to={door} width={1.6} />
-      ))}
-      <Plaza />
+      <PathNetwork
+        segments={[
+          { from: { x: TOWN.gate.x + 0.4, z: TOWN.gate.z - 0.6 }, to: { x: TOWN.gate.x + 1.5, z: mainPathZ } },
+          { from: { x: TOWN.gate.x + 1.5, z: mainPathZ }, to: { x: bounds.maxX - 1.5, z: mainPathZ }, width: 2.2 },
+          ...[TOWN.seedShop.door, TOWN.furnitureShop.door].map((door) => ({ from: { x: door.x, z: mainPathZ }, to: door })),
+          // 분수 둘레의 둥근 돌바닥
+          PLAZA,
+        ]}
+      />
 
       <StaticShadow>
         <Gate />
@@ -223,13 +229,6 @@ function Shop({
         <SignBoard text={label} width={1.6} />
       </group>
     </group>
-  );
-}
-
-/** 분수 둘레의 둥근 돌바닥 */
-function Plaza(): React.ReactElement {
-  return (
-    <PathStrip from={{ x: 0, z: -3.6 }} to={{ x: 0, z: TOWN.mainPathZ - 0.4 }} width={4.2} />
   );
 }
 

@@ -21,10 +21,10 @@ import { DecorateSystem, PlacedFurnitureLayer, decorateFloorHover, decorateFloor
 import { placePlayer } from '../core/movement';
 import { goToScene, useWorldScene, type Spawn } from '../core/scenes';
 import { input, obstacles, walkBounds } from '../core/runtime';
-import { GrassGround, PathStrip, Surroundings } from '../props/Ground';
+import { GrassGround, PathNetwork, Surroundings } from '../props/Ground';
 import { SignBoard } from '../props/SignBoard';
 import { AnimalPen } from './yard/AnimalPen';
-import { FarmPlot, plantWithMath } from './yard/FarmPlot';
+import { FarmPlot, PlotBeds, plantWithMath } from './yard/FarmPlot';
 
 /** 미리 그리는 그림자를 까는 범위: 걸어 다니는 범위 + 외곽 덤불과 그 그림자 (그림자는 +x · -z 쪽으로 진다) */
 const YARD_SHADOW_BOUNDS = {
@@ -103,19 +103,24 @@ export function YardWorld(): React.ReactElement {
       </StaticShadow>
 
       {/* 길: 집 문 → 큰길 → 시장 표지판, 큰길에서 밭 사이로 한 줄 */}
-      <PathStrip from={door} to={{ x: door.x, z: pathZ }} />
-      <PathStrip from={{ x: door.x, z: pathZ }} to={{ x: YARD.townGate.x - 1.5, z: pathZ }} width={1.9} />
-      <PathStrip from={{ x: YARD.townGate.x - 1.5, z: pathZ }} to={{ x: YARD.townGate.x - 0.4, z: YARD.townGate.z - 0.6 }} />
-      <PathStrip
-        from={{ x: (firstPlot.x + plotPosition(1).x) / 2, z: pathZ }}
-        to={{ x: (firstPlot.x + plotPosition(1).x) / 2, z: firstPlot.z - 0.6 }}
-        width={0.9}
+      <PathNetwork
+        segments={[
+          { from: door, to: { x: door.x, z: pathZ } },
+          { from: { x: door.x, z: pathZ }, to: { x: YARD.townGate.x - 1.5, z: pathZ }, width: 1.9 },
+          { from: { x: YARD.townGate.x - 1.5, z: pathZ }, to: { x: YARD.townGate.x - 0.4, z: YARD.townGate.z - 0.6 } },
+          {
+            from: { x: (firstPlot.x + plotPosition(1).x) / 2, z: pathZ },
+            to: { x: (firstPlot.x + plotPosition(1).x) / 2, z: firstPlot.z - 0.6 },
+            width: 0.9,
+          },
+        ]}
       />
 
       <StaticShadow>
         <House />
       </StaticShadow>
 
+      <PlotBeds />
       {Array.from({ length: PLOT_COUNT }, (_, index) => (
         <FarmPlot key={index} index={index} />
       ))}

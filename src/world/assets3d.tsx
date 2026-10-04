@@ -7,22 +7,18 @@
 import { Component, Suspense, useEffect, useMemo, type ReactNode } from 'react';
 import { useGLTF, useTexture } from '@react-three/drei';
 import {
-  BufferGeometry,
-  Float32BufferAttribute,
-  Mesh,
   MeshBasicMaterial,
   RepeatWrapping,
   SRGBColorSpace,
   type Bone,
   type Material,
   type Matrix4,
-  type SkinnedMesh,
+  type BufferGeometry,
+  type Mesh,
   type Object3D,
   type Texture,
 } from 'three';
 import { clone as cloneWithSkeleton } from 'three/examples/jsm/utils/SkeletonUtils.js';
-import { mergeVertices } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
-import { MeshoptSimplifier } from 'meshoptimizer/simplifier';
 import { isArtReady, realAssetUrl } from '@/config/artReady';
 import { modelUrl } from '@/config/modelReady';
 
@@ -104,20 +100,11 @@ function LoadedModel({
         node.receiveShadow = true;
       }
     });
+    // 그림자는 모델 안의 저해상도 사본으로 만든다 (아래 setupShadowProxies)
+    setupShadowProxies(clone, castShadow);
     return clone;
   }, [scene, castShadow]);
 
-  // 그림자는 면 수를 줄인 사본으로 만든다 (아래 attachShadowProxies). 줄이는 도구를 처음 쓸 때 준비가 필요해 뒤늦게 붙인다
-  useEffect(() => {
-    if (!castShadow) return;
-    let cancelled = false;
-    void simplifierReady().then(() => {
-      if (!cancelled) attachShadowProxies(object);
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, [object, castShadow]);
 
   useEffect(() => {
     if (!onBones) return;
@@ -177,7 +164,10 @@ function LoadedParts({ url, children }: { url: string; children: (parts: ModelPa
     const list: ModelPart[] = [];
     scene.traverse((node) => {
       const mesh = node as Mesh;
-      if (mesh.isMesh) list.push({ geometry: mesh.geometry, material: mesh.material, matrix: mesh.matrixWorld.clone() });
+      // 그림자 사본은 빼고 (인스턴싱하는 것은 그림자를 만들지 않는 작은 물건이다)
+      if (mesh.isMesh && mesh.name !== SHADOW_PROXY_NAME) {
+        list.push({ geometry: mesh.geometry, material: mesh.material, matrix: mesh.matrixWorld.clone() });
+      }
     });
     return list;
   }, [scene]);
@@ -186,71 +176,43 @@ function LoadedParts({ url, children }: { url: string; children: (parts: ModelPa
 
 /**
  * 그림자 전용 사본. 그림자는 흐릿해서 모양이 조금 거칠어도 티가 안 나는데, 그리는 비용은 면 수에 비례한다.
- * 그래서 그림자만 면 수를 SHADOW_PROXY_RATIO 로 줄인 사본으로 만들고, 화면에는 원래 모델을 그린다.
- * 사본은 색도 깊이도 쓰지 않는 재질이라 화면에는 아무것도 남기지 않는다.
- * (따로 레이어에 두면 안 된다 — three.js 는 그림자를 계산할 때도 화면 카메라의 레이어로 물체를 고른다)
- * 같은 모양의 사본은 한 번만 만들어 모든 복제본이 같이 쓴다. 뼈대가 있는 모델(캐릭터)은 원래대로.
+ * 모델 파일 안에 면 수를 15% 로 줄인 사본(이름 SHADOW_PROXY_NAME)이 함께 들어 있다 (scripts/gen-model.ts).
+ * 그림자는 사본으로 만들고, 화면에는 원래 모양을 그린다.
+ *
+ * 사본은 화면에 그리면 안 된다. 레이어로 나눌 수는 없어서(three.js 는 그림자도 화면 카메라 레이어로 고른다)
+ * 재질을 평소엔 숨겨 두고, 그림자를 그리는 동안만 보이게 한다 (ShadowProxyGate).
  */
-const SHADOW_PROXY_RATIO = 0.15;
-const proxyGeometries = new WeakMap<BufferGeometry, BufferGeometry | null>();
-const PROXY_MATERIAL = new MeshBasicMaterial({ colorWrite: false, depthWrite: false });
-let simplifierPromise: Promise<void> | null = null;
+export const SHADOW_PROXY_NAME = 'shadow_proxy';
+const PROXY_MATERIAL = new MeshBasicMaterial({ colorWrite: false, depthWrite: false, visible: false });
 
-function simplifierReady(): Promise<void> {
-  simplifierPromise ??= MeshoptSimplifier.ready;
-  return simplifierPromise;
+/** 사본 재질을 보이게/숨기게. 그림자를 그리는 동안만 켠다 */
+export function setShadowProxiesVisible(visible: boolean): void {
+  PROXY_MATERIAL.visible = visible;
 }
 
-function proxyGeometry(source: BufferGeometry): BufferGeometry | null {
-  if (proxyGeometries.has(source)) return proxyGeometries.get(source)!;
-  let result: BufferGeometry | null = null;
-  const position = source.getAttribute('position');
-  const index = source.getIndex();
-  if (position && index) {
-    // 위치만 남기고 같은 자리 꼭짓점을 합친다 (무늬 이음매에서 끊겨 있으면 면이 잘 줄지 않는다)
-    const positions = new Float32Array(position.count * 3);
-    for (let i = 0; i < position.count; i += 1) {
-      positions[i * 3] = position.getX(i);
-      positions[i * 3 + 1] = position.getY(i);
-      positions[i * 3 + 2] = position.getZ(i);
-    }
-    const bare = new BufferGeometry();
-    bare.setAttribute('position', new Float32BufferAttribute(positions, 3));
-    bare.setIndex(Array.from(index.array as ArrayLike<number>));
-    const welded = mergeVertices(bare, 1e-4);
-    bare.dispose();
-    const weldedIndex = welded.getIndex()!;
-    const target = Math.max(36, Math.floor((weldedIndex.count * SHADOW_PROXY_RATIO) / 3) * 3);
-    const [indices] = MeshoptSimplifier.simplify(
-      new Uint32Array(weldedIndex.array as ArrayLike<number>),
-      welded.getAttribute('position').array as Float32Array,
-      3,
-      target,
-      0.05,
-    );
-    welded.setIndex(Array.from(indices));
-    welded.computeBoundingSphere();
-    result = welded;
-  }
-  proxyGeometries.set(source, result);
-  return result;
+/**
+ * 사본이 대신하는 원래 모양들. 사본은 원래 모양의 노드 아래에 들어 있는데, three.js 로 불러오면 그 노드가
+ * 모양 자체(Mesh)일 수도, 모양을 감싼 묶음(Group)일 수도 있다. 묶음이면 그 안의 다른 모양이 원래 모양이다.
+ */
+export function proxiedMeshes(proxy: Object3D): Mesh[] {
+  const parent = proxy.parent;
+  if (!parent) return [];
+  if ((parent as Mesh).isMesh) return [parent as Mesh];
+  return parent.children.filter((child) => (child as Mesh).isMesh && child.name !== SHADOW_PROXY_NAME) as Mesh[];
 }
 
-function attachShadowProxies(root: Object3D): void {
-  const meshes: Mesh[] = [];
+/** 모델 안의 그림자 사본을 준비하고, 사본이 있는 원래 모양은 그림자를 만들지 않게 한다 */
+function setupShadowProxies(root: Object3D, castShadow: boolean): void {
+  const proxies: Mesh[] = [];
   root.traverse((node) => {
-    const mesh = node as Mesh;
-    if (mesh.isMesh && !(mesh as SkinnedMesh).isSkinnedMesh && !mesh.userData.shadowProxy && mesh.castShadow) meshes.push(mesh);
+    if ((node as Mesh).isMesh && node.name === SHADOW_PROXY_NAME) proxies.push(node as Mesh);
   });
-  for (const mesh of meshes) {
-    const geometry = proxyGeometry(mesh.geometry);
-    if (!geometry) continue;
-    const proxy = new Mesh(geometry, PROXY_MATERIAL);
+  for (const proxy of proxies) {
+    proxy.material = PROXY_MATERIAL;
     proxy.userData.shadowProxy = true;
-    proxy.castShadow = true;
+    proxy.castShadow = castShadow;
     proxy.receiveShadow = false;
-    mesh.add(proxy);
-    mesh.castShadow = false;
+    for (const real of proxiedMeshes(proxy)) real.castShadow = false;
   }
 }
 

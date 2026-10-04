@@ -1,12 +1,24 @@
 /**
  * 모든 장면이 함께 쓰는 것: 카메라, 해, 입력.
  */
-import { useEffect, useRef } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
-import { Color, PMREMGenerator, Vector3, type DirectionalLight, type HemisphereLight, type Object3D } from 'three';
+import {
+  BufferGeometry,
+  Color,
+  Float32BufferAttribute,
+  Mesh,
+  MeshBasicMaterial,
+  PMREMGenerator,
+  Vector3,
+  type DirectionalLight,
+  type HemisphereLight,
+  type Object3D,
+} from 'three';
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
 import { PALETTE } from '@/config/artTokens';
 import { gameEvents } from '@/bridge/eventBus';
+import { setShadowProxiesVisible } from './assets3d';
 import { daylight } from './core/dayNight';
 import { input, player, resetInput } from './core/runtime';
 import { useWorldScene } from './core/scenes';
@@ -69,9 +81,30 @@ export function Sun(): React.ReactElement {
     if (light.current && target.current) light.current.target = target.current;
   }, []);
 
+  // 그림자 사본(assets3d)은 그림자를 그리는 동안만 보이게 한다. 장면에서 가장 먼저 그림자를 그리는
+  // 이 작은 물체(gate)가 사본을 켜고, 다음 프레임이 시작될 때 끈다 — 화면을 그릴 목록은 그림자보다 먼저 정해지므로
+  // 사본은 화면 목록에 들어가지 않는다 (예전에는 투명하게 화면에도 그려 그리기 호출을 낭비했다)
+  const gate = useMemo(() => {
+    const geometry = new BufferGeometry();
+    geometry.setAttribute('position', new Float32BufferAttribute([0, 0, 0, 0, 0, 0, 0, 0, 0], 3));
+    const mesh = new Mesh(geometry, new MeshBasicMaterial({ colorWrite: false, depthWrite: false }));
+    mesh.castShadow = true;
+    mesh.frustumCulled = false;
+    mesh.onBeforeShadow = () => setShadowProxiesVisible(true);
+    return mesh;
+  }, []);
+  useEffect(
+    () => () => {
+      gate.geometry.dispose();
+      (gate.material as MeshBasicMaterial).dispose();
+    },
+    [gate],
+  );
+
   // 그림자는 매 프레임 다시 그린다. 2프레임에 한 번 그렸더니 그림자가 한 박자 늦게 따라와
   // 걸을 때 캐릭터가 2~3개 겹쳐 보였다 (태블릿에서 확인)
   useFrame(() => {
+    setShadowProxiesVisible(false);
 
     // 그림자 상자는 캐릭터보다 화면 위쪽(-z)으로 당긴다. 카메라가 남쪽에서 북쪽을 내려다봐서
     // 화면에 보이는 땅은 대부분 캐릭터 앞(-z)에 있다
@@ -99,6 +132,8 @@ export function Sun(): React.ReactElement {
 
   return (
     <>
+      {/* 그림자 사본을 켜는 물체. 장면에서 가장 먼저 그림자를 그리도록 맨 앞에 둔다 */}
+      <primitive object={gate} />
       <hemisphereLight ref={sky} args={[PALETTE.skyTop, PALETTE.grassShade, SKY_INTENSITY]} />
       <directionalLight
         ref={light}
