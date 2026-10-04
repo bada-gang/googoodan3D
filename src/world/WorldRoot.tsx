@@ -3,6 +3,7 @@
  *
  * 태블릿 성능을 위해 화면 배율(dpr)을 1 로 고정한다 (화질 "보통"). 레티나 태블릿의 2~3배를 그대로 쓰면
  * 픽셀 수가 4~9배가 되어 프레임이 떨어진다. 프레임에 따라 화질을 바꾸던 장치는 사용자 요청으로 뺐다.
+ * 그림자 경계는 PCF (soft 보다 픽셀마다 그림자를 덜 읽는다).
  */
 import { useEffect } from 'react';
 import { Canvas, useThree } from '@react-three/fiber';
@@ -23,6 +24,9 @@ import { resetWorldScene, useWorldScene } from './core/scenes';
 import { TEST_FLAGS } from './core/testFlags';
 import { CameraRig, InputSystem, SoftEnvironment, Sun } from './WorldSystems';
 
+/** 배포본에서도 주소에 ?debug 를 붙이면 콘솔 손잡이(__googooWorld · __googooR3f)를 열어 둔다 (태블릿 성능 점검용) */
+const DEBUG_HANDLES = typeof location !== 'undefined' && new URLSearchParams(location.search).has('debug');
+
 /** 집 안에서 벽 너머로 보이는 빈 곳의 색 (하늘이 보이면 어색하다) */
 const INDOOR_BACKGROUND = '#efe2cc';
 
@@ -33,8 +37,8 @@ export default function WorldRoot(): React.ReactElement {
     // 게임 화면에 들어올 때는 마당에서 시작한다. 장면이 준비되면 HUD 가 뜬다 (useGameBridge 가 booting 을 끈다)
     resetWorldScene();
     gameEvents.emit('scene:changed', { sceneKey: 'YardScene' });
-    if (import.meta.env.DEV) {
-      // 개발 중 콘솔에서 캐릭터 위치·입력을 들여다볼 수 있게 해 둔다.
+    // 개발 중(또는 배포본에서 ?debug) 콘솔에서 캐릭터 위치·입력을 들여다볼 수 있게 해 둔다. 성능 측정에도 쓴다
+    if (import.meta.env.DEV || DEBUG_HANDLES) {
       (window as unknown as { __googooWorld?: unknown }).__googooWorld = {
         player,
         input,
@@ -45,6 +49,8 @@ export default function WorldRoot(): React.ReactElement {
         decorate: { tap: decorateFloorTap, hover: decorateFloorHover, state: useDecorate },
         events: gameEvents,
       };
+    }
+    if (import.meta.env.DEV) {
       // 주소에 ?dev-animals 를 붙이면 동물을 한 마리씩 넣어 준다 (시장이 생기기 전 시험용)
       // ?dev-furniture 면 가구 · 장식을 하나씩 가방에 넣어 준다 (시장이 생기기 전 꾸미기 시험용)
       if (new URLSearchParams(window.location.search).has('dev-furniture')) {
@@ -77,7 +83,7 @@ export default function WorldRoot(): React.ReactElement {
   return (
     <Canvas
       dpr={1}
-      shadows={!TEST_FLAGS.noShadow}
+      shadows={TEST_FLAGS.noShadow ? false : 'percentage'}
       camera={{ position: [0, 9, 12], fov: 40, near: 0.5, far: 120 }}
       gl={{ antialias: !TEST_FLAGS.noAntialias, powerPreference: 'high-performance' }}
       style={{ background: PALETTE.skyBottom }}
@@ -108,7 +114,7 @@ export default function WorldRoot(): React.ReactElement {
       {scene === 'TownScene' && <TownWorld />}
       <Player />
       <EffectsLayer />
-      {import.meta.env.DEV && <DevHandle />}
+      {(import.meta.env.DEV || DEBUG_HANDLES) && <DevHandle />}
     </Canvas>
   );
 }
