@@ -24,7 +24,9 @@ import { input, obstacles, walkBounds } from '../../state/runtime';
 import { GrassGround, PathNetwork, Surroundings } from '../../props/Ground';
 import { SignBoard } from '../../props/SignBoard';
 import { AnimalPen } from './pen/AnimalPen';
-import { FarmPlot, PlotBeds, plantWithMath } from './farm/FarmPlot';
+import { plantWithMath } from './farm/farmActions';
+import { FarmPlot } from './farm/FarmPlot';
+import { PlotBeds } from './farm/PlotBeds';
 
 /** 미리 그리는 그림자를 까는 범위: 걸어 다니는 범위 + 외곽 덤불과 그 그림자 (그림자는 +x · -z 쪽으로 진다) */
 const YARD_SHADOW_BOUNDS = {
