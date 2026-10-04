@@ -20,6 +20,7 @@ import { HomeWorld } from './scenes/HomeWorld';
 import { TownWorld } from './scenes/TownWorld';
 import { YardWorld } from './scenes/YardWorld';
 import { resetWorldScene, useWorldScene } from './core/scenes';
+import { TEST_FLAGS } from './core/testFlags';
 import { CameraRig, InputSystem, SoftEnvironment, Sun } from './WorldSystems';
 
 /** 집 안에서 벽 너머로 보이는 빈 곳의 색 (하늘이 보이면 어색하다) */
@@ -76,9 +77,9 @@ export default function WorldRoot(): React.ReactElement {
   return (
     <Canvas
       dpr={1}
-      shadows
+      shadows={!TEST_FLAGS.noShadow}
       camera={{ position: [0, 9, 12], fov: 40, near: 0.5, far: 120 }}
-      gl={{ antialias: true, powerPreference: 'high-performance' }}
+      gl={{ antialias: !TEST_FLAGS.noAntialias, powerPreference: 'high-performance' }}
       style={{ background: PALETTE.skyBottom }}
     >
       {/* key 를 나눠야 바깥 · 집 안 배경이 각자 따로 만들어진다. 같은 자리라 하나를 같이 쓰면

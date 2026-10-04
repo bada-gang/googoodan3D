@@ -9,6 +9,7 @@
  */
 import { Component, Suspense, lazy, useEffect, useState, type ErrorInfo, type ReactNode } from 'react';
 import { SCENE_FADE_MS, useWorldScene } from './core/sceneStore';
+import { activeTestFlags } from './core/testFlags';
 
 const WorldRoot = lazy(() => import('./WorldRoot'));
 
@@ -84,7 +85,7 @@ function FpsMeter(): React.ReactElement {
   }, []);
   return (
     <div className="pointer-events-none absolute top-3 left-1/2 z-[60] -translate-x-1/2 rounded-lg bg-black/60 px-3 py-1 font-mono text-sm text-white">
-      {fps} fps
+      {[`${fps} fps`, ...activeTestFlags()].join(' · ')}
     </div>
   );
 }

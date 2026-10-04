@@ -6,7 +6,17 @@
  */
 import { Component, Suspense, useEffect, useMemo, type ReactNode } from 'react';
 import { useGLTF, useTexture } from '@react-three/drei';
-import { RepeatWrapping, SRGBColorSpace, type Bone, type Mesh, type Object3D, type Texture } from 'three';
+import {
+  RepeatWrapping,
+  SRGBColorSpace,
+  type Bone,
+  type BufferGeometry,
+  type Material,
+  type Matrix4,
+  type Mesh,
+  type Object3D,
+  type Texture,
+} from 'three';
 import { clone as cloneWithSkeleton } from 'three/examples/jsm/utils/SkeletonUtils.js';
 import { isArtReady, realAssetUrl } from '@/config/artReady';
 import { modelUrl } from '@/config/modelReady';
@@ -109,6 +119,52 @@ function LoadedModel({
   }, [object, onLoaded]);
 
   return <primitive object={object} />;
+}
+
+/** 모델 안의 모양 하나: 모양 · 재질과, 모델 원점 기준 위치(노드 변환을 모두 곱한 것) */
+export interface ModelPart {
+  geometry: BufferGeometry;
+  material: Material | Material[];
+  matrix: Matrix4;
+}
+
+/**
+ * 모델을 통째로 놓지 않고 부품(모양 · 재질)으로 꺼내 준다. 같은 모델을 여러 개 한 번에 그릴 때
+ * (인스턴싱) 쓴다 — 열매 다섯 개를 따로 그리면 5번, 묶으면 1번이다.
+ * 아직 없거나 못 불러오면 fallback 을 그린다.
+ */
+export function ModelParts({
+  modelKey,
+  fallback,
+  children,
+}: {
+  modelKey: string;
+  fallback: ReactNode;
+  children: (parts: ModelPart[]) => ReactNode;
+}): React.ReactElement {
+  const url = modelUrl(modelKey);
+  if (!url) return <>{fallback}</>;
+  return (
+    <LoadFailureGuard fallback={fallback} label={url}>
+      <Suspense fallback={fallback}>
+        <LoadedParts url={url}>{children}</LoadedParts>
+      </Suspense>
+    </LoadFailureGuard>
+  );
+}
+
+function LoadedParts({ url, children }: { url: string; children: (parts: ModelPart[]) => ReactNode }): React.ReactElement {
+  const { scene } = useGLTF(url);
+  const parts = useMemo(() => {
+    scene.updateMatrixWorld(true);
+    const list: ModelPart[] = [];
+    scene.traverse((node) => {
+      const mesh = node as Mesh;
+      if (mesh.isMesh) list.push({ geometry: mesh.geometry, material: mesh.material, matrix: mesh.matrixWorld.clone() });
+    });
+    return list;
+  }, [scene]);
+  return <>{children(parts)}</>;
 }
 
 /* --------------------------------- 질감 --------------------------------- */

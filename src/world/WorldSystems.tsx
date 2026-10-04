@@ -10,6 +10,7 @@ import { gameEvents } from '@/bridge/eventBus';
 import { daylight } from './core/dayNight';
 import { input, player, resetInput } from './core/runtime';
 import { useWorldScene } from './core/scenes';
+import { TEST_FLAGS } from './core/testFlags';
 
 /** 캐릭터에서 카메라까지 (뒤쪽 위). 동물의 숲처럼 비스듬히 내려다본다 */
 const CAMERA_OFFSET = new Vector3(0, 5.6, 7.6);
@@ -51,6 +52,13 @@ const SKY_INTENSITY = 0.55;
 const ENV_INTENSITY = 0.3;
 const indoorColor = new Color();
 
+/** 그림자를 계산하는 범위 (그림자 상자 가운데에서 ±m). 넓을수록 그릴 물체가 많아진다 */
+const SHADOW_RANGE = 9;
+/** 그림자 상자를 캐릭터보다 화면 위쪽으로 당기는 거리 (m) */
+const SHADOW_AHEAD = 3;
+/** 그림자를 몇 프레임에 한 번 다시 그리나 */
+const SHADOW_EVERY = 2;
+
 export function Sun(): React.ReactElement {
   const light = useRef<DirectionalLight>(null);
   const sky = useRef<HemisphereLight>(null);
@@ -62,10 +70,28 @@ export function Sun(): React.ReactElement {
     if (light.current && target.current) light.current.target = target.current;
   }, []);
 
+  // 그림자는 2프레임에 한 번 다시 그린다. 그림자 그리기는 물체를 한 번 더 그리는 일이라 태블릿에 무겁다.
+  // 빨리 움직일 때 그림자가 한 프레임 늦게 따라오지만 눈에 거의 띄지 않는다
+  const gl = useThree((s) => s.gl);
+  const frame = useRef(0);
+  useEffect(() => {
+    gl.shadowMap.autoUpdate = false;
+    gl.shadowMap.needsUpdate = true;
+    return () => {
+      gl.shadowMap.autoUpdate = true;
+    };
+  }, [gl]);
+
   useFrame(() => {
+    frame.current += 1;
+    if (frame.current % SHADOW_EVERY === 0) gl.shadowMap.needsUpdate = true;
+
+    // 그림자 상자는 캐릭터보다 화면 위쪽(-z)으로 당긴다. 카메라가 남쪽에서 북쪽을 내려다봐서
+    // 화면에 보이는 땅은 대부분 캐릭터 앞(-z)에 있다
     const p = player.position;
-    light.current?.position.set(p.x - 8, 14, p.z + 6);
-    target.current?.position.set(p.x, 0, p.z);
+    const cz = p.z - SHADOW_AHEAD;
+    light.current?.position.set(p.x - 8, 14, cz + 6);
+    target.current?.position.set(p.x, 0, cz);
 
     // 밤낮 (core/dayNight). 밤에도 나무 · 동물이 구별되게 너무 어둡게 하지 않는다. 집 안은 조금만
     const d = daylight.darkness * (indoor ? 0.35 : 1);
@@ -90,12 +116,12 @@ export function Sun(): React.ReactElement {
       <directionalLight
         ref={light}
         intensity={SUN_INTENSITY}
-        castShadow
+        castShadow={!TEST_FLAGS.noShadow}
         shadow-mapSize={[1024, 1024]}
-        shadow-camera-left={-14}
-        shadow-camera-right={14}
-        shadow-camera-top={14}
-        shadow-camera-bottom={-14}
+        shadow-camera-left={-SHADOW_RANGE}
+        shadow-camera-right={SHADOW_RANGE}
+        shadow-camera-top={SHADOW_RANGE}
+        shadow-camera-bottom={-SHADOW_RANGE}
         shadow-camera-near={1}
         shadow-camera-far={40}
         shadow-bias={-0.0005}

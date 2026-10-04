@@ -7,7 +7,7 @@
  */
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useFrame } from '@react-three/fiber';
-import { Box3, Matrix4, type Group, type Mesh, type Object3D } from 'three';
+import { Box3, Matrix4, Quaternion, Vector3, type Group, type InstancedMesh, type Mesh, type Object3D } from 'three';
 import { ASSETS } from '@/config/assets';
 import { PALETTE } from '@/config/artTokens';
 import { MAX_HARVESTS_PER_TREE, STAGE_LABEL } from '@/config/balance';
@@ -19,7 +19,7 @@ import type { InteractionPrompt } from '@/bridge/events';
 import { useGameStore } from '@/state/gameStore';
 import type { FarmPlot as FarmPlotData, TreeSpeciesId, TreeStage } from '@/types/game';
 import { audio } from '@/audio/sfx';
-import { ArtTexture, GltfModel } from '../../assets3d';
+import { ArtTexture, GltfModel, ModelParts, type ModelPart } from '../../assets3d';
 import { burstStars, floatText } from '../../core/effects';
 import { spawnParticles } from '../../core/particles';
 import { mergedBoxGeometry } from '../../props/mergedBoxes';
@@ -434,6 +434,14 @@ const FRUIT_SCALE = 1.5;
 /** 열매 모델은 원점이 밑바닥이라, 매달린 것처럼 반쯤 내린다 */
 const FRUIT_HANG = 0.16;
 
+/** 열매 인스턴스 위치 계산에 다시 쓰는 값 (매 프레임 새로 만들지 않게) */
+const UP = new Vector3(0, 1, 0);
+const FRUIT_ROTATION = new Quaternion();
+const FRUIT_POSITION = new Vector3();
+const FRUIT_SIZE = new Vector3();
+const FRUIT_BASE = new Matrix4();
+const FRUIT_MATRIX = new Matrix4();
+
 /** 수확한 열매가 캐릭터에게 날아가는 시간 */
 const FLY_SECONDS = 0.7;
 
@@ -470,18 +478,74 @@ function FruitModel({ species }: { species: TreeSpeciesId }): React.ReactElement
 }
 
 /** 나무에 열린 열매. 열매가 열릴 때 하나씩 톡톡 돋아난다 */
+/**
+ * 나무에 달린 열매. 모델을 불러왔으면 다섯 개를 한 번에 그린다(인스턴싱 — 그리기 호출 5번 → 1번).
+ * 모델이 아직 없으면 하나씩 그리는 예전 방식(임시 공 포함)으로.
+ */
 function Fruits({ species, crown }: { species: TreeSpeciesId; crown: Crown | null }): React.ReactElement {
   const spots = fruitSpots(crown ?? FALLBACK_CROWN, species);
+  return (
+    <ModelParts modelKey={MODELS.fruits[species]} fallback={<FruitGroups species={species} spots={spots} />}>
+      {(parts) => <FruitInstances parts={parts} spots={spots} />}
+    </ModelParts>
+  );
+}
+
+/** 열매가 하나씩 차례로 톡 튀어나오는 크기 (0 → FRUIT_SCALE) */
+function popScale(age: number, i: number): number {
+  const k = Math.min(1, Math.max(0, (age - i * 0.09) / 0.3));
+  return FRUIT_SCALE * backOut(k) + 1e-4;
+}
+
+/** 다 튀어나온 뒤에는 열매 위치를 다시 계산하지 않는다 */
+const FRUIT_POP_DONE = 0.09 * 5 + 0.4;
+
+function FruitInstances({ parts, spots }: { parts: ModelPart[]; spots: [number, number, number][] }): React.ReactElement {
+  const meshes = useRef<(InstancedMesh | null)[]>([]);
+  const started = useRef(performance.now());
+  const done = useRef(false);
+
+  useFrame(() => {
+    if (done.current) return;
+    const age = (performance.now() - started.current) / 1000;
+    spots.forEach((spot, i) => {
+      FRUIT_ROTATION.setFromAxisAngle(UP, i * 1.3);
+      FRUIT_BASE.compose(FRUIT_POSITION.set(spot[0], spot[1], spot[2]), FRUIT_ROTATION, FRUIT_SIZE.setScalar(popScale(age, i)));
+      parts.forEach((part, p) => {
+        meshes.current[p]?.setMatrixAt(i, FRUIT_MATRIX.multiplyMatrices(FRUIT_BASE, part.matrix));
+      });
+    });
+    for (const mesh of meshes.current) if (mesh) mesh.instanceMatrix.needsUpdate = true;
+    if (age > FRUIT_POP_DONE) done.current = true;
+  });
+
+  return (
+    <group>
+      {parts.map((part, p) => (
+        <instancedMesh
+          key={p}
+          ref={(mesh) => void (meshes.current[p] = mesh)}
+          args={[part.geometry, part.material, spots.length]}
+          receiveShadow
+          // 인스턴스가 원점에서 떨어져 있어 모양 하나 기준의 가림 판정이 틀린다. 다섯 개뿐이라 늘 그린다
+          frustumCulled={false}
+          // 모양 · 재질은 불러온 모델 것을 같이 쓴다. 이 열매가 사라질 때 정리하면 다른 나무 열매까지 다시 올려야 한다
+          dispose={null}
+        />
+      ))}
+    </group>
+  );
+}
+
+/** 모델이 아직 없을 때: 열매를 하나씩 그린다 (임시 공) */
+function FruitGroups({ species, spots }: { species: TreeSpeciesId; spots: [number, number, number][] }): React.ReactElement {
   const groups = useRef<(Group | null)[]>([]);
   const started = useRef(performance.now());
 
   useFrame(() => {
     const age = (performance.now() - started.current) / 1000;
     groups.current.forEach((group, i) => {
-      if (!group) return;
-      // 하나씩 차례로, 0.3초 동안 톡
-      const k = Math.min(1, Math.max(0, (age - i * 0.09) / 0.3));
-      group.scale.setScalar(FRUIT_SCALE * backOut(k) + 1e-4);
+      if (group) group.scale.setScalar(popScale(age, i));
     });
   });
 
