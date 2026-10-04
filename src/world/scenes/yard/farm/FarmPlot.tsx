@@ -19,14 +19,14 @@ import type { InteractionPrompt } from '@/bridge/events';
 import { useGameStore } from '@/state/gameStore';
 import type { FarmPlot as FarmPlotData, TreeSpeciesId, TreeStage } from '@/types/game';
 import { audio } from '@/audio/sfx';
-import { ArtTexture, GltfModel, ModelParts, type ModelPart } from '../../assets3d';
-import { burstStars, floatText } from '../../core/effects';
-import { spawnParticles } from '../../core/particles';
-import { StaticShadow } from '../../core/bakedShadows';
-import { mergedBoxGeometry, type BoxSpec } from '../../props/mergedBoxes';
-import { askMath, awardExperience, toast } from '../../core/gameplay';
-import { useInteractable } from '../../core/interaction';
-import { obstacles, player, raisedAreas } from '../../core/runtime';
+import { ArtTexture, GltfModel, ModelParts, type ModelPart } from '../../../rendering/assets';
+import { burstStars, floatText } from '../../../effects/effects';
+import { spawnParticles } from '../../../effects/particles';
+import { StaticShadow } from '../../../rendering/bakedShadows';
+import { mergedBoxGeometry, type BoxSpec } from '../../../props/mergedBoxes';
+import { askMath, awardExperience, toast } from '../../../gameplay/gameplay';
+import { useInteractable } from '../../../systems/interaction';
+import { obstacles, player, raisedAreas } from '../../../state/runtime';
 
 const PLOT_HEIGHT = 0.14;
 /** 나무가 서 있으면 걸어서 지나갈 수 없는 반지름 */
@@ -184,7 +184,7 @@ function handlePlotAction(plotId: string, actionId: string): void {
 
 /**
  * 밭 여섯 칸의 흙과 나무 테두리. 칸마다 그리면 12번이라, 흙끼리 · 테두리끼리 모양 하나로 합쳐 2번에 그린다.
- * 움직이지 않아 그림자를 미리 그려 두고(core/bakedShadows), 나무 그림자는 흙 위에 지도록 그림자를 받는다.
+ * 움직이지 않아 그림자를 미리 그려 두고(rendering/bakedShadows), 나무 그림자는 흙 위에 지도록 그림자를 받는다.
  */
 export function PlotBeds(): React.ReactElement {
   const { soil, border } = useMemo(() => {

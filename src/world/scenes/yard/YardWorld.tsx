@@ -13,18 +13,18 @@ import { SHOW_AREA_SIGNS } from '@/config/features';
 import { AREA_NAME } from '@/config/strings';
 import { gameEvents } from '@/bridge/eventBus';
 import type { TreeSpeciesId } from '@/types/game';
-import { GltfModel } from '../assets3d';
-import { BakedShadows, StaticShadow } from '../core/bakedShadows';
-import { NightGlow } from '../core/dayNight';
-import { useInteractable } from '../core/interaction';
-import { DecorateSystem, PlacedFurnitureLayer, decorateFloorHover, decorateFloorTap, type DecorateRules } from '../core/decorate';
-import { placePlayer } from '../core/movement';
-import { goToScene, useWorldScene, type Spawn } from '../core/scenes';
-import { input, obstacles, walkBounds } from '../core/runtime';
-import { GrassGround, PathNetwork, Surroundings } from '../props/Ground';
-import { SignBoard } from '../props/SignBoard';
-import { AnimalPen } from './yard/AnimalPen';
-import { FarmPlot, PlotBeds, plantWithMath } from './yard/FarmPlot';
+import { GltfModel } from '../../rendering/assets';
+import { BakedShadows, StaticShadow } from '../../rendering/bakedShadows';
+import { NightGlow } from '../../rendering/dayNight';
+import { useInteractable } from '../../systems/interaction';
+import { DecorateSystem, PlacedFurnitureLayer, decorateFloorHover, decorateFloorTap, type DecorateRules } from '../../gameplay/decorate';
+import { placePlayer } from '../../systems/movement';
+import { goToScene, useWorldScene, type Spawn } from '../../state/scenes';
+import { input, obstacles, walkBounds } from '../../state/runtime';
+import { GrassGround, PathNetwork, Surroundings } from '../../props/Ground';
+import { SignBoard } from '../../props/SignBoard';
+import { AnimalPen } from './pen/AnimalPen';
+import { FarmPlot, PlotBeds, plantWithMath } from './farm/FarmPlot';
 
 /** 미리 그리는 그림자를 까는 범위: 걸어 다니는 범위 + 외곽 덤불과 그 그림자 (그림자는 +x · -z 쪽으로 진다) */
 const YARD_SHADOW_BOUNDS = {
@@ -96,7 +96,7 @@ export function YardWorld(): React.ReactElement {
       <group position={[centerX, 0, centerZ]}>
         <GrassGround width={width} depth={depth} />
       </group>
-      {/* 움직이지 않는 것의 그림자는 미리 그려 둔다 (core/bakedShadows) */}
+      {/* 움직이지 않는 것의 그림자는 미리 그려 둔다 (rendering/bakedShadows) */}
       <BakedShadows bounds={YARD_SHADOW_BOUNDS} />
       <StaticShadow>
         <Surroundings bounds={YARD.bounds} />

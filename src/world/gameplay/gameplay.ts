@@ -7,9 +7,9 @@ import type { ToastTone } from '@/bridge/events';
 import { useGameStore } from '@/state/gameStore';
 import type { MathContext } from '@/types/learning';
 import { audio } from '@/audio/sfx';
-import { player, playEmote } from './runtime';
-import { burstStars } from './effects';
-import { spawnParticles } from './particles';
+import { player, playEmote } from '../state/runtime';
+import { burstStars } from '../effects/effects';
+import { spawnParticles } from '../effects/particles';
 
 /** 문제를 맞히고 돌아온 결과. 수확량과 경험치를 정하는 데 쓴다. */
 export interface MathAskResult {

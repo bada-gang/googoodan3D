@@ -2,10 +2,10 @@
  * 움직이지 않는 물체(건물 · 울타리 · 밭 테두리 · 덤불 · 표지판 · 시장 장식)의 그림자를 미리 그려 둔다.
  *
  * 실시간 그림자는 그림자를 만드는 물체를 매번 한 번 더 그려서 태블릿에 무겁다 (그림자를 끄면 32 → 42fps).
- * 해는 늘 같은 방향(core/sun)이라 움직이지 않는 물체의 그림자는 바뀌지 않는다. 그래서:
+ * 해는 늘 같은 방향(rendering/sun)이라 움직이지 않는 물체의 그림자는 바뀌지 않는다. 그래서:
  *  1. 장면에 들어오면 해 방향에서 정적 물체만 깊이로 한 번 그리고 (그림자 지도),
  *  2. 땅의 각 점이 그 그림자 안에 있는지 계산해 그림자 그림(마스크)으로 굽고,
- *  3. 땅 · 길을 칠할 때 그 그림을 같이 칠한다 (core/groundShadow — 추가로 칠하는 층이 없다).
+ *  3. 땅 · 길을 칠할 때 그 그림을 같이 칠한다 (rendering/groundShadow — 추가로 칠하는 층이 없다).
  * 정적 물체는 실시간 그림자에서 빠진다. 캐릭터 · 동물 · 밭의 나무 · 꾸미기 가구는 실시간 그대로.
  *
  * 한계: 미리 그린 그림자는 땅에만 생긴다 (헛간 그림자가 울타리 위에 지는 것처럼 물체끼리는 없다).
@@ -28,7 +28,7 @@ import {
   type Group,
   type Object3D,
 } from 'three';
-import { proxiedMeshes } from '../assets3d';
+import { proxiedMeshes } from './assets';
 import { daylight } from './dayNight';
 import { groundShadowUniforms } from './groundShadow';
 import { SUN_OFFSET } from './sun';
@@ -81,7 +81,7 @@ function markStaticCasters(): string {
       const mesh = node as Mesh;
       if (!mesh.isMesh) return;
       if (!receive) mesh.receiveShadow = false;
-      // 그림자 전용 사본(assets3d)은 정적 물체에는 필요 없다. 끄고, 원래 모델로 굽는다
+      // 그림자 전용 사본(rendering/assets)은 정적 물체에는 필요 없다. 끄고, 원래 모델로 굽는다
       if (mesh.userData.shadowProxy) {
         mesh.visible = false;
         for (const real of proxiedMeshes(mesh)) {
@@ -197,7 +197,7 @@ export function BakedShadows({ bounds }: { bounds: ShadowBounds }): null {
     [bake],
   );
 
-  // 땅 · 길 재질이 읽는 값 (core/groundShadow). 장면을 떠나면 그림자를 끈다
+  // 땅 · 길 재질이 읽는 값 (rendering/groundShadow). 장면을 떠나면 그림자를 끈다
   useEffect(() => {
     groundShadowUniforms.uBakedMask.value = bake.maskTarget.texture;
     groundShadowUniforms.uBakedBounds.value.set(bounds.minX, bounds.maxX, bounds.minZ, bounds.maxZ);

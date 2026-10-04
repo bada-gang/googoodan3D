@@ -17,10 +17,10 @@ import { MODELS } from '@/config/models';
 import { useGameStore } from '@/state/gameStore';
 import { characterOf, type CharacterId } from '@/types/game';
 import { audio } from '@/audio/sfx';
-import { GltfModel } from './assets3d';
-import { stepMovement } from './core/movement';
-import { groundHeight, player } from './core/runtime';
-import { useWorldScene } from './core/sceneStore';
+import { GltfModel } from '../rendering/assets';
+import { stepMovement } from '../systems/movement';
+import { groundHeight, player } from '../state/runtime';
+import { useWorldScene } from '../state/sceneStore';
 
 /** 발소리 간격 (초) */
 const STEP_INTERVAL = 0.32;

@@ -10,7 +10,7 @@ import { Html } from '@react-three/drei';
 import { CanvasTexture, SRGBColorSpace, type Sprite, type SpriteMaterial } from 'three';
 import { create } from 'zustand';
 import { PALETTE } from '@/config/artTokens';
-import { distanceToPlayer } from './interaction';
+import { distanceToPlayer } from '../systems/interaction';
 import { ParticleField, spawnParticles } from './particles';
 
 interface Point {

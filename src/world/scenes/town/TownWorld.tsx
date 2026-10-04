@@ -13,15 +13,15 @@ import { MODELS, furnitureModelKey } from '@/config/models';
 import { AREA_NAME } from '@/config/strings';
 import { gameEvents } from '@/bridge/eventBus';
 import { FURNITURE_3D } from '@/config/furniture3d';
-import { GltfModel } from '../assets3d';
-import { BakedShadows, StaticShadow } from '../core/bakedShadows';
-import { NightGlow } from '../core/dayNight';
-import { useInteractable } from '../core/interaction';
-import { placePlayer } from '../core/movement';
-import { input, obstacles, walkBounds, type Obstacle } from '../core/runtime';
-import { goToScene, useWorldScene, type Spawn } from '../core/scenes';
-import { GrassGround, PathNetwork, Surroundings } from '../props/Ground';
-import { SignBoard } from '../props/SignBoard';
+import { GltfModel } from '../../rendering/assets';
+import { BakedShadows, StaticShadow } from '../../rendering/bakedShadows';
+import { NightGlow } from '../../rendering/dayNight';
+import { useInteractable } from '../../systems/interaction';
+import { placePlayer } from '../../systems/movement';
+import { input, obstacles, walkBounds, type Obstacle } from '../../state/runtime';
+import { goToScene, useWorldScene, type Spawn } from '../../state/scenes';
+import { GrassGround, PathNetwork, Surroundings } from '../../props/Ground';
+import { SignBoard } from '../../props/SignBoard';
 
 /** 장식: 마당 꾸미기에 쓰는 것과 같은 모델. 광장 분수는 마당 것보다 크게 */
 const DECOR: { id: string; x: number; z: number; rotation?: number; scale?: number; radius: number }[] = [
@@ -111,7 +111,7 @@ export function TownWorld(): React.ReactElement {
       <group position={[(bounds.minX + bounds.maxX) / 2, 0, (bounds.minZ + bounds.maxZ) / 2]}>
         <GrassGround width={width} depth={depth} />
       </group>
-      {/* 시장은 움직이는 것이 캐릭터뿐이라, 건물 · 장식 · 나무 그림자를 모두 미리 그려 둔다 (core/bakedShadows) */}
+      {/* 시장은 움직이는 것이 캐릭터뿐이라, 건물 · 장식 · 나무 그림자를 모두 미리 그려 둔다 (rendering/bakedShadows) */}
       <BakedShadows bounds={TOWN_SHADOW_BOUNDS} />
       <StaticShadow>
         <Surroundings bounds={bounds} />

@@ -11,7 +11,7 @@ import type { InteractionPrompt } from '@/bridge/events';
 import type { Vec2 } from '@/config/layout';
 import { useUiStore } from '@/state/uiStore';
 import { audio } from '@/audio/sfx';
-import { input, player } from './runtime';
+import { input, player } from '../state/runtime';
 
 export interface Interactable {
   id: string;

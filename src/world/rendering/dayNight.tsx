@@ -24,7 +24,7 @@ import {
 } from 'three';
 import { PALETTE } from '@/config/artTokens';
 import { cycleNow, starAlphaAt, tintAt } from '@/config/dayNight';
-import { player } from './runtime';
+import { player } from '../state/runtime';
 
 /** 2D 판 덮개의 가장 진한 값 (한밤) */
 const NIGHT_ALPHA = 0.46;

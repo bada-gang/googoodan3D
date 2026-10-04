@@ -18,12 +18,12 @@ import {
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
 import { PALETTE } from '@/config/artTokens';
 import { gameEvents } from '@/bridge/eventBus';
-import { setShadowProxiesVisible } from './assets3d';
-import { daylight } from './core/dayNight';
-import { input, player, resetInput } from './core/runtime';
-import { useWorldScene } from './core/scenes';
-import { SUN_OFFSET } from './core/sun';
-import { TEST_FLAGS } from './core/testFlags';
+import { setShadowProxiesVisible } from './rendering/assets';
+import { daylight } from './rendering/dayNight';
+import { input, player, resetInput } from './state/runtime';
+import { useWorldScene } from './state/scenes';
+import { SUN_OFFSET } from './rendering/sun';
+import { TEST_FLAGS } from './debug/testFlags';
 
 /** 캐릭터에서 카메라까지 (뒤쪽 위). 동물의 숲처럼 비스듬히 내려다본다 */
 const CAMERA_OFFSET = new Vector3(0, 5.6, 7.6);
@@ -81,7 +81,7 @@ export function Sun(): React.ReactElement {
     if (light.current && target.current) light.current.target = target.current;
   }, []);
 
-  // 그림자 사본(assets3d)은 그림자를 그리는 동안만 보이게 한다. 장면에서 가장 먼저 그림자를 그리는
+  // 그림자 사본(rendering/assets)은 그림자를 그리는 동안만 보이게 한다. 장면에서 가장 먼저 그림자를 그리는
   // 이 작은 물체(gate)가 사본을 켜고, 다음 프레임이 시작될 때 끈다 — 화면을 그릴 목록은 그림자보다 먼저 정해지므로
   // 사본은 화면 목록에 들어가지 않는다 (예전에는 투명하게 화면에도 그려 그리기 호출을 낭비했다)
   const gate = useMemo(() => {
@@ -113,7 +113,7 @@ export function Sun(): React.ReactElement {
     light.current?.position.set(p.x + SUN_OFFSET.x, SUN_OFFSET.y, cz + SUN_OFFSET.z);
     target.current?.position.set(p.x, 0, cz);
 
-    // 밤낮 (core/dayNight). 밤에도 나무 · 동물이 구별되게 너무 어둡게 하지 않는다. 집 안은 조금만
+    // 밤낮 (rendering/dayNight). 밤에도 나무 · 동물이 구별되게 너무 어둡게 하지 않는다. 집 안은 조금만
     const d = daylight.darkness * (indoor ? 0.35 : 1);
     if (light.current) {
       light.current.intensity = SUN_INTENSITY * (1 - 0.65 * d);

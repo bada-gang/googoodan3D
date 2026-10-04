@@ -5,7 +5,7 @@
  * 카메라는 늘 같은 방향(남쪽 위)에서 보므로 화면 위 = 월드 -z 다.
  */
 import { useUiStore } from '@/state/uiStore';
-import { PLAYER_RADIUS, input, obstacles, player, walkBounds } from './runtime';
+import { PLAYER_RADIUS, input, obstacles, player, walkBounds } from '../state/runtime';
 
 /** 최고 속도 (m/s). 2학년이 조작하기에 너무 빠르지 않게 */
 export const WALK_SPEED = 4;

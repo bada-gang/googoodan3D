@@ -12,13 +12,13 @@ import { surfaceTextureKey } from '@/config/assets';
 import { SURFACE_BY_ID } from '@/config/catalog';
 import { YARD } from '@/config/layout';
 import { useGameStore } from '@/state/gameStore';
-import { ArtTexture } from '../assets3d';
-import { daylight } from '../core/dayNight';
-import { DecorateSystem, PlacedFurnitureLayer, decorateFloorHover, decorateFloorTap, type DecorateRules } from '../core/decorate';
-import { useInteractable } from '../core/interaction';
-import { placePlayer } from '../core/movement';
-import { input, walkBounds } from '../core/runtime';
-import { goToScene, useWorldScene } from '../core/scenes';
+import { ArtTexture } from '../../rendering/assets';
+import { daylight } from '../../rendering/dayNight';
+import { DecorateSystem, PlacedFurnitureLayer, decorateFloorHover, decorateFloorTap, type DecorateRules } from '../../gameplay/decorate';
+import { useInteractable } from '../../systems/interaction';
+import { placePlayer } from '../../systems/movement';
+import { input, walkBounds } from '../../state/runtime';
+import { goToScene, useWorldScene } from '../../state/scenes';
 
 /** 방 크기 (m). 가로 10, 깊이 7, 벽 높이 3 */
 export const ROOM = { width: 10, depth: 7, wallHeight: 3 } as const;

@@ -21,14 +21,14 @@ import type { InteractionPrompt } from '@/bridge/events';
 import { useGameStore } from '@/state/gameStore';
 import type { AnimalInstance, AnimalSpeciesId } from '@/types/game';
 import { audio } from '@/audio/sfx';
-import { GltfModel } from '../../assets3d';
-import { burstStars, floatText, Marker } from '../../core/effects';
-import { askMath, awardExperience, toast } from '../../core/gameplay';
-import { useInteractable } from '../../core/interaction';
-import { obstacles, type Obstacle } from '../../core/runtime';
-import { mergedBoxGeometry, type BoxSpec } from '../../props/mergedBoxes';
-import { SignBoard } from '../../props/SignBoard';
-import { StaticShadow } from '../../core/bakedShadows';
+import { GltfModel } from '../../../rendering/assets';
+import { burstStars, floatText, Marker } from '../../../effects/effects';
+import { askMath, awardExperience, toast } from '../../../gameplay/gameplay';
+import { useInteractable } from '../../../systems/interaction';
+import { obstacles, type Obstacle } from '../../../state/runtime';
+import { mergedBoxGeometry, type BoxSpec } from '../../../props/mergedBoxes';
+import { SignBoard } from '../../../props/SignBoard';
+import { StaticShadow } from '../../../rendering/bakedShadows';
 
 /* ---------------------------------- 배치 ---------------------------------- */
 
@@ -206,7 +206,7 @@ export function AnimalPen(): React.ReactElement {
 
   return (
     <group>
-      {/* 울타리 · 헛간 · 여물통 · 표지판은 움직이지 않아 그림자를 미리 그려 둔다 (core/bakedShadows) */}
+      {/* 울타리 · 헛간 · 여물통 · 표지판은 움직이지 않아 그림자를 미리 그려 둔다 (rendering/bakedShadows) */}
       <StaticShadow>
         <Fence />
         <group position={[BARN.x, 0, BARN.z]}>

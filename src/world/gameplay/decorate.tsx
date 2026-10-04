@@ -23,11 +23,11 @@ import type { DecorateTool } from '@/bridge/events';
 import { useGameStore } from '@/state/gameStore';
 import type { PlacedItem, PlacementArea } from '@/types/game';
 import { audio } from '@/audio/sfx';
-import { GltfModel } from '../assets3d';
-import { NightGlow } from './dayNight';
-import { burstStars } from './effects';
+import { GltfModel } from '../rendering/assets';
+import { NightGlow } from '../rendering/dayNight';
+import { burstStars } from '../effects/effects';
 import { toast } from './gameplay';
-import { obstacles, player } from './runtime';
+import { obstacles, player } from '../state/runtime';
 
 /** 놓는 자리를 이 간격에 맞춘다 (m). 줄 맞춰 놓기 쉽게 */
 const GRID = 0.25;

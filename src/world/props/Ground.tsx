@@ -6,9 +6,9 @@ import { Color, Matrix4, Shape, ShapeGeometry, Vector2, type InstancedMesh, type
 import { ASSETS } from '@/config/assets';
 import { PALETTE } from '@/config/artTokens';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
-import { ArtTexture } from '../assets3d';
-import { applyGroundShadow } from '../core/groundShadow';
-import { TEST_FLAGS } from '../core/testFlags';
+import { ArtTexture } from '../rendering/assets';
+import { applyGroundShadow } from '../rendering/groundShadow';
+import { TEST_FLAGS } from '../debug/testFlags';
 
 /** 잔디 질감 한 장이 덮는 크기 (m). 작으면 무늬가 반복되는 게 보이고, 크면 흐릿하다 */
 const GRASS_TILE = 4;
@@ -97,7 +97,7 @@ function PathMaterial({ repeat }: { repeat: [number, number] }): React.ReactElem
  * 땅 · 길 재질. 화면의 대부분을 차지해서 픽셀마다 하는 계산이 프레임을 좌우한다.
  * 땅은 원래 반사가 없는 무광이라 반사광 계산(PBR)을 뺀 가벼운 재질(Lambert)로 그린다.
  * 화면 밝기를 재 보니 예전 재질과 거의 같았다 (풀 186→184, 길 216→216, 그림자 속 풀 128→132).
- * 미리 그린 그림자도 여기서 같이 칠한다 (core/groundShadow).
+ * 미리 그린 그림자도 여기서 같이 칠한다 (rendering/groundShadow).
  * 사물(모델)은 원래 재질 그대로다. ?pbrground 로 예전 재질과 비교할 수 있다.
  */
 function GroundMaterial({ map, fallbackColor, raised = false }: { map: Texture | null; fallbackColor: string; raised?: boolean }): React.ReactElement {

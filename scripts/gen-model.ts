@@ -397,7 +397,7 @@ function hslToRgb(h: number, s: number, l: number): [number, number, number] {
 
 /** 그림자 전용 사본의 면 수 (본 모양 대비) */
 const SHADOW_PROXY_RATIO = 0.15;
-/** 게임이 그림자 사본을 알아보는 이름 (src/world/assets3d.tsx 와 같아야 한다) */
+/** 게임이 그림자 사본을 알아보는 이름 (src/world/rendering/assets.tsx 와 같아야 한다) */
 const SHADOW_PROXY_NAME = 'shadow_proxy';
 
 /**

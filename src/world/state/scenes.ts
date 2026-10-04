@@ -6,7 +6,7 @@
  */
 import { gameEvents } from '@/bridge/eventBus';
 import { audio } from '@/audio/sfx';
-import { clearParticles } from './particles';
+import { clearParticles } from '../effects/particles';
 import { resetInput } from './runtime';
 import { SCENE_FADE_MS, useWorldScene, type Spawn, type WorldSceneKey } from './sceneStore';
 

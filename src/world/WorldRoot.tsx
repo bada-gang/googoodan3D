@@ -11,17 +11,17 @@ import { PALETTE } from '@/config/artTokens';
 import { gameEvents } from '@/bridge/eventBus';
 import { FURNITURE } from '@/config/catalog';
 import { useGameStore } from '@/state/gameStore';
-import { decorateFloorHover, decorateFloorTap, useDecorate } from './core/decorate';
-import { DayNightSystem, NightStars } from './core/dayNight';
-import { EffectsLayer } from './core/effects';
-import { InteractionSystem } from './core/interaction';
-import { input, obstacles, player } from './core/runtime';
-import { Player } from './Player';
-import { HomeWorld } from './scenes/HomeWorld';
-import { TownWorld } from './scenes/TownWorld';
-import { YardWorld } from './scenes/YardWorld';
-import { resetWorldScene, useWorldScene } from './core/scenes';
-import { TEST_FLAGS, frameStats } from './core/testFlags';
+import { decorateFloorHover, decorateFloorTap, useDecorate } from './gameplay/decorate';
+import { DayNightSystem, NightStars } from './rendering/dayNight';
+import { EffectsLayer } from './effects/effects';
+import { InteractionSystem } from './systems/interaction';
+import { input, obstacles, player } from './state/runtime';
+import { Player } from './player/Player';
+import { HomeWorld } from './scenes/home/HomeWorld';
+import { TownWorld } from './scenes/town/TownWorld';
+import { YardWorld } from './scenes/yard/YardWorld';
+import { resetWorldScene, useWorldScene } from './state/scenes';
+import { TEST_FLAGS, frameStats } from './debug/testFlags';
 import { CameraRig, InputSystem, SoftEnvironment, Sun } from './WorldSystems';
 
 /** 배포본에서도 주소에 ?debug 를 붙이면 콘솔 손잡이(__googooWorld · __googooR3f)를 열어 둔다 (태블릿 성능 점검용) */

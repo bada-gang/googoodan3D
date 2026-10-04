@@ -8,8 +8,8 @@
  * 그래픽 메모리가 모자라 3D 화면이 끊긴 경우(WebGL context lost)도 같은 안내를 띄운다.
  */
 import { Component, Suspense, lazy, useEffect, useState, type ErrorInfo, type ReactNode } from 'react';
-import { SCENE_FADE_MS, useWorldScene } from './core/sceneStore';
-import { activeTestFlags, frameStats } from './core/testFlags';
+import { SCENE_FADE_MS, useWorldScene } from './state/sceneStore';
+import { activeTestFlags, frameStats } from './debug/testFlags';
 
 const WorldRoot = lazy(() => import('./WorldRoot'));
 
