@@ -57,8 +57,8 @@ const indoorColor = new Color();
 const SHADOW_RANGE = 9;
 /** 그림자 상자를 캐릭터보다 화면 위쪽으로 당기는 거리 (m) */
 const SHADOW_AHEAD = 3;
-/** 그림자를 몇 프레임에 한 번 다시 그리나 */
-const SHADOW_EVERY = 2;
+/** 그림자를 몇 프레임에 한 번 다시 그리나 (?shadow1 이면 매 프레임) */
+const SHADOW_EVERY = TEST_FLAGS.shadowEveryFrame ? 1 : 2;
 
 export function Sun(): React.ReactElement {
   const light = useRef<DirectionalLight>(null);

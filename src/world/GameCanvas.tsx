@@ -9,7 +9,7 @@
  */
 import { Component, Suspense, lazy, useEffect, useState, type ErrorInfo, type ReactNode } from 'react';
 import { SCENE_FADE_MS, useWorldScene } from './core/sceneStore';
-import { activeTestFlags } from './core/testFlags';
+import { activeTestFlags, frameStats } from './core/testFlags';
 
 const WorldRoot = lazy(() => import('./WorldRoot'));
 
@@ -70,18 +70,16 @@ export function GameCanvas(): React.ReactElement {
 function FpsMeter(): React.ReactElement {
   const [fps, setFps] = useState(0);
   useEffect(() => {
-    let frames = 0;
+    // 화면 주사율이 아니라 3D 화면을 실제로 그린 횟수를 센다 (?cap30 이면 30)
+    let rendered = frameStats.rendered;
     let started = performance.now();
-    let id = requestAnimationFrame(function tick(now) {
-      frames += 1;
-      if (now - started >= 1000) {
-        setFps(Math.round((frames * 1000) / (now - started)));
-        frames = 0;
-        started = now;
-      }
-      id = requestAnimationFrame(tick);
-    });
-    return () => cancelAnimationFrame(id);
+    const timer = window.setInterval(() => {
+      const now = performance.now();
+      setFps(Math.round(((frameStats.rendered - rendered) * 1000) / (now - started)));
+      rendered = frameStats.rendered;
+      started = now;
+    }, 1000);
+    return () => window.clearInterval(timer);
   }, []);
   return (
     <div className="pointer-events-none absolute top-3 left-1/2 z-[60] -translate-x-1/2 rounded-lg bg-black/60 px-3 py-1 font-mono text-sm text-white">

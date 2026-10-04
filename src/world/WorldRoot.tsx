@@ -6,7 +6,7 @@
  * 그림자 경계는 PCF (soft 보다 픽셀마다 그림자를 덜 읽는다).
  */
 import { useEffect } from 'react';
-import { Canvas, useThree } from '@react-three/fiber';
+import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { PALETTE } from '@/config/artTokens';
 import { gameEvents } from '@/bridge/eventBus';
 import { FURNITURE } from '@/config/catalog';
@@ -21,7 +21,7 @@ import { HomeWorld } from './scenes/HomeWorld';
 import { TownWorld } from './scenes/TownWorld';
 import { YardWorld } from './scenes/YardWorld';
 import { resetWorldScene, useWorldScene } from './core/scenes';
-import { TEST_FLAGS } from './core/testFlags';
+import { TEST_FLAGS, frameStats } from './core/testFlags';
 import { CameraRig, InputSystem, SoftEnvironment, Sun } from './WorldSystems';
 
 /** 배포본에서도 주소에 ?debug 를 붙이면 콘솔 손잡이(__googooWorld · __googooR3f)를 열어 둔다 (태블릿 성능 점검용) */
@@ -83,6 +83,8 @@ export default function WorldRoot(): React.ReactElement {
   return (
     <Canvas
       dpr={1}
+      // ?cap30 이면 직접 박자를 맞춰 그린다 (FrameCap)
+      frameloop={TEST_FLAGS.cap30 ? 'never' : 'always'}
       shadows={TEST_FLAGS.noShadow ? false : 'percentage'}
       camera={{ position: [0, 9, 12], fov: 40, near: 0.5, far: 120 }}
       gl={{ antialias: !TEST_FLAGS.noAntialias, powerPreference: 'high-performance' }}
@@ -114,9 +116,41 @@ export default function WorldRoot(): React.ReactElement {
       {scene === 'TownScene' && <TownWorld />}
       <Player />
       <EffectsLayer />
+      <FrameCounter />
+      {TEST_FLAGS.cap30 && <FrameCap fps={30} />}
       {(import.meta.env.DEV || DEBUG_HANDLES) && <DevHandle />}
     </Canvas>
   );
+}
+
+/** 그린 횟수를 센다 (?fps 표시용) */
+function FrameCounter(): null {
+  useFrame(() => {
+    frameStats.rendered += 1;
+  });
+  return null;
+}
+
+/**
+ * 정해진 fps 로만 그린다 (?cap30). 60Hz 화면에서 30 이면 모든 그림이 똑같이 두 번씩 보여
+ * 움직임 간격이 일정해진다 — fps 가 40~50 처럼 주사율과 안 맞으면 간격이 들쭉날쭉해 겹쳐 보인다.
+ */
+function FrameCap({ fps }: { fps: number }): null {
+  const advance = useThree((s) => s.advance);
+  useEffect(() => {
+    const interval = 1000 / fps;
+    let last = 0;
+    let id = requestAnimationFrame(function tick(now) {
+      // 화면 갱신 시각이 조금씩 흔들려도 박자를 놓치지 않게 여유(2ms)를 둔다
+      if (now - last >= interval - 2) {
+        last = now;
+        advance(now);
+      }
+      id = requestAnimationFrame(tick);
+    });
+    return () => cancelAnimationFrame(id);
+  }, [advance, fps]);
+  return null;
 }
 
 /** 개발 중 콘솔에서 프레임을 직접 돌려 볼 수 있게 한다 (화면이 숨겨진 창에서 시험할 때) */
