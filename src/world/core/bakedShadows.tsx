@@ -175,7 +175,7 @@ export function BakedShadows({ bounds }: { bounds: ShadowBounds }): null {
     maskQuad.frustumCulled = false;
     maskScene.add(maskQuad);
     const maskCamera = new OrthographicCamera();
-    return { depthTarget, maskTarget, sunCamera, depthMaterial, maskMaterial, maskScene, maskCamera };
+    return { depthTarget, maskTarget, sunCamera, depthMaterial, maskMaterial, maskScene, maskQuad, maskCamera };
   }, [bounds.minX, bounds.maxX, bounds.minZ, bounds.maxZ, width, depth]);
 
   useEffect(
@@ -185,6 +185,8 @@ export function BakedShadows({ bounds }: { bounds: ShadowBounds }): null {
       bake.maskTarget.dispose();
       bake.depthMaterial.dispose();
       bake.maskMaterial.dispose();
+      // 판 모양도 정리한다 (빠뜨렸더니 장면을 오갈 때마다 GPU 에 모양이 하나씩 쌓였다)
+      bake.maskQuad.geometry.dispose();
     },
     [bake],
   );
