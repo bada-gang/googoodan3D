@@ -43,6 +43,11 @@ export function burstStars(at: Point, count = 10): void {
   spawnParticles('stars', at, count);
 }
 
+/** 나무 · 동물을 돌볼 때(심기 · 물 주기 · 수확 · 먹이 · 생산물)의 별. 너무 화려해서 30% 줄였다 (사용자 요청) */
+export function burstCareStars(at: Point, count: number): void {
+  burstStars(at, count * 0.7);
+}
+
 /** 입자(별 · 물방울 등)와 떠오르는 글자 */
 export function EffectsLayer(): React.ReactElement {
   const list = useEffects((s) => s.list);
