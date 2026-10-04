@@ -23,7 +23,7 @@ import {
   type SpriteMaterial,
 } from 'three';
 import { PALETTE } from '@/config/artTokens';
-import { cycleNow, starAlphaAt, tintAt } from '@/config/dayNight';
+import { SUNSET_LIGHT, cycleNow, starAlphaAt, tintAt } from '@/config/dayNight';
 import { player } from '../state/runtime';
 
 /** 2D 판 덮개의 가장 진한 값 (한밤) */
@@ -72,8 +72,8 @@ function update(ms: number): void {
   // 노을빛은 덮개 색(주황)으로, 밤에는 맑은 달빛 파랑으로. 남색을 섞기만 하면 어둡고 칙칙한 흐린 날처럼 보인다
   const night = Math.min(1, Math.max(0, (alpha - 0.3) / (NIGHT_ALPHA - 0.3)));
   daylight.night = night;
-  daylight.sunColor.copy(WHITE).lerp(tint, Math.min(1, alpha * 1.6)).lerp(MOON, night);
-  daylight.skyLight.copy(DAY_SKY).lerp(tint, Math.min(1, alpha * 1.5)).lerp(NIGHT_SKY_LIGHT, night);
+  daylight.sunColor.copy(WHITE).lerp(tint, Math.min(1, alpha * 1.6 * SUNSET_LIGHT)).lerp(MOON, night);
+  daylight.skyLight.copy(DAY_SKY).lerp(tint, Math.min(1, alpha * 1.5 * SUNSET_LIGHT)).lerp(NIGHT_SKY_LIGHT, night);
   daylight.groundLight.copy(DAY_GROUND).lerp(NIGHT_GROUND_LIGHT, night);
 }
 

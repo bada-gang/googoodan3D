@@ -123,10 +123,10 @@ export function handlePlotAction(plotId: string, actionId: string): void {
       // 물뿌리개로 준 물이 나무 위에서 떨어진다 (나무 크기에 맞춰)
       spawnParticles('water', above(plot.index, WATER_HEIGHT[before ?? 'seed']), 14);
       if (before !== after) {
-        floatText(above(plot.index, 2.2), STAGE_LABEL[after ?? 'sprout'], PALETTE.leafShade);
         audio.play('harvest');
-        // 열매가 맺히면 별만 터뜨린다 (안내 문구는 사용자 요청으로 뺐다)
+        // 열매가 맺히면 글자 없이 별만 터뜨린다 (안내 문구 · "열매 맺음" 글자는 사용자 요청으로 뺐다)
         if (after === 'fruiting') burstStars(above(plot.index, 2.4), 12);
+        else floatText(above(plot.index, 2.2), STAGE_LABEL[after ?? 'sprout'], PALETTE.leafShade);
       } else {
         floatText(above(plot.index, 1.8), '쑥쑥!', PALETTE.leafShade);
       }

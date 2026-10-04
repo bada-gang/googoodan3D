@@ -109,12 +109,23 @@ export interface SkyTint {
   alpha: number;
 }
 
+/**
+ * 노을 색. 노을이 시작될 때(start)와 가장 진할 때(mid, 노을 한가운데)의 덮개 색 · 진하기.
+ * 사용자가 시안 다섯 개 중 "붉은 노을"을 골랐다 (2026-10-04). 예전 주황 노을은 거의 티가 안 났다.
+ * 진하기는 0.3 을 넘기지 않는다 — 넘으면 rendering/dayNight 에서 달빛(파랑)이 섞여 붉은 기운이 빠진다.
+ */
+const SUNSET = { start: 0xf08848, mid: 0xd83a30, startAlpha: 0.14, midAlpha: 0.3 };
+/** 햇빛 · 하늘빛에 노을색을 섞는 세기 배율. 마당 카메라엔 하늘이 거의 안 보여서 빛이 물들어야 노을로 보인다 */
+export const SUNSET_LIGHT = 1.7;
+
+const channel = (hex: number, shift: number) => (hex >> shift) & 0xff;
+
 /** [순환 안 시각(ms), 값] 구간표. 마지막은 처음과 같아야 매끄럽게 이어진다. */
 const R = [
   [0, 0xff],
   [SUNSET_AT * 0.86, 0xff],
-  [SUNSET_AT, 0xf0],
-  [SUNSET_AT + DAY_PHASE_MS.sunset * 0.5, 0xe2],
+  [SUNSET_AT, channel(SUNSET.start, 16)],
+  [SUNSET_AT + DAY_PHASE_MS.sunset * 0.5, channel(SUNSET.mid, 16)],
   [NIGHT_AT, 0x4a],
   [NIGHT_AT + DAY_PHASE_MS.night * 0.2, 0x22],
   [NIGHT_AT + DAY_PHASE_MS.night * 0.8, 0x22],
@@ -124,8 +135,8 @@ const R = [
 const G = [
   [0, 0xff],
   [SUNSET_AT * 0.86, 0xff],
-  [SUNSET_AT, 0xb4],
-  [SUNSET_AT + DAY_PHASE_MS.sunset * 0.5, 0x6c],
+  [SUNSET_AT, channel(SUNSET.start, 8)],
+  [SUNSET_AT + DAY_PHASE_MS.sunset * 0.5, channel(SUNSET.mid, 8)],
   [NIGHT_AT, 0x52],
   [NIGHT_AT + DAY_PHASE_MS.night * 0.2, 0x30],
   [NIGHT_AT + DAY_PHASE_MS.night * 0.8, 0x30],
@@ -135,8 +146,8 @@ const G = [
 const B = [
   [0, 0xff],
   [SUNSET_AT * 0.86, 0xff],
-  [SUNSET_AT, 0x5a],
-  [SUNSET_AT + DAY_PHASE_MS.sunset * 0.5, 0x42],
+  [SUNSET_AT, channel(SUNSET.start, 0)],
+  [SUNSET_AT + DAY_PHASE_MS.sunset * 0.5, channel(SUNSET.mid, 0)],
   [NIGHT_AT, 0x96],
   [NIGHT_AT + DAY_PHASE_MS.night * 0.2, 0x72],
   [NIGHT_AT + DAY_PHASE_MS.night * 0.8, 0x72],
@@ -146,8 +157,8 @@ const B = [
 const ALPHA = [
   [0, 0],
   [SUNSET_AT * 0.86, 0],
-  [SUNSET_AT, 0.12],
-  [SUNSET_AT + DAY_PHASE_MS.sunset * 0.5, 0.32],
+  [SUNSET_AT, SUNSET.startAlpha],
+  [SUNSET_AT + DAY_PHASE_MS.sunset * 0.5, SUNSET.midAlpha],
   [NIGHT_AT, 0.4],
   [NIGHT_AT + DAY_PHASE_MS.night * 0.2, 0.46],
   [NIGHT_AT + DAY_PHASE_MS.night * 0.8, 0.46],
