@@ -52,7 +52,7 @@ export function plotPrompts(plotId: string): InteractionPrompt[] {
     return [
       {
         id: 'harvest',
-        // 밭이 여섯 개라 어떤 나무 앞인지 버튼에서 바로 보여 준다
+        // 밭이 여러 칸이라 어떤 나무 앞인지 버튼에서 바로 보여 준다
         label: `${TREE_SPECIES[plot.species].name} 수확하기`,
         enabled: true,
         highlight: true,

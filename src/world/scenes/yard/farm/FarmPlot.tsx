@@ -1,6 +1,6 @@
 /**
  * 밭 한 칸: 땅 높이 · 부딪힘 · 안내 버튼(farmActions) · 나무(Tree) · 열매(Fruits)를 묶는다.
- * 흙과 테두리는 여섯 칸을 한 번에 그린다 (PlotBeds).
+ * 흙과 테두리는 모든 칸을 한 번에 그린다 (PlotBeds).
  */
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { YARD, plotPosition } from '@/config/layout';
@@ -70,7 +70,7 @@ export function FarmPlot({ index }: { index: number }): React.ReactElement {
   return (
     <>
       <group position={[x, 0, z]}>
-        {/* 흙과 나무 테두리는 밭 여섯 칸을 한 번에 그린다 (PlotBeds) */}
+        {/* 흙과 나무 테두리는 모든 밭 칸을 한 번에 그린다 (PlotBeds) */}
         {plot?.species && <Tree species={plot.species} stage={plot.stage} onCrown={onCrown} />}
         {flying && (
           <FlyingFruits

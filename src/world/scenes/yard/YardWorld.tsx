@@ -7,7 +7,7 @@
 import { useEffect } from 'react';
 import type { ThreeEvent } from '@react-three/fiber';
 import { PALETTE } from '@/config/artTokens';
-import { PLOT_COUNT, YARD, plotPosition } from '@/config/layout';
+import { PLOT_COUNT, YARD, farmFieldRect, plotPosition } from '@/config/layout';
 import { MODELS } from '@/config/models';
 import { SHOW_AREA_SIGNS } from '@/config/features';
 import { AREA_NAME } from '@/config/strings';
@@ -36,17 +36,19 @@ const YARD_SHADOW_BOUNDS = {
   maxZ: YARD.bounds.maxZ + 3,
 };
 
+const FARM_RECTS = [farmFieldRect('north'), farmFieldRect('south')];
+/** 큰길에서 아래쪽 밭으로 들어가는 오솔길의 x (가운데 두 칸 사이) */
+const SOUTH_PATH_X = YARD.farm.fields.south.origin.x + YARD.farm.fields.south.gap * 1.5;
+
 /** 마당 꾸미기: 걸어 다니는 범위 안 어디든, 밭과 집 문 앞만 빼고 */
 const YARD_DECORATE_RULES: DecorateRules = {
   area: 'yard',
   bounds: { minX: YARD.bounds.minX + 0.5, maxX: YARD.bounds.maxX - 0.5, minZ: YARD.bounds.minZ + 0.5, maxZ: YARD.bounds.maxZ - 0.3 },
   blocked: (x, z, radius) => {
-    // 밭 6칸 전체 (밭 사이 길까지)
-    const first = plotPosition(0);
-    const last = plotPosition(PLOT_COUNT - 1);
-    const half = YARD.farm.plotSize / 2;
-    const inFarm =
-      x + radius > first.x - half && x - radius < last.x + half && z + radius > first.z - half && z - radius < last.z + half;
+    // 밭 두 곳 전체 (밭 사이 길까지)
+    const inFarm = FARM_RECTS.some(
+      (r) => x + radius > r.minX && x - radius < r.maxX && z + radius > r.minZ && z - radius < r.maxZ,
+    );
     // 집 문 앞은 비워 둔다 (집에 못 들어가게 막히지 않게)
     const atDoor = Math.hypot(x - YARD.house.door.x, z - YARD.house.door.z) < radius + 1.2;
     return inFarm || atDoor;
@@ -89,7 +91,7 @@ export function YardWorld(): React.ReactElement {
   const { door } = YARD.house;
   const pathZ = YARD.mainPathZ;
   const firstPlot = plotPosition(0);
-  const lastPlot = plotPosition(PLOT_COUNT - 1);
+  const northRect = FARM_RECTS[0];
 
   return (
     <group onClick={onTap} onPointerMove={(event) => decorateFloorHover(event.point.x, event.point.z)}>
@@ -104,7 +106,7 @@ export function YardWorld(): React.ReactElement {
         <Surroundings bounds={YARD.bounds} />
       </StaticShadow>
 
-      {/* 길: 집 문 → 큰길 → 시장 표지판, 큰길에서 밭 사이로 한 줄 */}
+      {/* 길: 집 문 → 큰길 → 시장 표지판, 큰길에서 위쪽 밭 사이 · 아래쪽 밭 사이로 한 줄씩 */}
       <PathNetwork
         segments={[
           { from: door, to: { x: door.x, z: pathZ } },
@@ -115,6 +117,7 @@ export function YardWorld(): React.ReactElement {
             to: { x: (firstPlot.x + plotPosition(1).x) / 2, z: firstPlot.z - 0.6 },
             width: 0.9,
           },
+          { from: { x: SOUTH_PATH_X, z: pathZ }, to: { x: SOUTH_PATH_X, z: FARM_RECTS[1].maxZ + 0.2 }, width: 0.9 },
         ]}
       />
 
@@ -128,7 +131,7 @@ export function YardWorld(): React.ReactElement {
       ))}
       {SHOW_AREA_SIGNS.farm && (
         <StaticShadow>
-          <group position={[firstPlot.x - 2.2, 0, lastPlot.z + 1.6]} rotation-y={0.25}>
+          <group position={[northRect.minX - 1, 0, northRect.maxZ + 0.4]} rotation-y={0.25}>
             <SignBoard text={AREA_NAME.farm} width={1.4} />
           </group>
         </StaticShadow>
