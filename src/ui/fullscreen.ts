@@ -76,19 +76,30 @@ export function onFullscreenChange(listener: () => void): () => void {
 }
 
 /**
- * 첫 터치 한 번에 전체화면으로 들어간다.
- * 브라우저가 제스처를 요구하므로 앱 시작 시 자동 진입은 이 방법뿐이다.
+ * 첫 터치에 전체화면으로 들어간다. 브라우저가 제스처를 요구하므로 앱 시작 시 자동 진입은 이 방법뿐이다.
+ *
+ * 터치는 손가락을 **뗄 때**(pointerup · touchend · click)만 사용자 동작으로 인정된다. 닿는 순간(pointerdown)에
+ * 부르면 마우스(PC)에서는 되지만 태블릿에서는 거부된다. 그래서 뗄 때 부르고,
+ * 거부되면(다른 창이 떠 있었다 등) 다음 터치에서 다시 시도한다. 한 번 들어가면 더 시도하지 않는다.
  */
 export function enterFullscreenOnFirstTouch(shouldEnter: () => boolean): () => void {
-  const once = () => {
-    detach();
-    if (shouldEnter()) void enterFullscreen();
+  const events = ['pointerup', 'touchend', 'click', 'keydown'] as const;
+  let trying = false;
+  const attempt = () => {
+    if (isFullscreen()) {
+      detach();
+      return;
+    }
+    if (trying || !shouldEnter()) return;
+    trying = true;
+    void enterFullscreen().then((entered) => {
+      trying = false;
+      if (entered) detach();
+    });
   };
   const detach = () => {
-    window.removeEventListener('pointerdown', once);
-    window.removeEventListener('keydown', once);
+    for (const type of events) window.removeEventListener(type, attempt);
   };
-  window.addEventListener('pointerdown', once, { once: true });
-  window.addEventListener('keydown', once, { once: true });
+  for (const type of events) window.addEventListener(type, attempt);
   return detach;
 }
