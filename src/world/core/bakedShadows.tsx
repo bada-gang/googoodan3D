@@ -5,7 +5,7 @@
  * 해는 늘 같은 방향(core/sun)이라 움직이지 않는 물체의 그림자는 바뀌지 않는다. 그래서:
  *  1. 장면에 들어오면 해 방향에서 정적 물체만 깊이로 한 번 그리고 (그림자 지도),
  *  2. 땅의 각 점이 그 그림자 안에 있는지 계산해 그림자 그림(마스크)으로 굽고,
- *  3. 땅 위에 얇은 판으로 그 그림을 깐다 (그리기 1번, 가벼운 계산).
+ *  3. 땅 · 길을 칠할 때 그 그림을 같이 칠한다 (core/groundShadow — 추가로 칠하는 층이 없다).
  * 정적 물체는 실시간 그림자에서 빠진다. 캐릭터 · 동물 · 밭의 나무 · 꾸미기 가구는 실시간 그대로.
  *
  * 한계: 미리 그린 그림자는 땅에만 생긴다 (헛간 그림자가 울타리 위에 지는 것처럼 물체끼리는 없다).
@@ -17,7 +17,6 @@ import {
   Color,
   DepthTexture,
   Mesh,
-  MeshBasicMaterial,
   MeshDepthMaterial,
   OrthographicCamera,
   PlaneGeometry,
@@ -30,6 +29,7 @@ import {
   type Object3D,
 } from 'three';
 import { daylight } from './dayNight';
+import { groundShadowUniforms } from './groundShadow';
 import { SUN_OFFSET } from './sun';
 
 /** 미리 그릴 물체만 켜 두는 레이어 (화면 카메라는 0번만 본다) */
@@ -75,6 +75,16 @@ function markStaticCasters(): string {
     root.traverse((node) => {
       const mesh = node as Mesh;
       if (!mesh.isMesh) return;
+      // 그림자 전용 사본(assets3d)은 정적 물체에는 필요 없다. 끄고, 원래 모델로 굽는다
+      if (mesh.userData.shadowProxy) {
+        mesh.visible = false;
+        const real = mesh.parent as Mesh;
+        if (real?.isMesh) {
+          real.userData.bakedShadow = true;
+          real.layers.enable(BAKE_LAYER);
+        }
+        return;
+      }
       // 모델을 다시 불러오면 castShadow 가 다시 켜지므로, 한 번 표시한 것도 매번 확인한다
       if (mesh.castShadow || mesh.userData.bakedShadow) {
         mesh.userData.bakedShadow = true;
@@ -134,7 +144,7 @@ export interface ShadowBounds {
  * 장면에 하나: 이 범위의 땅에 정적 물체 그림자를 구워 깐다.
  * 범위는 정적 물체와 그 그림자가 다 들어가게 넉넉히 준다.
  */
-export function BakedShadows({ bounds }: { bounds: ShadowBounds }): React.ReactElement {
+export function BakedShadows({ bounds }: { bounds: ShadowBounds }): null {
   const gl = useThree((s) => s.gl);
   const scene = useThree((s) => s.scene);
   const width = bounds.maxX - bounds.minX;
@@ -179,20 +189,15 @@ export function BakedShadows({ bounds }: { bounds: ShadowBounds }): React.ReactE
     [bake],
   );
 
-  const overlay = useMemo(
-    () =>
-      new MeshBasicMaterial({
-        color: SHADOW_COLOR,
-        alphaMap: bake.maskTarget.texture,
-        transparent: true,
-        opacity: 0,
-        depthWrite: false,
-        polygonOffset: true,
-        polygonOffsetFactor: -2,
-      }),
-    [bake],
-  );
-  useEffect(() => () => overlay.dispose(), [overlay]);
+  // 땅 · 길 재질이 읽는 값 (core/groundShadow). 장면을 떠나면 그림자를 끈다
+  useEffect(() => {
+    groundShadowUniforms.uBakedMask.value = bake.maskTarget.texture;
+    groundShadowUniforms.uBakedBounds.value.set(bounds.minX, bounds.maxX, bounds.minZ, bounds.maxZ);
+    groundShadowUniforms.uBakedColor.value.copy(SHADOW_COLOR).convertLinearToSRGB();
+    return () => {
+      groundShadowUniforms.uBakedOpacity.value = 0;
+    };
+  }, [bake, bounds.minX, bounds.maxX, bounds.minZ, bounds.maxZ]);
 
   const signature = useRef('');
   const elapsed = useRef(CHECK_EVERY);
@@ -263,7 +268,7 @@ export function BakedShadows({ bounds }: { bounds: ShadowBounds }): React.ReactE
 
   useFrame((_, delta) => {
     // 낮엔 진하게, 밤엔 해(달)빛이 약해 옅게 — 실시간 그림자가 옅어지는 정도에 맞춘다
-    overlay.opacity = SHADOW_OPACITY * (1 - 0.65 * daylight.darkness) * (signature.current ? 1 : 0);
+    groundShadowUniforms.uBakedOpacity.value = SHADOW_OPACITY * (1 - 0.65 * daylight.darkness) * (signature.current ? 1 : 0);
     elapsed.current += delta;
     if (elapsed.current < CHECK_EVERY) return;
     elapsed.current = 0;
@@ -274,14 +279,5 @@ export function BakedShadows({ bounds }: { bounds: ShadowBounds }): React.ReactE
     if (next) render();
   });
 
-  return (
-    <mesh
-      position={[(bounds.minX + bounds.maxX) / 2, 0.03, (bounds.minZ + bounds.maxZ) / 2]}
-      rotation-x={-Math.PI / 2}
-      material={overlay}
-      renderOrder={1}
-    >
-      <planeGeometry args={[width, depth]} />
-    </mesh>
-  );
+  return null;
 }

@@ -10,7 +10,7 @@ import { gameEvents } from '@/bridge/eventBus';
 import { daylight } from './core/dayNight';
 import { input, player, resetInput } from './core/runtime';
 import { useWorldScene } from './core/scenes';
-import { SHADOW_PROXY_LAYER, SUN_OFFSET } from './core/sun';
+import { SUN_OFFSET } from './core/sun';
 import { TEST_FLAGS } from './core/testFlags';
 
 /** 캐릭터에서 카메라까지 (뒤쪽 위). 동물의 숲처럼 비스듬히 내려다본다 */
@@ -69,8 +69,6 @@ export function Sun(): React.ReactElement {
 
   useEffect(() => {
     if (light.current && target.current) light.current.target = target.current;
-    // 그림자 카메라는 그림자 전용 사본(면 수를 줄인 모양)도 본다 (assets3d)
-    light.current?.shadow.camera.layers.enable(SHADOW_PROXY_LAYER);
   }, []);
 
   // 그림자는 2프레임에 한 번 다시 그린다. 그림자 그리기는 물체를 한 번 더 그리는 일이라 태블릿에 무겁다.

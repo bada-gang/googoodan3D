@@ -25,7 +25,6 @@ import { mergeVertices } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { MeshoptSimplifier } from 'meshoptimizer/simplifier';
 import { isArtReady, realAssetUrl } from '@/config/artReady';
 import { modelUrl } from '@/config/modelReady';
-import { SHADOW_PROXY_LAYER } from './core/sun';
 
 /* --------------------------------- 모델 --------------------------------- */
 
@@ -188,7 +187,8 @@ function LoadedParts({ url, children }: { url: string; children: (parts: ModelPa
 /**
  * 그림자 전용 사본. 그림자는 흐릿해서 모양이 조금 거칠어도 티가 안 나는데, 그리는 비용은 면 수에 비례한다.
  * 그래서 그림자만 면 수를 SHADOW_PROXY_RATIO 로 줄인 사본으로 만들고, 화면에는 원래 모델을 그린다.
- * 사본은 SHADOW_PROXY_LAYER 에만 있어서 화면 카메라에는 안 보이고 해의 그림자 카메라만 본다.
+ * 사본은 색도 깊이도 쓰지 않는 재질이라 화면에는 아무것도 남기지 않는다.
+ * (따로 레이어에 두면 안 된다 — three.js 는 그림자를 계산할 때도 화면 카메라의 레이어로 물체를 고른다)
  * 같은 모양의 사본은 한 번만 만들어 모든 복제본이 같이 쓴다. 뼈대가 있는 모델(캐릭터)은 원래대로.
  */
 const SHADOW_PROXY_RATIO = 0.15;
@@ -247,7 +247,6 @@ function attachShadowProxies(root: Object3D): void {
     if (!geometry) continue;
     const proxy = new Mesh(geometry, PROXY_MATERIAL);
     proxy.userData.shadowProxy = true;
-    proxy.layers.set(SHADOW_PROXY_LAYER);
     proxy.castShadow = true;
     proxy.receiveShadow = false;
     mesh.add(proxy);
