@@ -1,12 +1,11 @@
 /**
  * 3D 월드의 뿌리. 캔버스 설정과 지금 보여줄 장면을 고른다.
  *
- * 태블릿 성능을 위해 화면 배율(dpr)을 최대 1.5 로 묶고, 프레임이 떨어지면 화질을 스스로 낮춘다 (core/quality).
- * 레티나 태블릿의 2~3배를 그대로 쓰면 픽셀 수가 4~9배가 되어 프레임이 떨어진다.
+ * 태블릿 성능을 위해 화면 배율(dpr)을 1 로 고정한다 (화질 "보통"). 레티나 태블릿의 2~3배를 그대로 쓰면
+ * 픽셀 수가 4~9배가 되어 프레임이 떨어진다. 프레임에 따라 화질을 바꾸던 장치는 사용자 요청으로 뺐다.
  */
 import { useEffect } from 'react';
 import { Canvas, useThree } from '@react-three/fiber';
-import { PerformanceMonitor } from '@react-three/drei';
 import { PALETTE } from '@/config/artTokens';
 import { gameEvents } from '@/bridge/eventBus';
 import { FURNITURE } from '@/config/catalog';
@@ -21,7 +20,6 @@ import { HomeWorld } from './scenes/HomeWorld';
 import { TownWorld } from './scenes/TownWorld';
 import { YardWorld } from './scenes/YardWorld';
 import { resetWorldScene, useWorldScene } from './core/scenes';
-import { dprFor, lowerQuality, raiseQuality, useQuality } from './core/quality';
 import { CameraRig, InputSystem, SoftEnvironment, Sun } from './WorldSystems';
 
 /** 집 안에서 벽 너머로 보이는 빈 곳의 색 (하늘이 보이면 어색하다) */
@@ -29,7 +27,6 @@ const INDOOR_BACKGROUND = '#efe2cc';
 
 export default function WorldRoot(): React.ReactElement {
   const scene = useWorldScene((s) => s.scene);
-  const quality = useQuality((s) => s.level);
 
   useEffect(() => {
     // 게임 화면에 들어올 때는 마당에서 시작한다. 장면이 준비되면 HUD 가 뜬다 (useGameBridge 가 booting 을 끈다)
@@ -45,7 +42,6 @@ export default function WorldRoot(): React.ReactElement {
         store: useGameStore,
         scene: useWorldScene,
         decorate: { tap: decorateFloorTap, hover: decorateFloorHover, state: useDecorate },
-        quality: useQuality,
         events: gameEvents,
       };
       // 주소에 ?dev-animals 를 붙이면 동물을 한 마리씩 넣어 준다 (시장이 생기기 전 시험용)
@@ -79,7 +75,7 @@ export default function WorldRoot(): React.ReactElement {
 
   return (
     <Canvas
-      dpr={dprFor(quality)}
+      dpr={1}
       shadows
       camera={{ position: [0, 9, 12], fov: 40, near: 0.5, far: 120 }}
       gl={{ antialias: true, powerPreference: 'high-performance' }}
@@ -96,13 +92,6 @@ export default function WorldRoot(): React.ReactElement {
         </>
       )}
 
-      {/* 프레임이 떨어지면 화질을 한 단계씩 낮추고, 넉넉해지면 올린다. 오르내림을 3번 넘게 반복하면 낮게 고정 */}
-      <PerformanceMonitor
-        onDecline={lowerQuality}
-        onIncline={raiseQuality}
-        flipflops={3}
-        onFallback={() => useQuality.setState({ level: 0 })}
-      />
       <Sun />
       <SoftEnvironment />
       {/* 밤낮: 장면이 바뀌면 바로 그 장면의 하늘색으로 */}

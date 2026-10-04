@@ -8,12 +8,11 @@
  * 그래픽 메모리가 모자라 3D 화면이 끊긴 경우(WebGL context lost)도 같은 안내를 띄운다.
  */
 import { Component, Suspense, lazy, useEffect, useState, type ErrorInfo, type ReactNode } from 'react';
-import { useQuality } from './core/quality';
 import { SCENE_FADE_MS, useWorldScene } from './core/sceneStore';
 
 const WorldRoot = lazy(() => import('./WorldRoot'));
 
-/** 주소에 ?fps 를 붙이면 화면 구석에 초당 프레임 수와 화질 단계를 보인다 (태블릿에서 성능 확인용, 배포본에서도 된다) */
+/** 주소에 ?fps 를 붙이면 화면 위쪽에 초당 프레임 수를 보인다 (태블릿에서 성능 확인용, 배포본에서도 된다) */
 const SHOW_FPS = typeof location !== 'undefined' && new URLSearchParams(location.search).has('fps');
 /** 주소에 ?debug 를 붙이면 3D 오류 내용을 보인다 (배포본에서도) */
 const SHOW_DEBUG = typeof location !== 'undefined' && new URLSearchParams(location.search).has('debug');
@@ -35,7 +34,6 @@ function deviceInfo(): string {
 GPU: ${gpu}
 화면: ${screen.width}×${screen.height} · 배율 ${window.devicePixelRatio}`;
 }
-const QUALITY_NAME = ['낮음', '보통', '높음'] as const;
 
 export function GameCanvas(): React.ReactElement {
   const [contextLost, setContextLost] = useState(false);
@@ -69,7 +67,6 @@ export function GameCanvas(): React.ReactElement {
 
 /** 문을 지날 때 화면을 잠깐 덮는 크림색 막 (2D 판 fadeOut 과 같은 색) */
 function FpsMeter(): React.ReactElement {
-  const quality = useQuality((s) => s.level);
   const [fps, setFps] = useState(0);
   useEffect(() => {
     let frames = 0;
@@ -87,7 +84,7 @@ function FpsMeter(): React.ReactElement {
   }, []);
   return (
     <div className="pointer-events-none absolute top-3 left-1/2 z-[60] -translate-x-1/2 rounded-lg bg-black/60 px-3 py-1 font-mono text-sm text-white">
-      {fps} fps · 화질 {QUALITY_NAME[quality]}
+      {fps} fps
     </div>
   );
 }

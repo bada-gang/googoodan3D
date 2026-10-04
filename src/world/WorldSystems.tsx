@@ -9,7 +9,6 @@ import { PALETTE } from '@/config/artTokens';
 import { gameEvents } from '@/bridge/eventBus';
 import { daylight } from './core/dayNight';
 import { input, player, resetInput } from './core/runtime';
-import { useQuality } from './core/quality';
 import { useWorldScene } from './core/scenes';
 
 /** 캐릭터에서 카메라까지 (뒤쪽 위). 동물의 숲처럼 비스듬히 내려다본다 */
@@ -58,8 +57,6 @@ export function Sun(): React.ReactElement {
   const target = useRef<Object3D>(null);
   const scene = useThree((s) => s.scene);
   const indoor = useWorldScene((s) => s.scene === 'HomeScene');
-  // 화질이 가장 낮으면 그림자를 끈다 (core/quality)
-  const shadows = useQuality((s) => s.level > 0);
 
   useEffect(() => {
     if (light.current && target.current) light.current.target = target.current;
@@ -93,7 +90,7 @@ export function Sun(): React.ReactElement {
       <directionalLight
         ref={light}
         intensity={SUN_INTENSITY}
-        castShadow={shadows}
+        castShadow
         shadow-mapSize={[1024, 1024]}
         shadow-camera-left={-14}
         shadow-camera-right={14}
