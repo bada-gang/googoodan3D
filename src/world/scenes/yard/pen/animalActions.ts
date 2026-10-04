@@ -8,7 +8,7 @@ import type { InteractionPrompt } from '@/bridge/events';
 import { useGameStore } from '@/state/gameStore';
 import type { AnimalInstance } from '@/types/game';
 import { audio } from '@/audio/sfx';
-import { burstCareStars, floatText } from '../../../effects/effects';
+import { burstStars, floatText } from '../../../effects/effects';
 import { askMath, awardExperience, toast } from '../../../gameplay/gameplay';
 import { ANIMAL_BODY, INNER_MARGIN, PEN_MIN_X, PEN_MIN_Z, pen } from './penLayout';
 
@@ -100,11 +100,11 @@ export function handleAnimalAction(animalId: string, actionId: string): void {
       if (!useGameStore.getState().feedAnimal(animalId)) return;
       audio.play('animal', animalById(animalId)?.species);
       emote(animalId, 'eat');
-      burstCareStars(above(animalId, body.marker * 0.5), 6);
+      burstStars(above(animalId, body.marker * 0.5), 6);
       floatText(above(animalId, body.marker), '냠냠', PALETTE.accentPink);
       if (animalById(animalId)?.produceReady) {
         toast(`${def.produceName}이(가) 준비됐어요!`, 'reward');
-        burstCareStars(above(animalId, body.marker * 0.7), 9);
+        burstStars(above(animalId, body.marker * 0.7), 9);
       }
       awardExperience('ANIMAL', math);
     });
@@ -118,7 +118,7 @@ export function handleAnimalAction(animalId: string, actionId: string): void {
       // 다 틀려도 최소 1개는 받는다 (PRODUCE_BY_ATTEMPTS)
       audio.play('harvest');
       emote(animalId, 'happy');
-      burstCareStars(above(animalId, body.marker * 0.7), 6 + result.count * 4);
+      burstStars(above(animalId, body.marker * 0.7), 6 + result.count * 4);
       floatText(above(animalId, body.marker + 0.4), `${def.produceName} +${result.count}`, PALETTE.goldShade);
       toast(`${def.produceName} ${result.count}개를 얻었어요`, 'reward');
       awardExperience('ANIMAL', math);

@@ -11,7 +11,7 @@ import type { InteractionPrompt } from '@/bridge/events';
 import { useGameStore } from '@/state/gameStore';
 import type { FarmPlot as FarmPlotData, TreeSpeciesId, TreeStage } from '@/types/game';
 import { audio } from '@/audio/sfx';
-import { burstCareStars, floatText } from '../../../effects/effects';
+import { burstStars, floatText } from '../../../effects/effects';
 import { spawnParticles } from '../../../effects/particles';
 import { askMath, awardExperience, toast } from '../../../gameplay/gameplay';
 
@@ -85,7 +85,7 @@ export function plantWithMath(plotId: string, species: TreeSpeciesId): void {
   const def = TREE_SPECIES[species];
   askMath('PLANT', `${def.seedName}을 심어 볼까요?`, (math) => {
     if (!useGameStore.getState().plantSeed(plotId, species)) return;
-    burstCareStars(above(plot.index, 0.4), 6);
+    burstStars(above(plot.index, 0.4), 6);
     audio.play('place');
     floatText(above(plot.index, 1.2), `${def.name} 심기`, PALETTE.leafShade);
     awardExperience('PLANT', math);
@@ -126,7 +126,7 @@ export function handlePlotAction(plotId: string, actionId: string): void {
         floatText(above(plot.index, 2.2), STAGE_LABEL[after ?? 'sprout'], PALETTE.leafShade);
         audio.play('harvest');
         // 열매가 맺히면 별만 터뜨린다 (안내 문구는 사용자 요청으로 뺐다)
-        if (after === 'fruiting') burstCareStars(above(plot.index, 2.4), 12);
+        if (after === 'fruiting') burstStars(above(plot.index, 2.4), 12);
       } else {
         floatText(above(plot.index, 1.8), '쑥쑥!', PALETTE.leafShade);
       }
@@ -141,7 +141,7 @@ export function handlePlotAction(plotId: string, actionId: string): void {
       if (!result) return;
       // 다 틀려도 최소 1개는 딴다 (HARVEST_BY_ATTEMPTS) — 빈손으로 끝나는 경우는 없다.
       audio.play('harvest');
-      burstCareStars(above(plot.index, 2.4), 6 + result.count * 3);
+      burstStars(above(plot.index, 2.4), 6 + result.count * 3);
       floatText(above(plot.index, 3), `${def.fruitName} +${result.count}`, PALETTE.goldShade);
       if (result.finished) {
         // 다 딴 나무는 밭에서 사라진다. (요청 3)

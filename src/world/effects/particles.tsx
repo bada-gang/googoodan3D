@@ -164,8 +164,11 @@ function launch(slot: Slot, preset: ParticlePreset, at: Point, i: number, count:
   }
 }
 
-/** 연출마다 개수 배율. 별 · 물방울은 너무 화려해서 20% 줄였다 (사용자 요청) */
-const DENSITY: Record<ParticlePreset, number> = { stars: 0.8, water: 0.8, sparkle: 1 };
+/**
+ * 연출마다 개수 배율 (사용자 요청). 너무 화려해서 별 · 물방울을 20% 줄였고,
+ * 별은 거기서 30% 더 줄였다 (0.8 × 0.7). 별은 돌보기 · 레벨업 · 가구 놓기 모두 같은 배율이다.
+ */
+const DENSITY: Record<ParticlePreset, number> = { stars: 0.56, water: 0.8, sparkle: 1 };
 
 /** 입자 연출을 띄운다. 그림을 아직 못 불러왔으면 건너뛴다 */
 export function spawnParticles(preset: ParticlePreset, at: Point, count: number): void {
