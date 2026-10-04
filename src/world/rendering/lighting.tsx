@@ -1,60 +1,23 @@
 /**
- * 모든 장면이 함께 쓰는 것: 카메라, 해, 입력.
+ * 빛: 해(그림자 포함) · 하늘빛 · 은은한 주변 반사광(환경맵). 밤낮 색은 rendering/dayNight 에서 받는다.
  */
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
-import {
-  BufferGeometry,
-  Color,
-  Float32BufferAttribute,
-  Mesh,
-  MeshBasicMaterial,
-  PMREMGenerator,
-  Vector3,
-  type DirectionalLight,
-  type HemisphereLight,
-  type Object3D,
-} from 'three';
+import { Color, PMREMGenerator, Vector3, type DirectionalLight, type HemisphereLight, type Object3D } from 'three';
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
 import { PALETTE } from '@/config/artTokens';
-import { gameEvents } from '@/bridge/eventBus';
-import { setShadowProxiesVisible } from './rendering/assets';
-import { daylight } from './rendering/dayNight';
-import { input, player, resetInput } from './state/runtime';
-import { useWorldScene } from './state/scenes';
-import { SUN_OFFSET } from './rendering/sun';
-import { TEST_FLAGS } from './debug/testFlags';
+import { TEST_FLAGS } from '../debug/testFlags';
+import { player } from '../state/runtime';
+import { useWorldScene } from '../state/scenes';
+import { daylight } from './dayNight';
+import { setShadowProxiesVisible, useShadowProxyGate } from './shadowProxies';
 
-/** 캐릭터에서 카메라까지 (뒤쪽 위). 동물의 숲처럼 비스듬히 내려다본다 */
-const CAMERA_OFFSET = new Vector3(0, 5.6, 7.6);
-/** 캐릭터보다 조금 위를 본다 (머리가 화면 가운데쯤) */
-const LOOK_OFFSET = new Vector3(0, 0.9, 0);
-/** 카메라가 따라붙는 빠르기. 너무 빠르면 어지럽고 느리면 캐릭터가 화면 밖으로 나간다 */
-const FOLLOW = 5;
-
-export function CameraRig(): null {
-  const camera = useThree((s) => s.camera);
-  const look = useRef(new Vector3());
-  const first = useRef(true);
-
-  useFrame((_, rawDelta) => {
-    const dt = Math.min(rawDelta, 1 / 20);
-    const desired = player.position.clone().add(CAMERA_OFFSET);
-    const lookAt = player.position.clone().add(LOOK_OFFSET);
-    if (first.current) {
-      // 처음에는 바로 그 자리에. 날아오는 카메라는 시작부터 어지럽다
-      camera.position.copy(desired);
-      look.current.copy(lookAt);
-      first.current = false;
-    } else {
-      const k = 1 - Math.exp(-FOLLOW * dt);
-      camera.position.lerp(desired, k);
-      look.current.lerp(lookAt, k);
-    }
-    camera.lookAt(look.current);
-  });
-  return null;
-}
+/**
+ * 해의 방향. 해는 늘 같은 방향(화면 왼쪽 위 뒤쪽)에서 비춘다 — 시간에 따라 바뀌는 것은 색과 밝기뿐이다.
+ * 방향이 고정이라 움직이지 않는 물체의 그림자를 미리 그려 둘 수 있다 (rendering/bakedShadows).
+ */
+/** 그림자 중심에서 해까지 (m). 실시간 그림자의 해 위치와 미리 그리는 그림자의 방향에 같이 쓴다 */
+export const SUN_OFFSET = new Vector3(-8, 14, 6);
 
 /**
  * 해와 하늘빛. 해는 왼쪽 위 — 그림자는 오른쪽 아래로 떨어진다. (ART_DIRECTION 4)
@@ -81,25 +44,8 @@ export function Sun(): React.ReactElement {
     if (light.current && target.current) light.current.target = target.current;
   }, []);
 
-  // 그림자 사본(rendering/assets)은 그림자를 그리는 동안만 보이게 한다. 장면에서 가장 먼저 그림자를 그리는
-  // 이 작은 물체(gate)가 사본을 켜고, 다음 프레임이 시작될 때 끈다 — 화면을 그릴 목록은 그림자보다 먼저 정해지므로
-  // 사본은 화면 목록에 들어가지 않는다 (예전에는 투명하게 화면에도 그려 그리기 호출을 낭비했다)
-  const gate = useMemo(() => {
-    const geometry = new BufferGeometry();
-    geometry.setAttribute('position', new Float32BufferAttribute([0, 0, 0, 0, 0, 0, 0, 0, 0], 3));
-    const mesh = new Mesh(geometry, new MeshBasicMaterial({ colorWrite: false, depthWrite: false }));
-    mesh.castShadow = true;
-    mesh.frustumCulled = false;
-    mesh.onBeforeShadow = () => setShadowProxiesVisible(true);
-    return mesh;
-  }, []);
-  useEffect(
-    () => () => {
-      gate.geometry.dispose();
-      (gate.material as MeshBasicMaterial).dispose();
-    },
-    [gate],
-  );
+  // 그림자 사본을 그림자 그리는 동안만 켜는 물체 (rendering/shadowProxies)
+  const gate = useShadowProxyGate();
 
   // 그림자는 매 프레임 다시 그린다. 2프레임에 한 번 그렸더니 그림자가 한 박자 늦게 따라와
   // 걸을 때 캐릭터가 2~3개 겹쳐 보였다 (태블릿에서 확인)
@@ -152,37 +98,6 @@ export function Sun(): React.ReactElement {
       <object3D ref={target} />
     </>
   );
-}
-
-
-/** 조이스틱(React UI 에서 오는 이벤트)과 키보드를 runtime.input 에 옮긴다 */
-export function InputSystem(): null {
-  useEffect(() => {
-    resetInput();
-    const offStick = gameEvents.on('move:vector', (vector) => {
-      input.stick = vector;
-    });
-    const isTyping = (event: KeyboardEvent) =>
-      event.target instanceof HTMLInputElement || event.target instanceof HTMLTextAreaElement;
-    const down = (event: KeyboardEvent) => {
-      if (isTyping(event)) return;
-      input.keys.add(event.code);
-    };
-    const up = (event: KeyboardEvent) => input.keys.delete(event.code);
-    // 창을 벗어나면 뗀 키 이벤트를 못 받는다. 계속 걸어가지 않게 비운다
-    const blur = () => input.keys.clear();
-    window.addEventListener('keydown', down);
-    window.addEventListener('keyup', up);
-    window.addEventListener('blur', blur);
-    return () => {
-      offStick();
-      window.removeEventListener('keydown', down);
-      window.removeEventListener('keyup', up);
-      window.removeEventListener('blur', blur);
-      resetInput();
-    };
-  }, []);
-  return null;
 }
 
 /**

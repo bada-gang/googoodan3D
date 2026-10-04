@@ -2,7 +2,7 @@
  * 움직이지 않는 물체(건물 · 울타리 · 밭 테두리 · 덤불 · 표지판 · 시장 장식)의 그림자를 미리 그려 둔다.
  *
  * 실시간 그림자는 그림자를 만드는 물체를 매번 한 번 더 그려서 태블릿에 무겁다 (그림자를 끄면 32 → 42fps).
- * 해는 늘 같은 방향(rendering/sun)이라 움직이지 않는 물체의 그림자는 바뀌지 않는다. 그래서:
+ * 해는 늘 같은 방향(rendering/lighting 의 SUN_OFFSET)이라 움직이지 않는 물체의 그림자는 바뀌지 않는다. 그래서:
  *  1. 장면에 들어오면 해 방향에서 정적 물체만 깊이로 한 번 그리고 (그림자 지도),
  *  2. 땅의 각 점이 그 그림자 안에 있는지 계산해 그림자 그림(마스크)으로 굽고,
  *  3. 땅 · 길을 칠할 때 그 그림을 같이 칠한다 (rendering/groundShadow — 추가로 칠하는 층이 없다).
@@ -28,10 +28,10 @@ import {
   type Group,
   type Object3D,
 } from 'three';
-import { proxiedMeshes } from './assets';
+import { proxiedMeshes } from './shadowProxies';
 import { daylight } from './dayNight';
 import { groundShadowUniforms } from './groundShadow';
-import { SUN_OFFSET } from './sun';
+import { SUN_OFFSET } from './lighting';
 
 /** 미리 그릴 물체만 켜 두는 레이어 (화면 카메라는 0번만 본다) */
 const BAKE_LAYER = 5;

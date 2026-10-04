@@ -7,7 +7,6 @@
 import { Component, Suspense, useEffect, useMemo, type ReactNode } from 'react';
 import { useGLTF, useTexture } from '@react-three/drei';
 import {
-  MeshBasicMaterial,
   RepeatWrapping,
   SRGBColorSpace,
   type Bone,
@@ -21,6 +20,7 @@ import {
 import { clone as cloneWithSkeleton } from 'three/examples/jsm/utils/SkeletonUtils.js';
 import { isArtReady, realAssetUrl } from '@/config/artReady';
 import { modelUrl } from '@/config/modelReady';
+import { SHADOW_PROXY_NAME, setupShadowProxies } from './shadowProxies';
 
 /* --------------------------------- 모델 --------------------------------- */
 
@@ -172,48 +172,6 @@ function LoadedParts({ url, children }: { url: string; children: (parts: ModelPa
     return list;
   }, [scene]);
   return <>{children(parts)}</>;
-}
-
-/**
- * 그림자 전용 사본. 그림자는 흐릿해서 모양이 조금 거칠어도 티가 안 나는데, 그리는 비용은 면 수에 비례한다.
- * 모델 파일 안에 면 수를 15% 로 줄인 사본(이름 SHADOW_PROXY_NAME)이 함께 들어 있다 (scripts/gen-model.ts).
- * 그림자는 사본으로 만들고, 화면에는 원래 모양을 그린다.
- *
- * 사본은 화면에 그리면 안 된다. 레이어로 나눌 수는 없어서(three.js 는 그림자도 화면 카메라 레이어로 고른다)
- * 재질을 평소엔 숨겨 두고, 그림자를 그리는 동안만 보이게 한다 (ShadowProxyGate).
- */
-export const SHADOW_PROXY_NAME = 'shadow_proxy';
-const PROXY_MATERIAL = new MeshBasicMaterial({ colorWrite: false, depthWrite: false, visible: false });
-
-/** 사본 재질을 보이게/숨기게. 그림자를 그리는 동안만 켠다 */
-export function setShadowProxiesVisible(visible: boolean): void {
-  PROXY_MATERIAL.visible = visible;
-}
-
-/**
- * 사본이 대신하는 원래 모양들. 사본은 원래 모양의 노드 아래에 들어 있는데, three.js 로 불러오면 그 노드가
- * 모양 자체(Mesh)일 수도, 모양을 감싼 묶음(Group)일 수도 있다. 묶음이면 그 안의 다른 모양이 원래 모양이다.
- */
-export function proxiedMeshes(proxy: Object3D): Mesh[] {
-  const parent = proxy.parent;
-  if (!parent) return [];
-  if ((parent as Mesh).isMesh) return [parent as Mesh];
-  return parent.children.filter((child) => (child as Mesh).isMesh && child.name !== SHADOW_PROXY_NAME) as Mesh[];
-}
-
-/** 모델 안의 그림자 사본을 준비하고, 사본이 있는 원래 모양은 그림자를 만들지 않게 한다 */
-function setupShadowProxies(root: Object3D, castShadow: boolean): void {
-  const proxies: Mesh[] = [];
-  root.traverse((node) => {
-    if ((node as Mesh).isMesh && node.name === SHADOW_PROXY_NAME) proxies.push(node as Mesh);
-  });
-  for (const proxy of proxies) {
-    proxy.material = PROXY_MATERIAL;
-    proxy.userData.shadowProxy = true;
-    proxy.castShadow = castShadow;
-    proxy.receiveShadow = false;
-    for (const real of proxiedMeshes(proxy)) real.castShadow = false;
-  }
 }
 
 /* --------------------------------- 질감 --------------------------------- */
