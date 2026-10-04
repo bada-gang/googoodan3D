@@ -57,8 +57,6 @@ const indoorColor = new Color();
 const SHADOW_RANGE = 9;
 /** 그림자 상자를 캐릭터보다 화면 위쪽으로 당기는 거리 (m) */
 const SHADOW_AHEAD = 3;
-/** 그림자를 몇 프레임에 한 번 다시 그리나 (?shadow1 이면 매 프레임) */
-const SHADOW_EVERY = TEST_FLAGS.shadowEveryFrame ? 1 : 2;
 
 export function Sun(): React.ReactElement {
   const light = useRef<DirectionalLight>(null);
@@ -71,21 +69,9 @@ export function Sun(): React.ReactElement {
     if (light.current && target.current) light.current.target = target.current;
   }, []);
 
-  // 그림자는 2프레임에 한 번 다시 그린다. 그림자 그리기는 물체를 한 번 더 그리는 일이라 태블릿에 무겁다.
-  // 빨리 움직일 때 그림자가 한 프레임 늦게 따라오지만 눈에 거의 띄지 않는다
-  const gl = useThree((s) => s.gl);
-  const frame = useRef(0);
-  useEffect(() => {
-    gl.shadowMap.autoUpdate = false;
-    gl.shadowMap.needsUpdate = true;
-    return () => {
-      gl.shadowMap.autoUpdate = true;
-    };
-  }, [gl]);
-
+  // 그림자는 매 프레임 다시 그린다. 2프레임에 한 번 그렸더니 그림자가 한 박자 늦게 따라와
+  // 걸을 때 캐릭터가 2~3개 겹쳐 보였다 (태블릿에서 확인)
   useFrame(() => {
-    frame.current += 1;
-    if (frame.current % SHADOW_EVERY === 0) gl.shadowMap.needsUpdate = true;
 
     // 그림자 상자는 캐릭터보다 화면 위쪽(-z)으로 당긴다. 카메라가 남쪽에서 북쪽을 내려다봐서
     // 화면에 보이는 땅은 대부분 캐릭터 앞(-z)에 있다
