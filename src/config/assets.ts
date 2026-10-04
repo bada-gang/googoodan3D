@@ -90,7 +90,6 @@ export const ASSETS = {
   particles: {
     star: 'particle_star',
     sparkle: 'particle_sparkle',
-    leaf: 'particle_leaf',
   },
 } as const;
 

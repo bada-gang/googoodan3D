@@ -103,5 +103,4 @@ export const ART_PROMPTS: Record<string, string> = {
   /* ---- 연출 ---- */
   [ASSETS.particles.star]: 'one small glowing golden yellow star',
   [ASSETS.particles.sparkle]: 'one four-pointed white and pale-gold twinkle sparkle',
-  [ASSETS.particles.leaf]: 'one small fresh green leaf (#6fbf6a)',
 };

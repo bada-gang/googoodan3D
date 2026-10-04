@@ -97,26 +97,6 @@ export function MoneyTag({ amount, size = 30 }: { amount: number; size?: number 
   );
 }
 
-/** 물·먹이처럼 개수를 세는 소모품 표시 */
-export function SupplyTag({
-  icon,
-  count,
-  label,
-  size = 30,
-}: {
-  icon: string;
-  count: number;
-  label: string;
-  size?: number;
-}): React.ReactElement {
-  return (
-    <span className="text-game inline-flex items-center gap-1.5 whitespace-nowrap">
-      <Icon src={icon} size={size} alt={label} />
-      {count}
-    </span>
-  );
-}
-
 /** 나무 간판 형태의 제목 띠 */
 export function SignTitle({ children }: { children: ReactNode }): React.ReactElement {
   return (

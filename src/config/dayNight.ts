@@ -29,23 +29,6 @@ const NIGHT_AT = DAY_PHASE_MS.day + DAY_PHASE_MS.sunset;
 
 export type DayPhase = 'day' | 'sunset' | 'night';
 
-/** 학생에게 보여 줄 이름. */
-export const PHASE_NAME: Record<DayPhase, string> = {
-  day: '낮',
-  sunset: '저녁',
-  night: '밤',
-};
-
-/**
- * 시간대가 바뀔 때 한 번 띄우는 안내.
- * 화면이 어두워지는 이유를 말해 주지 않으면 고장난 줄 안다.
- */
-export const PHASE_CHANGE_TEXT: Record<DayPhase, string> = {
-  day: '아침이 되었어요!',
-  sunset: '해가 지고 있어요',
-  night: '밤이 되었어요. 별이 떴어요',
-};
-
 /**
  * 개발 중에만 듣는 배속.
  *
@@ -193,11 +176,4 @@ const STAR_ALPHA = [
 
 export function starAlphaAt(ms: number): number {
   return lerpStops(STAR_ALPHA, ms);
-}
-
-/** 이 시간대가 끝나기까지 남은 ms. 안내 문구에 쓴다. */
-export function msLeftInPhase(ms: number): number {
-  if (ms < SUNSET_AT) return SUNSET_AT - ms;
-  if (ms < NIGHT_AT) return NIGHT_AT - ms;
-  return CYCLE_MS - ms;
 }
