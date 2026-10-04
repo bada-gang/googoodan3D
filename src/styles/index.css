@@ -241,7 +241,7 @@ button {
   animation: glow-pulse 1600ms ease-in-out infinite;
 }
 
-/* ---- 3D 월드 위에 뜨는 글자·표시 (src/world/core/effects.tsx) ---- */
+/* ---- 3D 월드 위에 뜨는 글자·표시 (src/world/effects/effects.tsx) ---- */
 
 /* 머리 위로 떠오르는 글자. 1초 안에 끝난다 (ART_DIRECTION 8) */
 @keyframes float-up {
