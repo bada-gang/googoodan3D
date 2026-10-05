@@ -1,4 +1,4 @@
-/** 동물 우리: 울타리(앞쪽에 문), 헛간, 여물통, 표지판, 그리고 그 안의 동물들(Animal.tsx). */
+/** 동물 우리: 울타리(앞쪽에 문, 뒤쪽은 헛간 문 앞만 트임), 헛간, 여물통 · 물통, 표지판, 그리고 그 안의 동물들(Animal.tsx). */
 import { useEffect, useMemo } from 'react';
 import { PALETTE } from '@/config/artTokens';
 import { MODELS } from '@/config/models';
@@ -10,7 +10,7 @@ import { obstacles, type Obstacle } from '../../../state/runtime';
 import { mergedBoxGeometry, type BoxSpec } from '../../../props/mergedBoxes';
 import { SignBoard } from '../../../props/SignBoard';
 import { StaticShadow } from '../../../rendering/bakedShadows';
-import { BARN, FENCE_THICKNESS, GATE_WIDTH, PEN_MAX_X, PEN_MAX_Z, PEN_MIN_X, PEN_MIN_Z, TROUGH, pen } from './penLayout';
+import { BARN, BARN_OPENING, FENCE_THICKNESS, GATE_WIDTH, PEN_MAX_X, PEN_MAX_Z, PEN_MIN_X, PEN_MIN_Z, TROUGH, WATER_TROUGH, pen } from './penLayout';
 import { Animal } from './Animal';
 
 /* -------------------------------- 우리 전체 -------------------------------- */
@@ -18,13 +18,16 @@ import { Animal } from './Animal';
 export function AnimalPen(): React.ReactElement {
   const animals = useGameStore((s) => s.animals);
 
-  // 울타리는 네 변을 얇은 상자로 막고, 앞쪽 가운데만 문으로 비운다
+  // 울타리는 네 변을 얇은 상자로 막고, 앞쪽 가운데는 문으로, 뒤쪽은 헛간 문 앞을 비운다 (헛간이 막는다)
   useEffect(() => {
     const t = FENCE_THICKNESS / 2;
     const gateMin = pen.center.x - GATE_WIDTH / 2;
     const gateMax = pen.center.x + GATE_WIDTH / 2;
+    const barnMin = BARN.x - BARN_OPENING / 2;
+    const barnMax = BARN.x + BARN_OPENING / 2;
     const walls: [string, Obstacle][] = [
-      ['fence_back', { kind: 'box', minX: PEN_MIN_X, maxX: PEN_MAX_X, minZ: PEN_MIN_Z - t, maxZ: PEN_MIN_Z + t }],
+      ['fence_back_l', { kind: 'box', minX: PEN_MIN_X, maxX: barnMin, minZ: PEN_MIN_Z - t, maxZ: PEN_MIN_Z + t }],
+      ['fence_back_r', { kind: 'box', minX: barnMax, maxX: PEN_MAX_X, minZ: PEN_MIN_Z - t, maxZ: PEN_MIN_Z + t }],
       ['fence_left', { kind: 'box', minX: PEN_MIN_X - t, maxX: PEN_MIN_X + t, minZ: PEN_MIN_Z, maxZ: PEN_MAX_Z }],
       ['fence_right', { kind: 'box', minX: PEN_MAX_X - t, maxX: PEN_MAX_X + t, minZ: PEN_MIN_Z, maxZ: PEN_MAX_Z }],
       ['fence_front_l', { kind: 'box', minX: PEN_MIN_X, maxX: gateMin, minZ: PEN_MAX_Z - t, maxZ: PEN_MAX_Z + t }],
@@ -37,6 +40,16 @@ export function AnimalPen(): React.ReactElement {
           maxX: TROUGH.x + 0.35,
           minZ: TROUGH.z - TROUGH.length / 2,
           maxZ: TROUGH.z + TROUGH.length / 2,
+        },
+      ],
+      [
+        'water_trough',
+        {
+          kind: 'box',
+          minX: WATER_TROUGH.x - 0.35,
+          maxX: WATER_TROUGH.x + 0.35,
+          minZ: WATER_TROUGH.z - WATER_TROUGH.length / 2,
+          maxZ: WATER_TROUGH.z + WATER_TROUGH.length / 2,
         },
       ],
       ['barn', { kind: 'circle', x: BARN.x, z: BARN.z, radius: 1.9 }],
@@ -57,6 +70,9 @@ export function AnimalPen(): React.ReactElement {
         </group>
         <group position={[TROUGH.x, 0, TROUGH.z]} rotation-y={Math.PI / 2}>
           <GltfModel modelKey={MODELS.buildings.trough} fallback={<FallbackTrough />} />
+        </group>
+        <group position={[WATER_TROUGH.x, 0, WATER_TROUGH.z]} rotation-y={-Math.PI / 2}>
+          <GltfModel modelKey={MODELS.buildings.waterTrough} fallback={<FallbackWaterTrough />} />
         </group>
         {/* 표지판은 울타리와 겹치지 않게 앞쪽 왼쪽 모서리 바깥에 */}
         {SHOW_AREA_SIGNS.pen && (
@@ -79,8 +95,11 @@ function Fence(): React.ReactElement {
   const { posts, rails } = useMemo(() => {
     const gateMin = pen.center.x - GATE_WIDTH / 2;
     const gateMax = pen.center.x + GATE_WIDTH / 2;
+    const barnMin = BARN.x - BARN_OPENING / 2;
+    const barnMax = BARN.x + BARN_OPENING / 2;
     const sides: [number, number, number, number][] = [
-      [PEN_MIN_X, PEN_MIN_Z, PEN_MAX_X, PEN_MIN_Z],
+      [PEN_MIN_X, PEN_MIN_Z, barnMin, PEN_MIN_Z],
+      [barnMax, PEN_MIN_Z, PEN_MAX_X, PEN_MIN_Z],
       [PEN_MAX_X, PEN_MIN_Z, PEN_MAX_X, PEN_MAX_Z],
       [PEN_MAX_X, PEN_MAX_Z, gateMax, PEN_MAX_Z],
       [gateMin, PEN_MAX_Z, PEN_MIN_X, PEN_MAX_Z],
@@ -134,6 +153,22 @@ function FallbackBarn(): React.ReactElement {
       <mesh position-y={3} rotation-z={Math.PI / 4} scale={[1.3, 1.3, 1]} castShadow>
         <boxGeometry args={[1.8, 1.8, 3]} />
         <meshStandardMaterial color={PALETTE.woodDark} roughness={0.9} />
+      </mesh>
+    </group>
+  );
+}
+
+/** 물통 모델이 아직 없을 때: 나무 통에 물 */
+function FallbackWaterTrough(): React.ReactElement {
+  return (
+    <group>
+      <mesh position-y={0.25} castShadow>
+        <boxGeometry args={[WATER_TROUGH.length, 0.4, 0.55]} />
+        <meshStandardMaterial color={PALETTE.wood} roughness={0.9} />
+      </mesh>
+      <mesh position-y={0.46} rotation-x={-Math.PI / 2}>
+        <planeGeometry args={[WATER_TROUGH.length - 0.16, 0.4]} />
+        <meshStandardMaterial color="#7cc6e8" roughness={0.3} />
       </mesh>
     </group>
   );

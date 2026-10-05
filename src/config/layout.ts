@@ -29,7 +29,7 @@ export interface Vec2 {
 
 export const YARD = {
   /** 걸어 다닐 수 있는 범위 */
-  bounds: { minX: -15, maxX: 19, minZ: -11, maxZ: 10 },
+  bounds: { minX: -15, maxX: 19, minZ: -11, maxZ: 11.5 },
   /** 처음 서는 자리 (집 앞 길) */
   spawn: { x: -8, z: 0.4 } as Vec2,
   house: {
@@ -45,15 +45,15 @@ export const YARD = {
     fields: {
       /** 집 옆, 큰길 위쪽: 2칸 × 2줄. 옆 칸 사이 0.9m 길, 위아래 줄 사이 1.35m 길 (위쪽 줄을 조금 더 띄웠다) */
       north: { origin: { x: -2, z: -5.95 } as Vec2, columns: 2, rows: 2, gap: 3.3, rowGap: 3.75 },
-      /** 큰길 건너편: 4칸 × 2줄. 칸 사이 0.9m 길. 가운데 두 줄이 위쪽 밭과 같은 x 에 선다 */
-      south: { origin: { x: -5.3, z: 4.25 } as Vec2, columns: 4, rows: 2, gap: 3.3, rowGap: 3.3 },
+      /** 큰길 건너편: 4칸 × 2줄. 옆 칸 사이 0.9m, 위아래 줄 사이 1.35m (위쪽 밭과 같게). 가운데 두 줄이 위쪽 밭과 같은 x 에 선다 */
+      south: { origin: { x: -5.3, z: 5.25 } as Vec2, columns: 4, rows: 2, gap: 3.3, rowGap: 3.75 },
     },
   },
   /**
-   * 동물 우리. 위쪽 밭 오른쪽 줄을 없앤 자리까지 왼쪽으로 넓혔다 (가로 8m → 12.9m).
-   * 왼쪽 울타리(x 3.6)와 위쪽 밭(오른쪽 끝 x 2.5) 사이에 1.1m 길이 남는다.
+   * 동물 우리. 위쪽 밭 오른쪽 줄을 없앤 자리까지 왼쪽으로 넓혔다 (가로 8m → 12m).
+   * 왼쪽 울타리(x 4.5)와 위쪽 밭(오른쪽 끝 x 2.5) 사이를 2m 띄웠다.
    */
-  pen: { center: { x: 10.05, z: -4.5 } as Vec2, width: 12.9, depth: 6 },
+  pen: { center: { x: 10.5, z: -4.5 } as Vec2, width: 12, depth: 6 },
   /** 마을을 가로지르는 큰길 (z 고정) */
   mainPathZ: 1.2,
   /** 시장 가는 표지판 */

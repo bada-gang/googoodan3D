@@ -133,6 +133,11 @@ export const MODEL_PROMPTS: Record<string, string> = {
   [MODELS.buildings.trough]: item(
     'A long low wooden feeding trough on short legs, filled with golden hay and grains (#f6c453). Simple chunky shapes.',
   ),
+  /* 목장 물통. 건초 여물통과 짝을 이루게 같은 나무 통 모양으로 */
+  [MODELS.buildings.waterTrough]: item(
+    'A long low wooden water trough on short legs, the same chunky wooden style as a farm feeding trough, ' +
+      'filled almost to the brim with clear light-blue water (#7cc6e8) with a few soft white highlights. Simple chunky shapes.',
+  ),
 
   /* ---- 나무 (열매 없이) ---- */
   [MODELS.trees.apple]: tree('An apple tree: round crown of fresh green leaves (#6fbf6a), warm brown trunk (#a3714a).'),

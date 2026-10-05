@@ -30,9 +30,12 @@ export interface AnimalMotion {
 /** 동물 위치. 상호작용 거리 · 느낌표 · 서로 피하기에 쓴다 */
 export const motions = new Map<string, AnimalMotion>();
 
+/** 양쪽 벽 앞 여물통 · 물통 자리는 비운다 (0.8m 씩) */
+const TROUGH_SPACE = 1.6;
+
 export function randomSpot(): { x: number; z: number } {
   return {
-    x: PEN_MIN_X + INNER_MARGIN + 0.8 + Math.random() * (pen.width - INNER_MARGIN * 2 - 0.8),
+    x: PEN_MIN_X + INNER_MARGIN + 0.8 + Math.random() * (pen.width - INNER_MARGIN * 2 - TROUGH_SPACE),
     z: PEN_MIN_Z + INNER_MARGIN + Math.random() * (pen.depth - INNER_MARGIN * 2),
   };
 }
@@ -41,7 +44,7 @@ export function randomSpot(): { x: number; z: number } {
 export function startSpot(animal: AnimalInstance, index: number): { x: number; z: number } {
   const t = (animal.spot + index * 0.37) % 1;
   return {
-    x: PEN_MIN_X + INNER_MARGIN + 0.8 + t * (pen.width - INNER_MARGIN * 2 - 0.8),
+    x: PEN_MIN_X + INNER_MARGIN + 0.8 + t * (pen.width - INNER_MARGIN * 2 - TROUGH_SPACE),
     z: PEN_MIN_Z + INNER_MARGIN + ((index * 0.53 + 0.2) % 1) * (pen.depth - INNER_MARGIN * 2),
   };
 }

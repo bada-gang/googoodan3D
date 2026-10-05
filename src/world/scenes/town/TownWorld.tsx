@@ -22,6 +22,7 @@ import { input, obstacles, walkBounds, type Obstacle } from '../../state/runtime
 import { goToScene, useWorldScene, type Spawn } from '../../state/scenes';
 import { GrassGround, PathNetwork, Surroundings } from '../../props/Ground';
 import { SignBoard } from '../../props/SignBoard';
+import { ShopEmblem, type EmblemPicture } from '../../props/ShopEmblem';
 
 /** 장식: 마당 꾸미기에 쓰는 것과 같은 모델. 광장 분수는 마당 것보다 크게 */
 const DECOR: { id: string; x: number; z: number; rotation?: number; scale?: number; radius: number }[] = [
@@ -189,6 +190,15 @@ function Gate(): React.ReactElement {
 
 /* ---------------------------------- 가게 ---------------------------------- */
 
+/**
+ * 가게 모델의 둥근 간판 자리 (가게 중심 기준 x · 높이 · 앞쪽, 반지름). 모델에 광선을 쏴서 재고 겹쳐 보며 맞췄다.
+ * 모델 그림이 흐려서 선명한 판을 덧댄다 (props/ShopEmblem).
+ */
+const SHOP_EMBLEMS: Record<'seed' | 'furniture', { picture: EmblemPicture; at: [number, number, number]; radius: number }> = {
+  seed: { picture: 'sprout', at: [0.02, 2.6, 1.7], radius: 0.52 },
+  furniture: { picture: 'chair', at: [0.02, 2.41, 1.05], radius: 0.56 },
+};
+
 function Shop({
   id,
   label,
@@ -218,6 +228,9 @@ function Shop({
     <group>
       <group position={[position.x, 0, position.z]}>
         <GltfModel modelKey={modelKey} fallback={<FallbackShop color={color} half={half} />} />
+        <group position={SHOP_EMBLEMS[id].at}>
+          <ShopEmblem picture={SHOP_EMBLEMS[id].picture} radius={SHOP_EMBLEMS[id].radius} />
+        </group>
         {SHOP_LIGHTS[id].map(([x, y, z, size]) => (
           <group key={`${x}_${y}`} position={[x, 0, z]}>
             <NightGlow y={y} size={size} />

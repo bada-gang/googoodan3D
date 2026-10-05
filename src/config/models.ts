@@ -25,6 +25,7 @@ export const MODELS = {
     house: 'model_building_house',
     barn: 'model_building_barn',
     trough: 'model_building_trough',
+    waterTrough: 'model_building_water_trough',
     seedShop: 'model_building_seed_shop',
     furnitureShop: 'model_building_furniture_shop',
   },
@@ -140,6 +141,7 @@ export const MODEL_MANIFEST: ModelSpec[] = [
   model(MODELS.buildings.house, 'models/buildings/house.glb', 'large', 4.2),
   model(MODELS.buildings.barn, 'models/buildings/barn.glb', 'large', 3.4),
   model(MODELS.buildings.trough, 'models/buildings/trough.glb', 'medium', 0.55),
+  model(MODELS.buildings.waterTrough, 'models/buildings/water_trough.glb', 'medium', 0.55),
   model(MODELS.buildings.seedShop, 'models/buildings/seed_shop.glb', 'large', 3.6),
   model(MODELS.buildings.furnitureShop, 'models/buildings/furniture_shop.glb', 'large', 3.8),
 
