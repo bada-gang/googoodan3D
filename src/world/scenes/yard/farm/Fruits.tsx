@@ -67,22 +67,41 @@ const FRUIT_MATRIX = new Matrix4();
 export const FLY_SECONDS = 0.7;
 
 /**
- * 바나나는 실제처럼 잎 덩어리 아래, 줄기 앞에 송이가 층층이 매달린다 (열매 다섯 개 = 바나나 다섯 손).
+ * 바나나는 실제처럼 잎 덩어리 아래, 줄기에 송이가 매달린다 (열매 다섯 개 = 바나나 다섯 손).
+ * 줄기 앞쪽 반 바퀴에 위 3손 · 아래 2손을 둘러 달고, 손마다 줄기에서 바깥으로 뻗게 돌린다.
+ * 한 줄로 쌓거나 같은 쪽을 보게 하면 손 뒤쪽이 줄기에 파묻혀 고리처럼 보였다.
  * 수관(잎 덩어리) 아래쪽 끝을 기준으로 잰다. 값은 모델을 보고 맞췄다.
  */
 const BANANA_BUNCH = {
-  /** 줄기 중심에서 앞(+z)으로 */
-  front: 0.3,
-  /** 맨 윗손: 수관 아래 끝에서 이만큼 위 */
+  /** 줄기 중심에서 손 중심까지 (손 뒤쪽이 줄기에 닿지 않을 만큼) */
+  reach: 0.5,
+  /** 윗줄: 수관 아래 끝에서 이만큼 위 */
   top: 0.35,
-  /** 손 사이 간격 (아래로) */
-  step: 0.16,
+  /** 윗줄과 아랫줄 사이 */
+  step: 0.24,
 };
+/** 손마다 [줄기 둘레 각도(0 = 카메라 쪽), 줄(0 = 위)] */
+const BANANA_HANDS: [number, number][] = [
+  [0, 0],
+  [-0.95, 0],
+  [0.95, 0],
+  [-0.48, 1],
+  [0.48, 1],
+];
+
+/** 열매마다 돌리는 각도 (y 축). 보통은 130° 씩 돌려 제각각 보이게, 바나나는 줄기 바깥을 보게 */
+function fruitYaw(species: TreeSpeciesId, i: number): number {
+  return species === 'banana' ? BANANA_HANDS[i % BANANA_HANDS.length][0] : i * 1.3;
+}
 
 function fruitSpots({ center, radius }: Crown, species: TreeSpeciesId): [number, number, number][] {
   if (species === 'banana') {
     const top = center[1] - radius[1] + BANANA_BUNCH.top;
-    return FRUIT_ANGLES.map((_, i) => [center[0], top - i * BANANA_BUNCH.step, center[2] + BANANA_BUNCH.front]);
+    return BANANA_HANDS.map(([around, row]) => [
+      center[0] + Math.sin(around) * BANANA_BUNCH.reach,
+      top - row * BANANA_BUNCH.step,
+      center[2] + Math.cos(around) * BANANA_BUNCH.reach,
+    ]);
   }
   return FRUIT_ANGLES.map(([around, up], i) => {
     const inset = FRUIT_INSET_BY_SPECIES[species]?.[i] ?? FRUIT_INSET;
@@ -124,7 +143,7 @@ export function Fruits({ species, crown }: { species: TreeSpeciesId; crown: Crow
   const spots = fruitSpots(crown ?? FALLBACK_CROWN, species);
   return (
     <ModelParts modelKey={MODELS.fruits[species]} fallback={<FruitGroups species={species} spots={spots} />}>
-      {(parts) => <FruitInstances parts={parts} spots={spots} />}
+      {(parts) => <FruitInstances parts={parts} spots={spots} species={species} />}
     </ModelParts>
   );
 }
@@ -138,7 +157,15 @@ function popScale(age: number, i: number): number {
 /** 다 튀어나온 뒤에는 열매 위치를 다시 계산하지 않는다 */
 const FRUIT_POP_DONE = 0.09 * 5 + 0.4;
 
-function FruitInstances({ parts, spots }: { parts: ModelPart[]; spots: [number, number, number][] }): React.ReactElement {
+function FruitInstances({
+  parts,
+  spots,
+  species,
+}: {
+  parts: ModelPart[];
+  spots: [number, number, number][];
+  species: TreeSpeciesId;
+}): React.ReactElement {
   const meshes = useRef<(InstancedMesh | null)[]>([]);
   const started = useRef(performance.now());
   const done = useRef(false);
@@ -147,7 +174,7 @@ function FruitInstances({ parts, spots }: { parts: ModelPart[]; spots: [number, 
     if (done.current) return;
     const age = (performance.now() - started.current) / 1000;
     spots.forEach((spot, i) => {
-      FRUIT_ROTATION.setFromAxisAngle(UP, i * 1.3);
+      FRUIT_ROTATION.setFromAxisAngle(UP, fruitYaw(species, i));
       FRUIT_BASE.compose(FRUIT_POSITION.set(spot[0], spot[1], spot[2]), FRUIT_ROTATION, FRUIT_SIZE.setScalar(popScale(age, i)));
       parts.forEach((part, p) => {
         meshes.current[p]?.setMatrixAt(i, FRUIT_MATRIX.multiplyMatrices(FRUIT_BASE, part.matrix));
@@ -190,7 +217,7 @@ function FruitGroups({ species, spots }: { species: TreeSpeciesId; spots: [numbe
   return (
     <group>
       {spots.map((spot, i) => (
-        <group key={i} ref={(g) => void (groups.current[i] = g)} position={spot} rotation-y={i * 1.3} scale={1e-4}>
+        <group key={i} ref={(g) => void (groups.current[i] = g)} position={spot} rotation-y={fruitYaw(species, i)} scale={1e-4}>
           <FruitModel species={species} />
         </group>
       ))}
