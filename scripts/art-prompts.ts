@@ -62,6 +62,8 @@ export const ART_PROMPTS: Record<string, string> = {
   [ASSETS.crops.cherry]: 'a pair of shiny dark-red cherries (#d1385c) joined by green stems with one leaf',
   [ASSETS.crops.grape]: 'one bunch of purple grapes (#8f6fc4) with a short vine stem and one green leaf',
   [ASSETS.crops.persimmon]: 'one orange persimmon fruit (#ea8034), slightly flattened, with a green four-petal calyx on top',
+  [ASSETS.crops.banana]: 'one hand of three plump curved yellow bananas (#f6d24a) joined at a short green stem, with small brown tips',
+  [ASSETS.crops.blueberry]: 'a small cluster of five round dusty-blue blueberries (#4f6fc4) with tiny star-shaped crowns, on a short twig with one small green leaf',
   [ASSETS.crops.egg]: 'one smooth cream-white chicken egg standing upright',
   [ASSETS.crops.goatMilk]: 'a small round clay jug of goat milk with a light-brown body and a cream rim, with a little rope tied around the neck',
   [ASSETS.crops.wool]: 'a fluffy bundle of soft white sheep wool, like a cloud, tied with a pink ribbon',
@@ -74,6 +76,8 @@ export const ART_PROMPTS: Record<string, string> = {
   [ASSETS.seeds.cherry]: 'a small kraft-paper seed packet, folded at the top, with a picture of two red cherries printed on the front',
   [ASSETS.seeds.grape]: 'a small kraft-paper seed packet, folded at the top, with a picture of a bunch of purple grapes printed on the front',
   [ASSETS.seeds.persimmon]: 'a small kraft-paper seed packet, folded at the top, with a picture of an orange persimmon printed on the front',
+  [ASSETS.seeds.banana]: 'a small kraft-paper seed packet, folded at the top, with a picture of a bunch of yellow bananas printed on the front',
+  [ASSETS.seeds.blueberry]: 'a small kraft-paper seed packet, folded at the top, with a picture of a cluster of blue blueberries printed on the front',
 
   /* ---- UI ---- */
   [ASSETS.ui.coin]: 'one thick shiny gold coin (#f6c453) with a simple embossed star in the middle, tilted slightly',

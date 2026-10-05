@@ -19,6 +19,8 @@ const FRUIT_COLOR: Record<TreeSpeciesId, string> = {
   cherry: PALETTE.cherry,
   grape: '#8f6fc4',
   persimmon: '#ea8034',
+  banana: '#f6d24a',
+  blueberry: '#4f6fc4',
 };
 
 /**
@@ -64,7 +66,24 @@ const FRUIT_MATRIX = new Matrix4();
 /** 수확한 열매가 캐릭터에게 날아가는 시간 */
 export const FLY_SECONDS = 0.7;
 
+/**
+ * 바나나는 실제처럼 잎 덩어리 아래, 줄기 앞에 송이가 층층이 매달린다 (열매 다섯 개 = 바나나 다섯 손).
+ * 수관(잎 덩어리) 아래쪽 끝을 기준으로 잰다. 값은 모델을 보고 맞췄다.
+ */
+const BANANA_BUNCH = {
+  /** 줄기 중심에서 앞(+z)으로 */
+  front: 0.3,
+  /** 맨 윗손: 수관 아래 끝에서 이만큼 위 */
+  top: 0.35,
+  /** 손 사이 간격 (아래로) */
+  step: 0.16,
+};
+
 function fruitSpots({ center, radius }: Crown, species: TreeSpeciesId): [number, number, number][] {
+  if (species === 'banana') {
+    const top = center[1] - radius[1] + BANANA_BUNCH.top;
+    return FRUIT_ANGLES.map((_, i) => [center[0], top - i * BANANA_BUNCH.step, center[2] + BANANA_BUNCH.front]);
+  }
   return FRUIT_ANGLES.map(([around, up], i) => {
     const inset = FRUIT_INSET_BY_SPECIES[species]?.[i] ?? FRUIT_INSET;
     return [

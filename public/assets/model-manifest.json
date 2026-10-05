@@ -18,6 +18,8 @@
     "model_tree_cherry",
     "model_tree_grape",
     "model_tree_persimmon",
+    "model_tree_banana",
+    "model_tree_blueberry",
     "model_plant_sprout",
     "model_animal_chicken",
     "model_animal_goat",
@@ -51,6 +53,8 @@
     "model_fruit_peach",
     "model_fruit_cherry",
     "model_fruit_grape",
-    "model_fruit_persimmon"
+    "model_fruit_persimmon",
+    "model_fruit_banana",
+    "model_fruit_blueberry"
   ]
 }

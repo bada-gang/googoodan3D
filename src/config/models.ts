@@ -37,6 +37,8 @@ export const MODELS = {
     cherry: 'model_tree_cherry',
     grape: 'model_tree_grape',
     persimmon: 'model_tree_persimmon',
+    banana: 'model_tree_banana',
+    blueberry: 'model_tree_blueberry',
   },
   /** 씨앗을 심은 뒤 첫 싹 (모든 나무 공통) */
   sprout: 'model_plant_sprout',
@@ -55,6 +57,8 @@ export const MODELS = {
     cherry: 'model_fruit_cherry',
     grape: 'model_fruit_grape',
     persimmon: 'model_fruit_persimmon',
+    banana: 'model_fruit_banana',
+    blueberry: 'model_fruit_blueberry',
   },
 } as const;
 
@@ -124,6 +128,12 @@ export function furnitureModelKey(itemId: string): string {
   return `model_furniture_${itemId}`;
 }
 
+/** 나무 키 (m). 기본 2.9. 실제 모양을 따른 나무는 다르게: 바나나는 키가 크고, 블루베리는 낮은 덤불이다 */
+const TREE_HEIGHT: Partial<Record<TreeSpeciesId, number>> = {
+  banana: 3.3,
+  blueberry: 2.0,
+};
+
 /** 동물 키 (m). 캐릭터 키가 1.2 — 2학년 아이 옆에 섰을 때 그럴듯하게 */
 const ANIMAL_HEIGHT: Record<AnimalSpeciesId, number> = {
   chicken: 0.55,
@@ -146,7 +156,7 @@ export const MODEL_MANIFEST: ModelSpec[] = [
   model(MODELS.buildings.furnitureShop, 'models/buildings/furniture_shop.glb', 'large', 3.8),
 
   ...(Object.entries(MODELS.trees) as [TreeSpeciesId, string][]).map(([id, key]) =>
-    model(key, `models/trees/${id}.glb`, 'medium', 2.9),
+    model(key, `models/trees/${id}.glb`, 'medium', TREE_HEIGHT[id] ?? 2.9),
   ),
   model(MODELS.sprout, 'models/trees/sprout.glb', 'small', 0.45),
 
@@ -174,6 +184,8 @@ export const MODEL_MANIFEST: ModelSpec[] = [
   model(MODELS.fruits.cherry, 'models/fruits/cherry.glb', 'tiny', 0.2, ASSETS.crops.cherry),
   model(MODELS.fruits.grape, 'models/fruits/grape.glb', 'tiny', 0.26, ASSETS.crops.grape),
   model(MODELS.fruits.persimmon, 'models/fruits/persimmon.glb', 'tiny', 0.2, ASSETS.crops.persimmon),
+  model(MODELS.fruits.banana, 'models/fruits/banana.glb', 'tiny', 0.26, ASSETS.crops.banana),
+  model(MODELS.fruits.blueberry, 'models/fruits/blueberry.glb', 'tiny', 0.2, ASSETS.crops.blueberry),
 ];
 
 export const MODEL_SPEC_BY_KEY: Record<string, ModelSpec> = Object.fromEntries(

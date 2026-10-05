@@ -53,6 +53,17 @@ function facade(description: string): string {
 }
 
 /** 나무: 열매 없이. 열매는 게임이 따로 단다 */
+/**
+ * 실제 식물 모양을 따르는 나무 (바나나 · 블루베리). 둥근 잎 덩어리 틀(tree)을 쓰면 다 같은 나무처럼 보인다.
+ * 얇은 잎은 3D 변환에서 찢어지므로 잎을 두툼하게 그리게 한다.
+ */
+function realPlant(description: string): string {
+  return (
+    'Front view of a young fruit plant for a small farm, cute chunky toy-like 3D style that still clearly shows the real shape ' +
+    `of the plant, thick chunky leaves (not paper-thin), NO fruits at all, no flowers, no ground, no grass, no pot. ${description}`
+  );
+}
+
 function tree(description: string): string {
   return (
     'Front view of a young fruit tree for a small farm: short sturdy trunk, a big soft rounded leafy crown made of a few puffy ' +
@@ -152,6 +163,15 @@ export const MODEL_PROMPTS: Record<string, string> = {
   ),
   [MODELS.trees.persimmon]: tree(
     'A persimmon tree: slightly taller oval crown of deep green leaves (#529c50) with a few warm orange-tinted leaves, dark brown trunk.',
+  ),
+  [MODELS.trees.banana]: realPlant(
+    'A banana plant: one thick smooth upright pseudo-stem trunk made of wrapped leaf sheaths (light olive green #a8b86a with soft brown streaks), ' +
+      'and at the top a crown of seven or eight very large long paddle-shaped bright green leaves (#6fbf6a) with a pale midrib, ' +
+      'arching outward in every direction and drooping at the tips like a fountain. Taller than wide.',
+  ),
+  [MODELS.trees.blueberry]: realPlant(
+    'A blueberry bush: a rounded shrub that is wider than tall, with several thin brown woody stems rising from one base and branching, ' +
+      'densely covered with many small oval blue-green leaves (#5f9e55), a few leaf edges tinted soft red.',
   ),
   [MODELS.sprout]: item(
     'A tiny young seedling: a short thick green stem with two plump round leaves opening like a little V, no soil, no pot.',

@@ -43,7 +43,7 @@ export interface GameSessionSettings {
 
 /* ---------------------------------- 농장 ---------------------------------- */
 
-export type TreeSpeciesId = 'apple' | 'orange' | 'peach' | 'cherry' | 'grape' | 'persimmon';
+export type TreeSpeciesId = 'apple' | 'orange' | 'peach' | 'cherry' | 'grape' | 'persimmon' | 'banana' | 'blueberry';
 
 /** 나무 성장 단계. (명세 20, 46) */
 export type TreeStage = 'seed' | 'sprout' | 'sapling' | 'mature' | 'fruiting';

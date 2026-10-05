@@ -30,6 +30,8 @@ export const ASSETS = {
     cherry: 'crop_cherry',
     grape: 'crop_grape',
     persimmon: 'crop_persimmon',
+    banana: 'crop_banana',
+    blueberry: 'crop_blueberry',
     egg: 'crop_egg',
     goatMilk: 'crop_goat_milk',
     wool: 'crop_wool',
@@ -42,6 +44,8 @@ export const ASSETS = {
     cherry: 'seedbag_cherry',
     grape: 'seedbag_grape',
     persimmon: 'seedbag_persimmon',
+    banana: 'seedbag_banana',
+    blueberry: 'seedbag_blueberry',
   },
   /**
    * 목록/상점에서 쓰는 동물 썸네일.

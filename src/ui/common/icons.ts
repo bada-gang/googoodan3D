@@ -44,6 +44,8 @@ function fallbackInfoOf(assetKey: string): { label: string; color: string } {
       cherry: PALETTE.cherry,
       grape: '#8f6fc4',
       persimmon: '#ea8034',
+      banana: '#f6d24a',
+      blueberry: '#4f6fc4',
       egg: '#fdfaf2',
       goatMilk: '#f4ecd8',
       wool: '#fbf7ef',
