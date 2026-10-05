@@ -44,7 +44,7 @@ export const YARD = {
     plotSize: 2.4,
     fields: {
       /** 집 옆, 큰길 위쪽: 2칸 × 2줄. 옆 칸 사이 0.9m 길, 위아래 줄 사이 1.35m 길 (위쪽 줄을 조금 더 띄웠다) */
-      north: { origin: { x: -2, z: -5.95 } as Vec2, columns: 2, rows: 2, gap: 3.3, rowGap: 3.75 },
+      north: { origin: { x: -2, z: -6.25 } as Vec2, columns: 2, rows: 2, gap: 3.3, rowGap: 3.75 },
       /** 큰길 건너편: 4칸 × 2줄. 옆 칸 사이 0.9m, 위아래 줄 사이 1.35m (위쪽 밭과 같게). 가운데 두 줄이 위쪽 밭과 같은 x 에 선다 */
       south: { origin: { x: -5.3, z: 5.25 } as Vec2, columns: 4, rows: 2, gap: 3.3, rowGap: 3.75 },
     },

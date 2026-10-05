@@ -4,6 +4,10 @@
  * 가게 모델은 질감 한 장(1024px)에 건물 전체가 들어 있어서, 간판 그림(새싹 · 의자)은 그중 작은 조각이라 흐리다.
  * 모델을 다시 만들면 건물 모양까지 바뀌므로, 같은 자리에 캔버스로 그린 판을 살짝 띄워 붙인다.
  * 테두리 · 바탕 색은 원래 간판과 맞췄다.
+ *
+ * ⚠ 지금은 쓰지 않는다 (2026-10-05). 붙여 보니 건물과 그림 느낌이 달라 이질적이라 뺐다 — 사용자가 나중에 쓸 수도 있어 보관만 한다.
+ * 다시 붙이려면 TownWorld 의 가게(Shop) 모델 옆에 아래 자리로 놓는다 (가게 중심 기준 x · 높이 · 앞쪽, 반지름):
+ *   농장 가게 sprout [0.02, 2.6, 1.7] 반지름 0.52 / 가구 가게 chair [0.02, 2.41, 1.05] 반지름 0.56
  */
 import { useEffect, useMemo } from 'react';
 import { CanvasTexture, SRGBColorSpace } from 'three';
@@ -141,7 +145,7 @@ function emblemTexture(picture: EmblemPicture): CanvasTexture {
   return texture;
 }
 
-/** 둥근 간판판. 놓는 자리는 가게 모델을 재서 맞춘다 (TownWorld 의 SHOP_EMBLEMS) */
+/** 둥근 간판판. 놓는 자리는 가게 모델을 재서 맞춘다 (맨 위 설명의 자리 참고) */
 export function ShopEmblem({ picture, radius }: { picture: EmblemPicture; radius: number }): React.ReactElement {
   const texture = useMemo(() => emblemTexture(picture), [picture]);
   useEffect(() => () => texture.dispose(), [texture]);
