@@ -51,6 +51,8 @@ const SFX_FILE_GAIN: Record<string, number> = {
   correct: 0.68,
   // 수확 소리는 자주 나서 작게 (사용자가 들어 보고 정한 크기)
   harvest: 0.54,
+  // 장면 이동(집 문 · 마을 ↔ 시장) 소리는 기본보다 25% 작게 (사용자 요청)
+  door: 0.6,
 };
 const SFX_FILE_DEFAULT_GAIN = 0.8;
 
