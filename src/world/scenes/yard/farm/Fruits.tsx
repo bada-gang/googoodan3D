@@ -41,10 +41,13 @@ const FRUIT_ANGLES: [number, number][] = [
  */
 const FRUIT_INSET = 0.78;
 
-/** 나무마다 잎 모양이 달라 잎에 묻히는 자리가 있다. 그 자리만 겉으로 더 뺀다 (열매 번호 → inset) */
+/** 나무마다 잎 모양이 달라 잎에 묻히거나 떠 보이는 자리가 있다. 그 자리만 겉으로 빼거나 안으로 넣는다 (열매 번호 → inset) */
 const FRUIT_INSET_BY_SPECIES: Partial<Record<TreeSpeciesId, Record<number, number>>> = {
   // 체리: 오른쪽 열매가 잎 속에 묻혔다
   cherry: { 1: 0.95 },
+  // 사과 · 오렌지: 맨 왼쪽 열매(2번)가 잎 밖 공중에 떠 보였다. 안쪽으로 넣는다
+  apple: { 2: 0.62 },
+  orange: { 2: 0.62 },
 };
 
 /** 나무 모델을 아직 못 불러왔을 때(임시 나무)의 수관 */

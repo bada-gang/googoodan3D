@@ -29,7 +29,7 @@ export function Animal({ animal, index }: { animal: AnimalInstance; index: numbe
   const produceReady = useGameStore((s) => s.animals.find((a) => a.id === animal.id)?.produceReady ?? false);
 
   const motion = useMemo<AnimalMotion>(() => {
-    const spot = startSpot(animal, index);
+    const spot = startSpot(animal, index, size.radius);
     return {
       ...spot,
       facing: Math.random() * Math.PI * 2,
@@ -71,7 +71,7 @@ export function Animal({ animal, index }: { animal: AnimalInstance; index: numbe
     const busy = motion.emote && performance.now() - motion.emote.startedAt < 1200;
 
     // 돌아다니기: 쉬다가 → 우리 안 아무 곳으로 걸어가기
-    if (!motion.target && !busy && now > motion.restUntil) motion.target = randomSpot();
+    if (!motion.target && !busy && now > motion.restUntil) motion.target = randomSpot(motion, size.radius);
     motion.moving = false;
     if (motion.target && !busy) {
       const dx = motion.target.x - motion.x;

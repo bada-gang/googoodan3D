@@ -13,6 +13,12 @@ import { Fruits } from './Fruits';
 
 /** 어린나무는 다 자란 나무 모델을 이만큼 줄여 쓴다 */
 const SAPLING_SCALE = 0.55;
+/**
+ * 다 자란 나무 크기 배율. 밭에 비해 커 보여 8% 줄였다 (사용자 요청). 블루베리는 원래 낮은 덤불이라 그대로.
+ * 열매는 이 배율 밖에 달아서 크기가 바뀌지 않는다.
+ */
+const MATURE_SCALE: Partial<Record<TreeSpeciesId, number>> = { blueberry: 1 };
+const DEFAULT_MATURE_SCALE = 0.92;
 
 /** 나무 잎 덩어리(수관)의 대략적인 타원체. 열매를 그 겉면에 단다 */
 export interface Crown {
@@ -20,10 +26,10 @@ export interface Crown {
   radius: [number, number, number];
 }
 
-/** 불러온 나무 모델의 크기를 재서 수관 타원체를 정한다 (나무 그룹 기준 좌표) */
-function measureCrown(object: Object3D): Crown {
+/** 불러온 나무 모델의 크기를 재서 수관 타원체를 정한다 (frame = 나무 그룹 기준 좌표, 크기 배율까지 반영) */
+function measureCrown(object: Object3D, frame: Object3D | null): Crown {
   object.updateWorldMatrix(true, true);
-  const toLocal = new Matrix4().copy(object.parent?.matrixWorld ?? new Matrix4()).invert();
+  const toLocal = new Matrix4().copy((frame ?? object.parent)?.matrixWorld ?? new Matrix4()).invert();
   const box = new Box3();
   object.traverse((node) => {
     const mesh = node as Mesh;
@@ -58,7 +64,7 @@ export function Tree({
   const [crown, setCrown] = useState<Crown | null>(null);
   const onTreeLoaded = useCallback(
     (object: Object3D | null) => {
-      const measured = object ? measureCrown(object) : null;
+      const measured = object ? measureCrown(object, group.current) : null;
       setCrown(measured);
       onCrown(measured);
     },
@@ -86,11 +92,13 @@ export function Tree({
         </group>
       )}
       {(stage === 'mature' || stage === 'fruiting') && (
-        <GltfModel
-          modelKey={MODELS.trees[species]}
-          fallback={<Trunk height={1.4} radius={0.13} crown={0.95} />}
-          onLoaded={onTreeLoaded}
-        />
+        <group scale={MATURE_SCALE[species] ?? DEFAULT_MATURE_SCALE}>
+          <GltfModel
+            modelKey={MODELS.trees[species]}
+            fallback={<Trunk height={1.4} radius={0.13} crown={0.95} />}
+            onLoaded={onTreeLoaded}
+          />
+        </group>
       )}
       {stage === 'fruiting' && <Fruits species={species} crown={crown} />}
     </group>

@@ -30,13 +30,19 @@ const INTERACT_SECONDS = 0.35;
  * 걸을 때 허벅지를 흔드는 크기 (라디안). 앞으로 내딛는 쪽을 크게 해야 성큼성큼 걷는 것처럼 보인다.
  * 뒤로 차는 쪽까지 크게 하면 다리가 몸 뒤로 너무 빠진다.
  */
-const LEG_FORWARD = 0.9;
-const LEG_BACK = 0.45;
+const LEG_FORWARD = 1.2;
+const LEG_BACK = 0.75;
 const ARM_SWING = 0.6;
 /** 다리를 앞으로 가져올 때 무릎을 굽히는 크기. 없으면 막대처럼 뻣뻣해 보인다 */
-const KNEE_BEND = 0.95;
-/** 뼈가 목표 자세로 다가가는 빠르기. 걷다 멈출 때 팔다리가 툭 끊기지 않게 */
+const KNEE_BEND = 1.35;
+/** 뒤로 찬 다리도 발끝이 땅을 밀며 무릎이 조금 굽는다 */
+const KNEE_PUSH = 0.35;
+/**
+ * 뼈가 목표 자세로 다가가는 빠르기. 걷다 멈출 때 팔다리가 툭 끊기지 않게.
+ * 걷는 중에는 빠르게 따라가야 목표 각도까지 다리가 벌어진다 (14 로는 70~80% 만 벌어져 걸음이 작아 보였다)
+ */
 const LIMB_FOLLOW = 14;
+const LIMB_FOLLOW_WALK = 26;
 
 interface Limbs {
   legL?: Bone;
@@ -113,8 +119,8 @@ export function Player(): React.ReactElement {
       // 다리가 앞으로 나오는 동안(허벅지가 앞으로 움직이는 동안) 무릎을 굽힌다. 왼쪽과 오른쪽은 반 박자 차이.
       // 왼 허벅지 각도는 -sin(박자) 라서, 각도가 줄어드는(앞으로 가는) 때는 cos(박자) > 0 이다
       const forwardL = Math.cos(walkPhase.current);
-      kneeL = Math.max(0, forwardL) * KNEE_BEND * strength;
-      kneeR = Math.max(0, -forwardL) * KNEE_BEND * strength;
+      kneeL = (Math.max(0, forwardL) * KNEE_BEND + Math.max(0, -forwardL) * KNEE_PUSH) * strength;
+      kneeR = (Math.max(0, -forwardL) * KNEE_BEND + Math.max(0, forwardL) * KNEE_PUSH) * strength;
       stepTimer.current += dt;
       if (stepTimer.current > STEP_INTERVAL) {
         stepTimer.current = 0;
@@ -155,7 +161,7 @@ export function Player(): React.ReactElement {
     body.current.scale.set(1 / Math.sqrt(squash), squash, 1 / Math.sqrt(squash));
 
     // 팔다리. 같은 쪽 팔다리는 반대로 (왼다리가 앞이면 왼팔은 뒤)
-    const k = 1 - Math.exp(-LIMB_FOLLOW * dt);
+    const k = 1 - Math.exp(-(walking ? LIMB_FOLLOW_WALK : LIMB_FOLLOW) * dt);
     const { legL, legR, shinL, shinR, armL, armR } = limbs.current;
     // legSwing > 0 이면 왼다리가 앞(각도 −), 오른다리가 뒤
     ease(legL, legSwing > 0 ? -legSwing * LEG_FORWARD : -legSwing * LEG_BACK, 0, k);

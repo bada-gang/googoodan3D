@@ -12,8 +12,6 @@ export const PEN_MAX_Z = pen.center.z + pen.depth / 2;
 export const GATE_WIDTH = 1.8;
 /** 울타리 두께 (부딪힘) */
 export const FENCE_THICKNESS = 0.2;
-/** 동물이 울타리에 붙지 않게 안쪽으로 띄우는 거리 */
-export const INNER_MARGIN = 0.8;
 /** 여물통(건초) 자리 (우리 안 왼쪽 벽 앞, 세로로) */
 export const TROUGH = { x: PEN_MIN_X + 0.9, z: pen.center.z, length: 1.6 };
 /** 물통 자리 (우리 안 오른쪽 벽 앞, 세로로). 여물통과 마주 본다 */
