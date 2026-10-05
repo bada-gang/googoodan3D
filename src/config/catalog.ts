@@ -24,8 +24,13 @@ export interface TreeSpecies {
   /** 열매 맺을 때 한 번에 달리는 개수. HARVEST_BY_ATTEMPTS[0] 과 같아야 무실수 수확이 온전히 들어온다. */
   yield: number;
   unlockLevel: number;
-  /** 단계 하나를 올리는 데 필요한 정답 수 */
+  /** 단계 하나를 올리는 데 필요한 정답 수 (처음 키울 때) */
   growthPerStage: number;
+  /**
+   * 수확한 뒤 큰 나무에서 다시 열매가 열리기까지 줄 물 (정답 수).
+   * 처음 키울 때와 따로 둔다 — 수확 사이가 길면 지루하다. 수확까지 2~3문제가 되게 잡았다.
+   */
+  regrowWater: number;
 }
 
 export const TREE_SPECIES: Record<TreeSpeciesId, TreeSpecies> = {
@@ -40,6 +45,7 @@ export const TREE_SPECIES: Record<TreeSpeciesId, TreeSpecies> = {
     yield: 4,
     unlockLevel: 1,
     growthPerStage: 1,
+    regrowWater: 1,
   },
   orange: {
     id: 'orange',
@@ -52,6 +58,7 @@ export const TREE_SPECIES: Record<TreeSpeciesId, TreeSpecies> = {
     yield: 4,
     unlockLevel: 2,
     growthPerStage: 1,
+    regrowWater: 1,
   },
   peach: {
     id: 'peach',
@@ -60,11 +67,12 @@ export const TREE_SPECIES: Record<TreeSpeciesId, TreeSpecies> = {
     seedPrice: 30,
     fruitId: 'peach',
     fruitName: '복숭아',
-    // 오렌지보다 문제를 하나 더 풀어야 하므로 값도 그만큼 높다. (곡선 역전 방지)
-    fruitPrice: 20,
+    // 열매 값은 "문제당 벌이"가 레벨 따라 고르게 오르도록 잡았다 (수확 사이 문제 수와 함께 본다)
+    fruitPrice: 13,
     yield: 4,
     unlockLevel: 3,
     growthPerStage: 2,
+    regrowWater: 1,
   },
   cherry: {
     id: 'cherry',
@@ -73,10 +81,11 @@ export const TREE_SPECIES: Record<TreeSpeciesId, TreeSpecies> = {
     seedPrice: 40,
     fruitId: 'cherry',
     fruitName: '체리',
-    fruitPrice: 22,
+    fruitPrice: 15,
     yield: 4,
     unlockLevel: 4,
     growthPerStage: 2,
+    regrowWater: 1,
   },
   grape: {
     id: 'grape',
@@ -89,6 +98,7 @@ export const TREE_SPECIES: Record<TreeSpeciesId, TreeSpecies> = {
     yield: 4,
     unlockLevel: 5,
     growthPerStage: 2,
+    regrowWater: 2,
   },
   persimmon: {
     id: 'persimmon',
@@ -97,10 +107,11 @@ export const TREE_SPECIES: Record<TreeSpeciesId, TreeSpecies> = {
     seedPrice: 75,
     fruitId: 'persimmon',
     fruitName: '감',
-    fruitPrice: 40,
+    fruitPrice: 30,
     yield: 4,
     unlockLevel: 6,
     growthPerStage: 3,
+    regrowWater: 2,
   },
   banana: {
     id: 'banana',
@@ -109,10 +120,11 @@ export const TREE_SPECIES: Record<TreeSpeciesId, TreeSpecies> = {
     seedPrice: 90,
     fruitId: 'banana',
     fruitName: '바나나',
-    fruitPrice: 48,
+    fruitPrice: 34,
     yield: 4,
     unlockLevel: 7,
     growthPerStage: 3,
+    regrowWater: 2,
   },
   blueberry: {
     id: 'blueberry',
@@ -121,10 +133,11 @@ export const TREE_SPECIES: Record<TreeSpeciesId, TreeSpecies> = {
     seedPrice: 105,
     fruitId: 'blueberry',
     fruitName: '블루베리',
-    fruitPrice: 56,
+    fruitPrice: 40,
     yield: 4,
     unlockLevel: 8,
     growthPerStage: 3,
+    regrowWater: 2,
   },
 };
 
@@ -156,19 +169,18 @@ export interface AnimalSpecies {
 }
 
 /**
- * 생산물 가격은 "같은 레벨 나무와 문제당 벌이가 비슷해지도록" 잡았다.
+ * 생산물 가격은 "같은 레벨(해금 레벨)의 가장 좋은 나무보다 문제당 벌이가 10~15% 높게" 잡았다 (2026-10-05).
+ * 동물은 데려오는 값이 크고(112~468원) 종류마다 마릿수 제한이 있어서, 그만큼 조금 더 번다.
+ * 모든 동물이 먹이 2번 + 받기 1번 = 3문제로, 나무의 수확 사이(2~3문제)와 리듬을 맞췄다.
  *
- * 동물은 선투자(80~260원)가 크고 먹이도 물보다 비싸서, 예전 가격에서는
- * 나무보다 1.8~3.4배 불리했다. 그래서 아무도 동물을 살 이유가 없었다.
- * 지금은 나무와 비슷해서 취향대로 고를 수 있다.
- *
- *   문제당 벌이 = (생산물값 × 2 − 먹이값 × 돌봄횟수) / (돌봄횟수 + 1)
+ *   문제당 벌이 = (생산물값 × 3 − 먹이값 2원 × 돌봄횟수) / (돌봄횟수 + 1)   (한 번에 맞히면 3개)
+ *   닭 24.7 (Lv2 오렌지 21.5) · 염소 32.7 (Lv4 체리 29.5) · 양 43.7 (Lv6 감 39.3) · 젖소 60.7 (Lv8 블루베리 52.7)
  */
 export const ANIMAL_SPECIES: Record<AnimalSpeciesId, AnimalSpecies> = {
   chicken: {
     id: 'chicken',
     name: '닭',
-    price: 80,
+    price: 112,
     produceId: 'egg',
     produceName: '달걀',
     producePrice: 26,
@@ -179,34 +191,34 @@ export const ANIMAL_SPECIES: Record<AnimalSpeciesId, AnimalSpecies> = {
   goat: {
     id: 'goat',
     name: '염소',
-    price: 120,
+    price: 168,
     produceId: 'goatMilk',
     produceName: '염소젖',
-    producePrice: 31,
+    producePrice: 34,
     careGoal: 2,
-    unlockLevel: 3,
+    unlockLevel: 4,
     maxCount: 3,
   },
   sheep: {
     id: 'sheep',
     name: '양',
-    price: 160,
+    price: 288,
     produceId: 'wool',
     produceName: '양털',
     producePrice: 45,
-    careGoal: 3,
-    unlockLevel: 4,
+    careGoal: 2,
+    unlockLevel: 6,
     maxCount: 2,
   },
   cow: {
     id: 'cow',
     name: '젖소',
-    price: 260,
+    price: 468,
     produceId: 'milk',
     produceName: '우유',
-    producePrice: 56,
-    careGoal: 3,
-    unlockLevel: 5,
+    producePrice: 62,
+    careGoal: 2,
+    unlockLevel: 8,
     maxCount: 2,
   },
 };
@@ -373,8 +385,8 @@ export const FURNITURE: FurnitureDef[] = [
   { id: 'carpet_colorful', name: '알록달록 카펫', theme: 'colorful', shape: 'carpet', area: 'home', price: 60, unlockLevel: 3, width: 240, height: 62, tint: '#8fd8c4' },
 
   // --- 별빛 세트 ---
-  { id: 'bed_starlight', name: '별빛 침대', theme: 'starlight', shape: 'bed', area: 'home', price: 180, unlockLevel: 5, width: 215, height: 124, tint: '#b8a0e0' },
-  { id: 'lamp_starlight', name: '별빛 조명', theme: 'starlight', shape: 'lamp', area: 'home', price: 130, unlockLevel: 5, width: 92, height: 190, tint: '#cbb6ef' },
+  { id: 'bed_starlight', name: '별빛 침대', theme: 'starlight', shape: 'bed', area: 'home', price: 180, unlockLevel: 7, width: 215, height: 124, tint: '#b8a0e0' },
+  { id: 'lamp_starlight', name: '별빛 조명', theme: 'starlight', shape: 'lamp', area: 'home', price: 130, unlockLevel: 7, width: 92, height: 190, tint: '#cbb6ef' },
 
   // --- 야외 ---
   { id: 'fence_wood', name: '나무 울타리', theme: 'basic', shape: 'fence', area: 'yard', price: 18, unlockLevel: 1, width: 130, height: 92, tint: '#c08a52' },
@@ -382,7 +394,7 @@ export const FURNITURE: FurnitureDef[] = [
   { id: 'bench_wood', name: '마당 벤치', theme: 'basic', shape: 'bench', area: 'yard', price: 55, unlockLevel: 2, width: 170, height: 104, tint: '#b57f4a' },
   { id: 'stonepath', name: '돌길', theme: 'nature', shape: 'stonepath', area: 'yard', price: 15, unlockLevel: 1, width: 140, height: 44, tint: '#cfc6b4' },
   { id: 'streetlamp', name: '가로등', theme: 'basic', shape: 'streetlamp', area: 'yard', price: 90, unlockLevel: 3, width: 80, height: 230, tint: '#6a5445' },
-  { id: 'fountain', name: '작은 분수', theme: 'starlight', shape: 'fountain', area: 'yard', price: 220, unlockLevel: 5, width: 200, height: 150, tint: '#9ed4ea' },
+  { id: 'fountain', name: '작은 분수', theme: 'starlight', shape: 'fountain', area: 'yard', price: 220, unlockLevel: 7, width: 200, height: 150, tint: '#9ed4ea' },
 ];
 
 export const FURNITURE_BY_ID: Record<string, FurnitureDef> = Object.fromEntries(
@@ -409,13 +421,13 @@ export const WALLPAPERS: SurfaceDef[] = [
   { id: 'wall_cream', name: '크림 벽지', price: 0, unlockLevel: 1, color: '#f7e6cd', accent: '#ecd7b6' },
   { id: 'wall_mint', name: '민트 벽지', price: 70, unlockLevel: 2, color: '#dff1e6', accent: '#c6e3d2' },
   { id: 'wall_sky', name: '하늘 벽지', price: 70, unlockLevel: 3, color: '#deeefb', accent: '#c4dff3' },
-  { id: 'wall_star', name: '별빛 벽지', price: 150, unlockLevel: 5, color: '#e4dcf6', accent: '#cdc0ec', pattern: 'star' },
+  { id: 'wall_star', name: '별빛 벽지', price: 150, unlockLevel: 7, color: '#e4dcf6', accent: '#cdc0ec', pattern: 'star' },
 ];
 
 export const FLOORS: SurfaceDef[] = [
   { id: 'floor_wood', name: '나무 바닥', price: 0, unlockLevel: 1, color: '#d8a973', accent: '#c08a52' },
   { id: 'floor_tile', name: '체크 바닥', price: 70, unlockLevel: 2, color: '#f0e0c4', accent: '#dcc7a2', pattern: 'check' },
-  { id: 'floor_carpet', name: '융단 바닥', price: 120, unlockLevel: 4, color: '#e6b3a6', accent: '#d0968a', pattern: 'carpet' },
+  { id: 'floor_carpet', name: '융단 바닥', price: 120, unlockLevel: 5, color: '#e6b3a6', accent: '#d0968a', pattern: 'carpet' },
 ];
 
 export const SURFACE_BY_ID: Record<string, SurfaceDef> = Object.fromEntries(

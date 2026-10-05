@@ -50,7 +50,9 @@ export const createFarmSlice: GameSlice<FarmSlice> = (set, get) => ({
     // 물을 하나 쓴다. 없으면 키울 수 없다.
     if (!get().consumeItem('water')) return false;
     const species = TREE_SPECIES[plot.species];
-    const needed = species.growthPerStage;
+    // 수확한 뒤 큰 나무 → 열매는 처음 키울 때보다 짧다 (regrowWater)
+    const regrowing = plot.stage === 'mature' && plot.harvestCount > 0;
+    const needed = regrowing ? species.regrowWater : species.growthPerStage;
     const nextPoints = plot.growthPoints + 1;
 
     if (nextPoints < needed) {
