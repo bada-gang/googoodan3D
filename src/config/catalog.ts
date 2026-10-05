@@ -186,7 +186,7 @@ export const ANIMAL_SPECIES: Record<AnimalSpeciesId, AnimalSpecies> = {
     producePrice: 26,
     careGoal: 2,
     unlockLevel: 2,
-    maxCount: 4,
+    maxCount: 2,
   },
   goat: {
     id: 'goat',
@@ -197,7 +197,7 @@ export const ANIMAL_SPECIES: Record<AnimalSpeciesId, AnimalSpecies> = {
     producePrice: 34,
     careGoal: 2,
     unlockLevel: 4,
-    maxCount: 3,
+    maxCount: 2,
   },
   sheep: {
     id: 'sheep',
