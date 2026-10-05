@@ -127,6 +127,8 @@ export interface AnimalSpecies {
   /** 생산물이 나오기까지 필요한 먹이 주기 횟수 */
   careGoal: number;
   unlockLevel: number;
+  /** 우리에 둘 수 있는 최대 마릿수 (목장 넓이 · 화면 혼잡을 보고 정함) */
+  maxCount: number;
 }
 
 /**
@@ -148,6 +150,7 @@ export const ANIMAL_SPECIES: Record<AnimalSpeciesId, AnimalSpecies> = {
     producePrice: 26,
     careGoal: 2,
     unlockLevel: 2,
+    maxCount: 4,
   },
   goat: {
     id: 'goat',
@@ -158,6 +161,7 @@ export const ANIMAL_SPECIES: Record<AnimalSpeciesId, AnimalSpecies> = {
     producePrice: 31,
     careGoal: 2,
     unlockLevel: 3,
+    maxCount: 3,
   },
   sheep: {
     id: 'sheep',
@@ -168,6 +172,7 @@ export const ANIMAL_SPECIES: Record<AnimalSpeciesId, AnimalSpecies> = {
     producePrice: 45,
     careGoal: 3,
     unlockLevel: 4,
+    maxCount: 2,
   },
   cow: {
     id: 'cow',
@@ -178,6 +183,7 @@ export const ANIMAL_SPECIES: Record<AnimalSpeciesId, AnimalSpecies> = {
     producePrice: 56,
     careGoal: 3,
     unlockLevel: 5,
+    maxCount: 2,
   },
 };
 

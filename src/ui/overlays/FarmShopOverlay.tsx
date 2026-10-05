@@ -36,6 +36,8 @@ export function FarmShopOverlay(): React.ReactElement {
   const money = useGameStore((s) => s.money);
   const level = useGameStore((s) => s.level);
   const inventory = useGameStore((s) => s.inventory);
+  const animals = useGameStore((s) => s.animals);
+  const ownedCount = (species: (typeof ANIMAL_LIST)[number]['id']) => animals.filter((a) => a.species === species).length;
   const sellableTotal = useGameStore((s) => s.sellableTotal());
   const closeOverlay = useUiStore((s) => s.closeOverlay);
   const pushToast = useUiStore((s) => s.pushToast);
@@ -70,6 +72,10 @@ export function FarmShopOverlay(): React.ReactElement {
   };
 
   const buyAnimal = async (animal: (typeof ANIMAL_LIST)[number]) => {
+    if (ownedCount(animal.id) >= animal.maxCount) {
+      pushToast({ text: `${animal.name}은(는) ${animal.maxCount}마리까지 키울 수 있어요`, tone: 'warn' });
+      return;
+    }
     if (money < animal.price) {
       pushToast({ text: '돈이 모자라요. 조금만 더 모아 볼까요?', tone: 'warn' });
       return;
@@ -188,18 +194,22 @@ export function FarmShopOverlay(): React.ReactElement {
               <EmptyNote>아직 동물을 데려올 수 없어요. 레벨을 조금 더 올려 보세요.</EmptyNote>
             ) : (
               <div className="grid grid-cols-4 gap-3">
-                {availableAnimals.map((animal) => (
-                  <ItemCard
-                    key={animal.id}
-                    icon={animalIcon(animal.id)}
-                    name={animal.name}
-                    sub={`${animal.produceName} · 한 개 ${animal.producePrice}${CURRENCY}`}
-                    price={animal.price}
-                    disabled={money < animal.price}
-                    actionLabel="데려오기"
-                    onClick={() => void buyAnimal(animal)}
-                  />
-                ))}
+                {availableAnimals.map((animal) => {
+                  const owned = ownedCount(animal.id);
+                  const full = owned >= animal.maxCount;
+                  return (
+                    <ItemCard
+                      key={animal.id}
+                      icon={animalIcon(animal.id)}
+                      name={`${animal.name} ${owned}/${animal.maxCount}마리`}
+                      sub={`${animal.produceName} · 한 개 ${animal.producePrice}${CURRENCY}`}
+                      price={full ? undefined : animal.price}
+                      disabled={full || money < animal.price}
+                      actionLabel={full ? '우리가 꽉 찼어요' : '데려오기'}
+                      onClick={() => void buyAnimal(animal)}
+                    />
+                  );
+                })}
               </div>
             )}
           </Section>

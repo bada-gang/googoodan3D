@@ -74,6 +74,8 @@ export const createInventorySlice: GameSlice<InventorySlice> = (set, get) => ({
 
   buyAnimal: (species) => {
     const def = ANIMAL_SPECIES[species];
+    // 우리가 꽉 찼으면 돈을 쓰기 전에 멈춘다
+    if (!get().canAddAnimal(species)) return false;
     if (!get().spendMoney(def.price)) return false;
     get().addAnimal(species);
     return true;
