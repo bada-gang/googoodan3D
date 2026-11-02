@@ -11,7 +11,7 @@ src/
   math/          곱셈 문제 출제기 · 오답 선택지 · 연습 필요 판단
   state/         게임 상태(저장되는 것) · UI 상태 · 기기 설정 · 자동 저장
     game/          게임 상태를 주제별로 나눈 조각 (세션 · 진행 · 가방 · 밭 · 동물 · 꾸미기 · 학습)
-  data/          저장소 (지금은 이 기기 localStorage. 학급 서버는 여기에 새 구현을 더한다)
+  data/          저장소 (Firebase 서버 저장, 안 되면 이 기기 localStorage 로 자동 전환)
   bridge/        3D 월드 ↔ React UI 이벤트 약속
   audio/         효과음 · 배경음
   ui/            React 화면: 시작 화면, HUD, 문제 팝업, 가게 · 가방 · 꾸미기 · 설정 창
@@ -120,7 +120,7 @@ art-src/         생성 원본 (git 에 안 들어감 — 아래 "백업" 참고
 - **새 나무 · 동물 · 가구**: `config/catalog.ts` 에 항목 → `config/models.ts` 에 모델 → `npm run model -- --only 키` → (가구면) `config/furniture3d.ts` 에 크기.
 - **새 장면**: `src/world/scenes/새장면/` 폴더를 만들고, 장면 이름을 `bridge/events.ts` 의 `SceneKey` · `world/state/sceneStore.ts` 에, 그리기를 `world/WorldRoot.tsx` 에 더한다.
 - **새 게임 상태**: 주제에 맞는 `state/game/*Slice.ts` 에 더한다. 저장해야 하면 `types/game.ts` 의 `GameSaveData`, `state/game/saveData.ts`, `sessionSlice.ts` 의 불러오기 · `toSaveData` 를 함께 고친다.
-- **학급 서버 저장**: `src/data/repositories.ts` 의 인터페이스를 서버용으로 구현해 `src/data/index.ts` 의 `setRepositories` 로 바꿔 끼운다. 게임 코드는 안 고쳐도 된다.
+- **서버 저장 (Firebase)**: 2D 판과 같은 프로젝트(googoodan-bada)를 쓴다. 컬렉션 이름은 `src/data/firebase/collections.ts`, 보안 규칙은 `firestore.rules` (2D 저장소에도 같은 파일 — 한쪽을 고치면 다른 쪽도). 설정 값은 `.env.local` 과 Netlify 환경변수의 `VITE_FIREBASE_*`. 다른 저장 방식으로 바꾸려면 `src/data/repositories.ts` 를 구현해 `src/data/index.ts` 에서 바꿔 끼운다.
 
 ## 명령
 

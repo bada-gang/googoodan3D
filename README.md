@@ -27,7 +27,7 @@ Vite + React 19 + TypeScript + Tailwind CSS 4 + three.js (React Three Fiber · d
 | `src/state/` | 게임 상태(주제별 조각은 `state/game/`) · 자동 저장 |
 | `src/config/` | 밸런스 · 상품 목록 · 배치 · 모델 목록 |
 | `src/math/` `src/bridge/` | 출제기 · 월드↔UI 이벤트 약속 |
-| `src/data/` | 저장소. 지금은 이 기기(localStorage)만. 학급 서버는 나중 단계 |
+| `src/data/` | 저장소. Firebase(2D 판과 같은 프로젝트, `players3d` · `saves3d` · `stats3d`)에 저장하고, 설정이 없거나 막히면 이 기기(localStorage)에 저장 |
 
 **무엇을 고치려면 어느 파일인지는 [CODE_MAP.md](CODE_MAP.md).**
 
