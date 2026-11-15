@@ -20,8 +20,7 @@ import { useInteractable } from '../../systems/interaction';
 import { placePlayer } from '../../systems/movement';
 import { input, obstacles, walkBounds, type Obstacle } from '../../state/runtime';
 import { goToScene, useWorldScene, type Spawn } from '../../state/scenes';
-import { PathNetwork } from '../../props/Ground';
-import { Scenery } from '../../scenery/Scenery';
+import { GrassGround, PathNetwork, Surroundings } from '../../props/Ground';
 import { SignBoard } from '../../props/SignBoard';
 
 /** 장식: 마당 꾸미기에 쓰는 것과 같은 모델. 광장 분수는 마당 것보다 크게 */
@@ -100,13 +99,19 @@ export function TownWorld(): React.ReactElement {
   };
 
   const { bounds, mainPathZ } = TOWN;
+  const width = bounds.maxX - bounds.minX + 40;
+  const depth = bounds.maxZ - bounds.minZ + 40;
 
   return (
     <group onClick={onTap}>
-      {/* 잔디 + 가장자리 숲 언덕 (world/scenery) */}
-      <Scenery bounds={bounds} />
+      <group position={[(bounds.minX + bounds.maxX) / 2, 0, (bounds.minZ + bounds.maxZ) / 2]}>
+        <GrassGround width={width} depth={depth} />
+      </group>
       {/* 시장은 움직이는 것이 캐릭터뿐이라, 건물 · 장식 · 나무 그림자를 모두 미리 그려 둔다 (rendering/bakedShadows) */}
       <BakedShadows bounds={TOWN_SHADOW_BOUNDS} />
+      <StaticShadow>
+        <Surroundings bounds={bounds} />
+      </StaticShadow>
 
       {/* 큰길, 가게 문 앞으로 가는 길, 분수 광장 */}
       <PathNetwork

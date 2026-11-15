@@ -1,8 +1,8 @@
 /**
- * 마당 바닥: 잔디, 흙길. (가장자리 숲 언덕은 world/scenery)
+ * 마당 바닥: 잔디, 흙길, 멀리 둘러싼 언덕.
  */
-import { useEffect, useMemo } from 'react';
-import { Shape, ShapeGeometry, Vector2, type Material, type Texture } from 'three';
+import { useEffect, useLayoutEffect, useMemo, useRef } from 'react';
+import { Color, Matrix4, Shape, ShapeGeometry, Vector2, type InstancedMesh, type Material, type Texture } from 'three';
 import { ASSETS } from '@/config/assets';
 import { PALETTE } from '@/config/artTokens';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
@@ -110,5 +110,98 @@ function GroundMaterial({ map, fallbackColor, raised = false }: { map: Texture |
   }
   return (
     <meshLambertMaterial ref={attach} map={map} color={map ? '#ffffff' : fallbackColor} {...offset} />
+  );
+}
+
+/**
+ * 걸어 다니는 범위 밖을 둘러싼 언덕과 덤불. 세상의 끝이 허공으로 보이지 않게 한다.
+ * 위치는 고정된 씨앗으로 만들어 매번 같은 풍경이 된다.
+ */
+export function Surroundings({
+  bounds,
+}: {
+  bounds: { minX: number; maxX: number; minZ: number; maxZ: number };
+}): React.ReactElement {
+  const items = useMemo(() => {
+    let seed = 7;
+    const random = () => {
+      seed = (seed * 16807) % 2147483647;
+      return seed / 2147483647;
+    };
+    const list: { x: number; z: number; r: number; color: string; kind: 'hill' | 'bush' }[] = [];
+    // 뒤쪽(북쪽)과 양옆에 언덕. 카메라 쪽(남쪽)은 비워 둔다 — 화면을 가린다
+    for (let i = 0; i < 14; i += 1) {
+      const t = i / 13;
+      list.push({
+        x: bounds.minX - 6 + t * (bounds.maxX - bounds.minX + 12),
+        z: bounds.minZ - 5 - random() * 4,
+        r: 4 + random() * 3,
+        color: random() > 0.5 ? PALETTE.farHill : PALETTE.midHill,
+        kind: 'hill',
+      });
+    }
+    for (const side of [bounds.minX - 4, bounds.maxX + 4]) {
+      for (let i = 0; i < 5; i += 1) {
+        list.push({
+          x: side + (random() - 0.5) * 3,
+          z: bounds.minZ + (i / 4) * (bounds.maxZ - bounds.minZ),
+          r: 3 + random() * 2,
+          color: PALETTE.midHill,
+          kind: 'hill',
+        });
+      }
+    }
+    // 경계선을 따라 덤불
+    for (let i = 0; i < 22; i += 1) {
+      const t = random();
+      const onBack = i % 2 === 0;
+      list.push({
+        x: onBack ? bounds.minX + t * (bounds.maxX - bounds.minX) : random() > 0.5 ? bounds.minX - 0.8 : bounds.maxX + 0.8,
+        z: onBack ? bounds.minZ - 0.8 : bounds.minZ + t * (bounds.maxZ - bounds.minZ),
+        r: 0.5 + random() * 0.5,
+        color: random() > 0.5 ? PALETTE.leaf : PALETTE.leafShade,
+        kind: 'bush',
+      });
+    }
+    return list;
+  }, [bounds.minX, bounds.maxX, bounds.minZ, bounds.maxZ]);
+
+  // 언덕 · 덤불은 각각 한 번에 그린다 (인스턴싱). 따로 그리면 46번이라 태블릿에 무겁다
+  const hills = useMemo(() => items.filter((item) => item.kind === 'hill'), [items]);
+  const bushes = useMemo(() => items.filter((item) => item.kind === 'bush'), [items]);
+  const hillMesh = useRef<InstancedMesh>(null);
+  const bushMesh = useRef<InstancedMesh>(null);
+
+  useLayoutEffect(() => {
+    const matrix = new Matrix4();
+    const color = new Color();
+    const place = (mesh: InstancedMesh | null, list: typeof items, hill: boolean) => {
+      if (!mesh) return;
+      list.forEach((item, i) => {
+        // 모양은 반지름 1 짜리 하나를 크기만 바꿔 쓴다
+        const y = hill ? -item.r * 0.55 : item.r * 0.55;
+        matrix.makeScale(item.r, item.r * (hill ? 0.75 : 1), item.r).setPosition(item.x, y, item.z);
+        mesh.setMatrixAt(i, matrix);
+        mesh.setColorAt(i, color.set(item.color));
+      });
+      mesh.instanceMatrix.needsUpdate = true;
+      if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
+      mesh.computeBoundingSphere();
+    };
+    place(hillMesh.current, hills, true);
+    place(bushMesh.current, bushes, false);
+  }, [hills, bushes]);
+
+  return (
+    <group>
+      <instancedMesh ref={hillMesh} args={[undefined, undefined, hills.length]} receiveShadow>
+        <sphereGeometry args={[1, 20, 12]} />
+        <meshStandardMaterial roughness={1} flatShading />
+      </instancedMesh>
+      <instancedMesh ref={bushMesh} args={[undefined, undefined, bushes.length]} castShadow>
+        <icosahedronGeometry args={[1, 1]} />
+        <meshStandardMaterial roughness={0.9} flatShading />
+      </instancedMesh>
+    </group>
   );
 }

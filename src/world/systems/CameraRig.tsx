@@ -11,8 +11,6 @@ import { player } from '../state/runtime';
 const CAMERA_OFFSET = new Vector3(0, 5.6, 7.6).multiplyScalar(1.05);
 /** 캐릭터보다 조금 위를 본다 (머리가 화면 가운데쯤) */
 const LOOK_OFFSET = new Vector3(0, 0.9, 0);
-/** 바깥에서 카메라가 보는 방향 (늘 같다). 가장자리 풍경의 사진 판을 이 각도에서 찍는다 (world/scenery) */
-export const CAMERA_VIEW_DIR = LOOK_OFFSET.clone().sub(CAMERA_OFFSET).normalize();
 /** 카메라가 따라붙는 빠르기. 너무 빠르면 어지럽고 느리면 캐릭터가 화면 밖으로 나간다 */
 const FOLLOW = 5;
 
