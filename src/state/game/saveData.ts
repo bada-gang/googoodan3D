@@ -49,6 +49,12 @@ export function createInitialSave(profile: PlayerProfile): GameSaveData {
   };
 }
 
+/**
+ * 밭이 12칸(아래쪽 밭 4칸 × 2줄)이던 저장본 → 지금 8칸. 새 번호 i 에는 예전 LEGACY_12_PLOTS[i] 번 밭이 온다.
+ * 아래쪽 밭 양 끝 줄(예전 2 · 5 · 6 · 9번)은 없어졌다 — 거기 있던 나무는 사라진다.
+ */
+const LEGACY_12_PLOTS = [0, 1, 7, 3, 4, 8, 10, 11];
+
 /** 지금 게임에 남아 있는 아이템인지 (없어진 씨앗·열매를 걸러낸다) */
 function isKnownItem(itemId: string): boolean {
   if (itemId in SUPPLIES) return true;
@@ -62,12 +68,14 @@ function isKnownItem(itemId: string): boolean {
  * 저장 데이터가 오래되었거나 손상된 경우를 메꾼다.
  *
  * - 밭 칸 수가 늘면 기존 밭은 두고 빈 밭만 추가한다 (키우던 나무를 잃지 않는다)
+ * - 밭이 12칸이던 저장본은 남은 8칸 자리로 옮긴다 (LEGACY_12_PLOTS)
  * - 없어진 나무 종류가 심겨 있으면 그 밭만 비운다
  * - 없어진 아이템은 가방에서 뺀다
  */
 export function migrate(save: GameSaveData, profile: PlayerProfile): GameSaveData {
   const base = createInitialSave(profile);
-  const saved = Array.isArray(save.farm?.plots) ? save.farm.plots : [];
+  const raw = Array.isArray(save.farm?.plots) ? save.farm.plots : [];
+  const saved = raw.length === 12 ? LEGACY_12_PLOTS.map((old) => raw[old]) : raw;
 
   const plots = base.farm.plots.map((fresh, index) => {
     const old = saved[index];

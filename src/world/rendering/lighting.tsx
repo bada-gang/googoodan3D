@@ -53,11 +53,13 @@ export function Sun(): React.ReactElement {
     setShadowProxiesVisible(false);
 
     // 그림자 상자는 캐릭터보다 화면 위쪽(-z)으로 당긴다. 카메라가 남쪽에서 북쪽을 내려다봐서
-    // 화면에 보이는 땅은 대부분 캐릭터 앞(-z)에 있다
+    // 화면에 보이는 땅은 대부분 캐릭터 앞(-z)에 있다.
+    // 집 안은 카메라가 방 전체를 고정해서 비추므로, 그림자 상자도 방 가운데에 고정한다 (방이 통째로 들어간다)
     const p = player.position;
-    const cz = p.z - SHADOW_AHEAD;
-    light.current?.position.set(p.x + SUN_OFFSET.x, SUN_OFFSET.y, cz + SUN_OFFSET.z);
-    target.current?.position.set(p.x, 0, cz);
+    const cx = indoor ? 0 : p.x;
+    const cz = indoor ? 0 : p.z - SHADOW_AHEAD;
+    light.current?.position.set(cx + SUN_OFFSET.x, SUN_OFFSET.y, cz + SUN_OFFSET.z);
+    target.current?.position.set(cx, 0, cz);
 
     // 밤낮 (rendering/dayNight). 밤에도 나무 · 동물이 구별되게 너무 어둡게 하지 않는다. 집 안은 조금만
     const d = daylight.darkness * (indoor ? 0.35 : 1);

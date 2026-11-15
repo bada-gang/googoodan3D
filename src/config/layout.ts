@@ -45,8 +45,8 @@ export const YARD = {
     fields: {
       /** 집 옆, 큰길 위쪽: 2칸 × 2줄. 옆 칸 사이 0.9m 길, 위아래 줄 사이 1.35m 길 (위쪽 줄을 조금 더 띄웠다) */
       north: { origin: { x: -2, z: -6.25 } as Vec2, columns: 2, rows: 2, gap: 3.3, rowGap: 3.75 },
-      /** 큰길 건너편: 4칸 × 2줄. 옆 칸 사이 0.9m, 위아래 줄 사이 1.35m (위쪽 밭과 같게). 가운데 두 줄이 위쪽 밭과 같은 x 에 선다 */
-      south: { origin: { x: -5.3, z: 5.25 } as Vec2, columns: 4, rows: 2, gap: 3.3, rowGap: 3.75 },
+      /** 큰길 건너편: 2칸 × 2줄. 위쪽 밭과 같은 x 에 서서 큰길을 사이에 두고 대칭이다 (처음엔 4칸 × 2줄이었다) */
+      south: { origin: { x: -2, z: 5.25 } as Vec2, columns: 2, rows: 2, gap: 3.3, rowGap: 3.75 },
     },
   },
   /**
@@ -56,8 +56,8 @@ export const YARD = {
   pen: { center: { x: 10.5, z: -4.5 } as Vec2, width: 12, depth: 6 },
   /** 마을을 가로지르는 큰길 (z 고정) */
   mainPathZ: 1.2,
-  /** 시장 가는 표지판 */
-  townGate: { x: 17.5, z: 3.6 } as Vec2,
+  /** 시장 가는 표지판. 큰길이 오른쪽 끝까지 곧게 가고, 끝머리 아래쪽(카메라 쪽)에 선다 */
+  townGate: { x: 17.6, z: 2.9 } as Vec2,
 } as const;
 
 export type FarmFieldKey = keyof typeof YARD.farm.fields;
@@ -65,22 +65,18 @@ export type FarmFieldKey = keyof typeof YARD.farm.fields;
 /**
  * 밭 칸 번호 → (어느 밭, 몇째 칸, 몇째 줄). 칸 번호는 저장 데이터의 순서라 바꾸면 안 된다.
  *
- * 예전에는 위쪽 밭이 3칸 × 2줄(0~5번)이었다. 오른쪽 줄(2 · 5번)을 없애면서 그 두 칸은 아래쪽 밭의
- * 같은 x 줄(오른쪽 끝)로 옮겼다 — 예전 저장본을 그대로 읽어도 그 자리에 있던 나무가 사라지지 않는다.
+ * 위쪽 밭 0 · 1 · 3 · 4번은 처음(3칸 × 2줄)부터 같은 번호다. 아래쪽 밭은 2 · 5 · 6 · 7번.
+ * 아래쪽 밭이 4칸 × 2줄(12칸)이던 저장본은 saveData 의 migrate 가 남은 칸으로 옮겨 준다 (LEGACY_12_PLOTS).
  */
 const PLOT_SLOTS: readonly (readonly [FarmFieldKey, number, number])[] = [
   ['north', 0, 0],
   ['north', 1, 0],
-  ['south', 3, 0],
+  ['south', 0, 0],
   ['north', 0, 1],
   ['north', 1, 1],
-  ['south', 3, 1],
-  ['south', 0, 0],
   ['south', 1, 0],
-  ['south', 2, 0],
   ['south', 0, 1],
   ['south', 1, 1],
-  ['south', 2, 1],
 ];
 
 /** 마당 밭 칸 수 */

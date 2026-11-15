@@ -2,6 +2,8 @@
  * 집 안. 가구를 놓아 꾸미는 방이다. (명세 29)
  *
  * 앞(카메라 쪽) 벽은 없다 — 인형의 집처럼 들여다본다.
+ * 카메라는 방 가운데에 고정한다 (HOME_VIEW). 방 밖이 보이지 않게 벽은 높게, 바닥 · 옆벽은 카메라 쪽으로 더 늘렸다 —
+ * 늘린 부분은 보이기만 하고, 걷거나 가구를 놓는 범위(ROOM)는 그대로다.
  * 벽지 · 바닥은 흰 바탕 무늬 질감에 고른 색을 곱해 칠한다 (상점 미리보기와 같은 계산 — icons.ts surfaceStyle).
  */
 import { useEffect, useMemo, useRef } from 'react';
@@ -26,6 +28,15 @@ const HALF_W = ROOM.width / 2;
 const HALF_D = ROOM.depth / 2;
 const BACK_Z = -HALF_D;
 const WALL_THICKNESS = 0.2;
+/** 보이는 벽 높이. 방(ROOM.wallHeight)보다 높여 벽 위로 바깥이 보이지 않게 한다 */
+const VISIBLE_WALL_HEIGHT = 6.5;
+/** 바닥 · 옆벽을 카메라 쪽으로 더 늘리는 길이 (화면 아래 끝까지 바닥이 차게) */
+const FRONT_EXTENSION = 2.5;
+/** 고정 카메라: 방 가운데 앞쪽 위에서 비스듬히 내려다본다 */
+export const HOME_VIEW = { position: [0, 8.6, 9.8], target: [0, 0.4, -0.6] } as {
+  position: [number, number, number];
+  target: [number, number, number];
+};
 
 /** 나가는 문 (왼쪽 벽 앞쪽) */
 const DOOR = { z: 1.6, width: 1.3, height: 2.2 };
@@ -84,15 +95,19 @@ export function HomeWorld(): React.ReactElement {
       <DecorateSystem rules={RULES} />
 
       {/* 바닥 */}
-      <mesh rotation-x={-Math.PI / 2} receiveShadow onClick={onTap} onPointerMove={onHover}>
-        <planeGeometry args={[ROOM.width, ROOM.depth]} />
-        <SurfaceMaterial textureKey={surfaceTextureKey(floor, 'floor')} color={floor.color} repeat={[ROOM.width / 2, ROOM.depth / 2]} />
+      <mesh position-z={FRONT_EXTENSION / 2} rotation-x={-Math.PI / 2} receiveShadow onClick={onTap} onPointerMove={onHover}>
+        <planeGeometry args={[ROOM.width, ROOM.depth + FRONT_EXTENSION]} />
+        <SurfaceMaterial
+          textureKey={surfaceTextureKey(floor, 'floor')}
+          color={floor.color}
+          repeat={[ROOM.width / 2, (ROOM.depth + FRONT_EXTENSION) / 2]}
+        />
       </mesh>
 
       {/* 벽: 뒤 · 왼쪽 · 오른쪽 */}
-      <Wall position={[0, ROOM.wallHeight / 2, BACK_Z]} length={ROOM.width} color={wallpaper.color} textureKey={surfaceTextureKey(wallpaper, 'wall')} />
-      <Wall position={[-HALF_W, ROOM.wallHeight / 2, 0]} length={ROOM.depth} rotation={Math.PI / 2} color={wallpaper.color} textureKey={surfaceTextureKey(wallpaper, 'wall')} />
-      <Wall position={[HALF_W, ROOM.wallHeight / 2, 0]} length={ROOM.depth} rotation={-Math.PI / 2} color={wallpaper.color} textureKey={surfaceTextureKey(wallpaper, 'wall')} />
+      <Wall position={[0, VISIBLE_WALL_HEIGHT / 2, BACK_Z]} length={ROOM.width + WALL_THICKNESS} color={wallpaper.color} textureKey={surfaceTextureKey(wallpaper, 'wall')} />
+      <Wall position={[-HALF_W, VISIBLE_WALL_HEIGHT / 2, FRONT_EXTENSION / 2]} length={ROOM.depth + FRONT_EXTENSION} rotation={Math.PI / 2} color={wallpaper.color} textureKey={surfaceTextureKey(wallpaper, 'wall')} />
+      <Wall position={[HALF_W, VISIBLE_WALL_HEIGHT / 2, FRONT_EXTENSION / 2]} length={ROOM.depth + FRONT_EXTENSION} rotation={-Math.PI / 2} color={wallpaper.color} textureKey={surfaceTextureKey(wallpaper, 'wall')} />
       <Baseboards />
 
       <Window />
@@ -138,8 +153,8 @@ function Wall({
   return (
     // 벽은 그림자를 드리우지 않는다. 해가 왼쪽 위에 있어 왼쪽 벽 그림자가 바닥을 반이나 덮는다
     <mesh position={position} rotation-y={rotation} receiveShadow>
-      <boxGeometry args={[length, ROOM.wallHeight, WALL_THICKNESS]} />
-      <SurfaceMaterial textureKey={textureKey} color={color} repeat={[length / 2, ROOM.wallHeight / 2]} />
+      <boxGeometry args={[length, VISIBLE_WALL_HEIGHT, WALL_THICKNESS]} />
+      <SurfaceMaterial textureKey={textureKey} color={color} repeat={[length / 2, VISIBLE_WALL_HEIGHT / 2]} />
     </mesh>
   );
 }
@@ -150,8 +165,8 @@ function Baseboards(): React.ReactElement {
     () =>
       [
         { position: [0, 0.08, BACK_Z + WALL_THICKNESS / 2 + 0.02], size: [ROOM.width, 0.16, 0.04] },
-        { position: [-HALF_W + WALL_THICKNESS / 2 + 0.02, 0.08, 0], size: [0.04, 0.16, ROOM.depth] },
-        { position: [HALF_W - WALL_THICKNESS / 2 - 0.02, 0.08, 0], size: [0.04, 0.16, ROOM.depth] },
+        { position: [-HALF_W + WALL_THICKNESS / 2 + 0.02, 0.08, FRONT_EXTENSION / 2], size: [0.04, 0.16, ROOM.depth + FRONT_EXTENSION] },
+        { position: [HALF_W - WALL_THICKNESS / 2 - 0.02, 0.08, FRONT_EXTENSION / 2], size: [0.04, 0.16, ROOM.depth + FRONT_EXTENSION] },
       ] as { position: [number, number, number]; size: [number, number, number] }[],
     [],
   );

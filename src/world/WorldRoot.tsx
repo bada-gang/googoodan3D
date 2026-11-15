@@ -13,7 +13,7 @@ import { DayNightSystem, NightStars } from './rendering/dayNight';
 import { EffectsLayer } from './effects/effects';
 import { InteractionSystem } from './systems/interaction';
 import { Player } from './player/Player';
-import { HomeWorld } from './scenes/home/HomeWorld';
+import { HOME_VIEW, HomeWorld } from './scenes/home/HomeWorld';
 import { TownWorld } from './scenes/town/TownWorld';
 import { YardWorld } from './scenes/yard/YardWorld';
 import { resetWorldScene, useWorldScene } from './state/scenes';
@@ -65,7 +65,8 @@ export default function WorldRoot(): React.ReactElement {
       <DayNightSystem key={`daynight_${scene}`} outdoor={scene !== 'HomeScene'} />
       {scene !== 'HomeScene' && <NightStars />}
       {/* 장면이 바뀌면 카메라를 새 자리로 바로 옮긴다 (날아가면 어지럽다) */}
-      <CameraRig key={`camera_${scene}`} />
+      {/* 집 안은 방 전체가 보이게 카메라를 고정한다 */}
+      <CameraRig key={`camera_${scene}`} fixed={scene === 'HomeScene' ? HOME_VIEW : undefined} />
       <InputSystem />
       <InteractionSystem />
 

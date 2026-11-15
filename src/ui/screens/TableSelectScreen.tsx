@@ -69,7 +69,7 @@ export function TableSelectScreen({
   const selectAll = () => {
     audio.play('tap');
     setSelected([...TABLES]);
-    setPickNote('전체를 골랐어요');
+    setPickNote('');
   };
 
   const selectPractice = () => {
@@ -184,10 +184,17 @@ export function TableSelectScreen({
         </div>
 
         <p className="font-game min-h-[2rem] text-center text-[1.2rem] text-ink-soft">
-          {selected.length === 0
-            ? '연습할 단을 하나 이상 골라 주세요'
-            : `${[...selected].sort((a, b) => a - b).join('단, ')}단을 연습해요`}
-          {pickNote && <span className="text-ink"> — {pickNote}</span>}
+          {selected.length === 0 ? (
+            '연습할 단을 하나 이상 골라 주세요'
+          ) : selected.length === TABLES.length ? (
+            // 여덟 단을 다 늘어놓으면 길기만 하다
+            <span className="text-ink">전체를 골랐어요</span>
+          ) : (
+            <>
+              {`${[...selected].sort((a, b) => a - b).join('단, ')}단을 연습해요`}
+              {pickNote && <span className="text-ink"> — {pickNote}</span>}
+            </>
+          )}
         </p>
 
         <div className="flex gap-4">

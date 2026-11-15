@@ -1,5 +1,6 @@
 /**
  * 카메라: 캐릭터를 비스듬히 뒤쪽 위에서 따라간다.
+ * fixed 를 주면 그 자리에 고정한다 (집 안: 방 전체가 한 화면에 들어오게).
  */
 import { useRef } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
@@ -13,12 +14,23 @@ const LOOK_OFFSET = new Vector3(0, 0.9, 0);
 /** 카메라가 따라붙는 빠르기. 너무 빠르면 어지럽고 느리면 캐릭터가 화면 밖으로 나간다 */
 const FOLLOW = 5;
 
-export function CameraRig(): null {
+/** 고정 카메라: 카메라 자리와 바라보는 점 */
+export interface FixedView {
+  position: [number, number, number];
+  target: [number, number, number];
+}
+
+export function CameraRig({ fixed }: { fixed?: FixedView }): null {
   const camera = useThree((s) => s.camera);
   const look = useRef(new Vector3());
   const first = useRef(true);
 
   useFrame((_, rawDelta) => {
+    if (fixed) {
+      camera.position.set(...fixed.position);
+      camera.lookAt(...fixed.target);
+      return;
+    }
     const dt = Math.min(rawDelta, 1 / 20);
     const desired = player.position.clone().add(CAMERA_OFFSET);
     const lookAt = player.position.clone().add(LOOK_OFFSET);

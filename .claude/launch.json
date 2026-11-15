@@ -18,6 +18,15 @@
         "preview:lan"
       ],
       "port": 4173
+    },
+    {
+      "name": "googoo3d-offline",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "run",
+        "dev:offline"
+      ],
+      "port": 5174
     }
   ]
 }

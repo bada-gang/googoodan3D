@@ -87,7 +87,7 @@ art-src/         생성 원본 (git 에 안 들어감 — 아래 "백업" 참고
 | 표지판 | `src/world/props/SignBoard.tsx` |
 | 내 캐릭터 (걷는 동작 · 밭 위 높이) | `src/world/player/Player.tsx` |
 | 걷는 빠르기 · 부딪힘 | `src/world/systems/movement.ts` |
-| 카메라 거리 · 각도 | `src/world/systems/CameraRig.tsx` |
+| 카메라 거리 · 각도 | `src/world/systems/CameraRig.tsx` (집 안 고정 카메라는 `HomeWorld.tsx` 의 `HOME_VIEW`) |
 | 가까이 가면 뜨는 버튼의 거리 | `src/world/systems/interaction.tsx` |
 | 별 터지기 · 물방울 개수 | `src/world/effects/particles.tsx` |
 | 떠오르는 글자 · 느낌표 | `src/world/effects/effects.tsx` |
@@ -127,6 +127,7 @@ art-src/         생성 원본 (git 에 안 들어감 — 아래 "백업" 참고
 | 명령 | 하는 일 |
 | --- | --- |
 | `npm run dev` | 개발 서버 (5173). 고치면 바로 반영 |
+| `npm run dev:offline` | 서버 저장 없이 이 브라우저에만 저장하는 개발 서버 (5174). 실제 수업 서버의 학생 · 진행도를 건드리지 않고 시험할 때 |
 | `npm run preview:lan` | 배포본을 만들어 같은 와이파이의 태블릿에서 열기 (4173) |
 | `npm run build` | 타입 검사 + 배포본 만들기 (`dist/`) |
 | `npm run art` | 그림 만들기 (Codex) |

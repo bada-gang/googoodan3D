@@ -37,8 +37,9 @@ const YARD_SHADOW_BOUNDS = {
 };
 
 const FARM_RECTS = [farmFieldRect('north'), farmFieldRect('south')];
-/** 큰길에서 아래쪽 밭으로 들어가는 오솔길의 x (가운데 두 칸 사이) */
-const SOUTH_PATH_X = YARD.farm.fields.south.origin.x + YARD.farm.fields.south.gap * 1.5;
+/** 큰길에서 아래쪽 밭으로 들어가는 오솔길의 x (가운데 칸 사이) */
+const SOUTH_PATH_X =
+  YARD.farm.fields.south.origin.x + (YARD.farm.fields.south.gap * (YARD.farm.fields.south.columns - 1)) / 2;
 
 /** 마당 꾸미기: 걸어 다니는 범위 안 어디든, 밭과 집 문 앞만 빼고 */
 const YARD_DECORATE_RULES: DecorateRules = {
@@ -110,8 +111,8 @@ export function YardWorld(): React.ReactElement {
       <PathNetwork
         segments={[
           { from: door, to: { x: door.x, z: pathZ } },
-          { from: { x: door.x, z: pathZ }, to: { x: YARD.townGate.x - 1.5, z: pathZ }, width: 1.9 },
-          { from: { x: YARD.townGate.x - 1.5, z: pathZ }, to: { x: YARD.townGate.x - 0.4, z: YARD.townGate.z - 0.6 } },
+          // 큰길은 오른쪽 끝(시장 쪽)까지 곧게
+          { from: { x: door.x, z: pathZ }, to: { x: YARD.bounds.maxX, z: pathZ }, width: 1.9 },
           {
             from: { x: (firstPlot.x + plotPosition(1).x) / 2, z: pathZ },
             to: { x: (firstPlot.x + plotPosition(1).x) / 2, z: firstPlot.z - 0.6 },
@@ -214,7 +215,7 @@ function TownGate(): React.ReactElement {
   });
 
   return (
-    <group position={[gate.x, 0, gate.z]} rotation-y={-0.35}>
+    <group position={[gate.x, 0, gate.z]} rotation-y={-0.2}>
       <SignBoard text={`${AREA_NAME.market} →`} width={1.6} />
     </group>
   );
