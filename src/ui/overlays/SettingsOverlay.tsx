@@ -14,6 +14,9 @@ import { audio } from '@/audio/sfx';
 import { CREDITS } from '@/config/credits';
 import { enterFullscreen, exitFullscreen, isFullscreenSupported } from '../fullscreen';
 
+/** 기록 항목 이름(푼 문제 · 맞힌 문제 · 정답률) 글씨색. 크림색 바탕에서 잘 읽히는 진한 파랑 */
+const RECORD_LABEL_COLOR = '#2f6fb8';
+
 function Toggle({
   label,
   on,
@@ -122,9 +125,14 @@ export function SettingsOverlay(): React.ReactElement {
         )}
 
         <div className="panel-paper mt-2 flex flex-col gap-1 px-5 py-4">
-          <p className="font-game text-[1.35rem]">오늘까지의 기록</p>
-          <p className="font-game text-[1.15rem] text-ink-soft">
-            푼 문제 {stats.totalAttempts}개 · 맞힌 문제 {stats.totalCorrect}개 · 정답률 {accuracy}%
+          {/* 제목과 기록을 한 줄로. 항목 이름은 파란 글씨 (사용자 요청) */}
+          <p className="font-game flex flex-wrap items-baseline gap-x-3 text-[1.15rem] text-ink-soft">
+            <span className="text-[1.35rem] text-ink">오늘까지의 기록</span>
+            <span>
+              <span style={{ color: RECORD_LABEL_COLOR }}>푼 문제</span> {stats.totalAttempts}개 ·{' '}
+              <span style={{ color: RECORD_LABEL_COLOR }}>맞힌 문제</span> {stats.totalCorrect}개 ·{' '}
+              <span style={{ color: RECORD_LABEL_COLOR }}>정답률</span> {accuracy}%
+            </span>
           </p>
           <p className="font-game text-[1.15rem] text-ink-soft">
             지금 연습하는 단: {tables.length > 0 ? `${tables.join(', ')}단` : '없음'} · 레벨 {level}
