@@ -203,7 +203,7 @@ export function ItemCard({
         </span>
       )}
       {count !== undefined && count > 0 && (
-        <span className="text-game absolute -top-2 -right-2 flex h-9 min-w-9 items-center justify-center rounded-full border-4 border-ink bg-gold px-1 text-[1.05rem]">
+        <span className="text-game absolute -top-2 -right-2 flex h-[2.475rem] min-w-[2.475rem] items-center justify-center rounded-full border-4 border-ink bg-gold px-1 text-[1.155rem]">
           {count}
         </span>
       )}

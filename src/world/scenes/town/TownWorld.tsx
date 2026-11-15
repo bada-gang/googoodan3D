@@ -30,10 +30,6 @@ const DECOR: { id: string; x: number; z: number; rotation?: number; scale?: numb
   { id: 'streetlamp', x: 8.6, z: -0.2, radius: 0.3 },
   { id: 'bench_wood', x: -9.4, z: -2.9, radius: 0.7 },
   { id: 'bench_wood', x: 9.2, z: -2.9, radius: 0.7 },
-  // 꽃밭은 위로 걸어 다닌다 (부딪히지 않는다)
-  { id: 'flower_bed', x: -6, z: 3.9, radius: 0 },
-  { id: 'flower_bed', x: 0, z: 4.1, radius: 0 },
-  { id: 'flower_bed', x: 6, z: 3.9, radius: 0 },
 ];
 
 /** 밤에 켜지는 가게 불빛 (건물 중심 기준 [x, 높이, z, 크기]). 모델을 보고 맞춘 자리 */
@@ -120,8 +116,8 @@ export function TownWorld(): React.ReactElement {
       {/* 큰길, 가게 문 앞으로 가는 길, 분수 광장 */}
       <PathNetwork
         segments={[
-          { from: { x: TOWN.gate.x + 0.4, z: TOWN.gate.z - 0.6 }, to: { x: TOWN.gate.x + 1.5, z: mainPathZ } },
-          { from: { x: TOWN.gate.x + 1.5, z: mainPathZ }, to: { x: bounds.maxX - 1.5, z: mainPathZ }, width: 2.2 },
+          // 큰길은 왼쪽 끝(마을 쪽)부터 곧게
+          { from: { x: bounds.minX, z: mainPathZ }, to: { x: bounds.maxX - 1.5, z: mainPathZ }, width: 2.2 },
           ...[TOWN.seedShop.door, TOWN.furnitureShop.door].map((door) => ({ from: { x: door.x, z: mainPathZ }, to: door })),
           // 분수 둘레의 둥근 돌바닥
           PLAZA,
@@ -181,7 +177,7 @@ function Gate(): React.ReactElement {
   });
 
   return (
-    <group position={[gate.x, 0, gate.z]} rotation-y={0.35}>
+    <group position={[gate.x, 0, gate.z]} rotation-y={0.2}>
       <SignBoard text={`← ${AREA_NAME.village}`} width={1.9} />
     </group>
   );

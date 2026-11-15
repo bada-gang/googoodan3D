@@ -50,6 +50,8 @@ export const FURNITURE_3D: Record<string, Furniture3D> = {
   // --- 마당 ---
   fence_wood: { height: 0.9, radius: 0.7 },
   flower_bed: { width: 1.2, radius: 0.6, walkable: true },
+  // 가로로 긴 꽃밭. 놓을 때 막는 범위는 원이라, 길이의 반쯤으로 잡는다
+  flower_bed_long: { width: 2.2, radius: 0.9, walkable: true },
   bench_wood: { height: 0.95, radius: 0.85 },
   stonepath: { width: 1.3, radius: 0.65, walkable: true },
   streetlamp: { height: 2.4, radius: 0.3, glow: { y: 2.08, size: 1.8 } },

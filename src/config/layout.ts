@@ -56,8 +56,8 @@ export const YARD = {
   pen: { center: { x: 10.5, z: -4.5 } as Vec2, width: 12, depth: 6 },
   /** 마을을 가로지르는 큰길 (z 고정) */
   mainPathZ: 1.2,
-  /** 시장 가는 표지판. 큰길이 오른쪽 끝까지 곧게 가고, 끝머리 아래쪽(카메라 쪽)에 선다 */
-  townGate: { x: 17.6, z: 2.9 } as Vec2,
+  /** 시장 가는 표지판. 큰길이 오른쪽 끝까지 곧게 가고, 끝머리 위쪽(길 건너, 목장 쪽)에 선다 */
+  townGate: { x: 17.6, z: -0.4 } as Vec2,
 } as const;
 
 export type FarmFieldKey = keyof typeof YARD.farm.fields;
@@ -110,8 +110,8 @@ export const TOWN = {
   bounds: { minX: -15, maxX: 11, minZ: -7, maxZ: 6 },
   /** 큰길 (z 고정) */
   mainPathZ: 1.4,
-  /** 마을로 돌아가는 표지판. 마당에서 오면 이 옆에 선다 */
-  gate: { x: -13, z: 3.2 } as Vec2,
+  /** 마을로 돌아가는 표지판. 큰길 왼쪽 끝머리 위쪽에 선다 (마당의 시장 표지판과 같은 자리 잡기) */
+  gate: { x: -13.6, z: -0.5 } as Vec2,
   spawn: { x: -11.5, z: 1.4 } as Vec2,
   /** 가게: 건물 중심, 문 앞(상호작용 자리), 바닥에서 차지하는 반 너비 · 반 깊이 (모델을 재서 맞춤) */
   seedShop: { position: { x: -4.5, z: -3.6 } as Vec2, door: { x: -4.5, z: -0.8 } as Vec2, half: { x: 2.1, z: 2.15 } },

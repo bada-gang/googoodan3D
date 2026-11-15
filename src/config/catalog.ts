@@ -391,6 +391,7 @@ export const FURNITURE: FurnitureDef[] = [
   // --- 야외 ---
   { id: 'fence_wood', name: '나무 울타리', theme: 'basic', shape: 'fence', area: 'yard', price: 18, unlockLevel: 1, width: 130, height: 92, tint: '#c08a52' },
   { id: 'flower_bed', name: '꽃밭', theme: 'nature', shape: 'flower', area: 'yard', price: 22, unlockLevel: 1, width: 110, height: 76, tint: '#f6a8bd' },
+  { id: 'flower_bed_long', name: '긴 꽃밭', theme: 'nature', shape: 'flower', area: 'yard', price: 35, unlockLevel: 1, width: 180, height: 60, tint: '#f6a8bd' },
   { id: 'bench_wood', name: '마당 벤치', theme: 'basic', shape: 'bench', area: 'yard', price: 55, unlockLevel: 2, width: 170, height: 104, tint: '#b57f4a' },
   { id: 'stonepath', name: '돌길', theme: 'nature', shape: 'stonepath', area: 'yard', price: 15, unlockLevel: 1, width: 140, height: 44, tint: '#cfc6b4' },
   { id: 'streetlamp', name: '가로등', theme: 'basic', shape: 'streetlamp', area: 'yard', price: 90, unlockLevel: 3, width: 80, height: 230, tint: '#6a5445' },

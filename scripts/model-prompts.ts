@@ -248,6 +248,10 @@ export const MODEL_PROMPTS: Record<string, string> = {
   [furnitureModelKey('flower_bed')]: furniture(
     'A small low oval flower bed edged with round stones, full of pink (#f6a8bd), yellow and white flowers.',
   ),
+  [furnitureModelKey('flower_bed_long')]: furniture(
+    'A long low rectangular flower bed, about three times as wide as it is deep, running left to right, ' +
+      'edged with a neat row of round stones, full of pink (#f6a8bd), yellow and white flowers with green leaves. Same style as a round flower bed.',
+  ),
   [furnitureModelKey('bench_wood')]: furniture('A wooden garden bench (#b57f4a) with a backrest and thick rounded legs.'),
   [furnitureModelKey('stonepath')]: flatItem('Three flat round stepping stones (#cfc6b4) in a short row, lying flat.'),
   [furnitureModelKey('streetlamp')]: furniture(
