@@ -32,7 +32,8 @@ function Toggle({
         audio.play('tap');
         onToggle();
       }}
-      className="panel-paper flex min-h-[68px] w-full items-center justify-between px-5 py-3"
+      // 높이는 처음(70px)보다 5% 낮게 (사용자 요청)
+      className="panel-paper flex h-[66.5px] w-full items-center justify-between px-5 py-2"
     >
       <span className="font-game text-[1.35rem]">{label}</span>
       <span

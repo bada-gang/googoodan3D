@@ -42,7 +42,7 @@ export function GameEndScreen(): React.ReactElement {
         </div>
 
         <p className="font-game text-center text-[1.3rem] text-leaf-dark">
-          저장했어요. 태블릿을 선생님께 돌려주세요.
+          저장했어요. 오늘도 구구 마을을 가꾸어 주어서 고마워요.
         </p>
 
         {/* 새로고침으로 완전히 새 판을 시작한다. 이전 학생의 상태가 조금도 남지 않아야 한다. */}
