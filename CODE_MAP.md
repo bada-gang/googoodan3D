@@ -23,6 +23,7 @@ src/
     effects/       별 터지기 · 물방울 · 떠오르는 글자 · 느낌표
     rendering/     빛 · 그림자 · 밤낮 · 모델과 질감 불러오기
     props/         여러 장면이 같이 쓰는 소품(땅 · 길 · 표지판)
+    scenery/       맵 가장자리 풍경: 솟아오르는 숲 언덕 지형 + 나무 · 덤불 사진 판(처음 한 번 찍어 둠)
     state/         매 프레임 쓰는 위치 · 장애물, 장면 바꾸기
     debug/         fps 측정 · 개발용 주소 옵션
   teacher/       선생님 화면 (teacher.html)
@@ -83,7 +84,8 @@ art-src/         생성 원본 (git 에 안 들어감 — 아래 "백업" 참고
 | 동물 움직임 (걷기 · 먹기 · 기뻐하기) | `src/world/scenes/yard/pen/Animal.tsx` |
 | 집 안 (방 크기 · 벽 · 문) | `src/world/scenes/home/HomeWorld.tsx` |
 | 시장 (가게 건물 · 가로등 · 장식) | `src/world/scenes/town/TownWorld.tsx` |
-| 땅 · 흙길 · 멀리 언덕 | `src/world/props/Ground.tsx` |
+| 땅 · 흙길 | `src/world/props/Ground.tsx` |
+| 맵 가장자리 숲 언덕 · 덤불 (지형 · 나무 사진 판) | `src/world/scenery/` (`terrain.ts` 모양 · 나무 자리, `impostors.ts` 사진 찍기, `Scenery.tsx`) |
 | 표지판 | `src/world/props/SignBoard.tsx` |
 | 내 캐릭터 (걷는 동작 · 밭 위 높이) | `src/world/player/Player.tsx` |
 | 걷는 빠르기 · 부딪힘 | `src/world/systems/movement.ts` |

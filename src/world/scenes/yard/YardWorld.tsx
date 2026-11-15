@@ -21,7 +21,8 @@ import { DecorateSystem, PlacedFurnitureLayer, decorateFloorHover, decorateFloor
 import { placePlayer } from '../../systems/movement';
 import { goToScene, useWorldScene, type Spawn } from '../../state/scenes';
 import { input, obstacles, walkBounds } from '../../state/runtime';
-import { GrassGround, PathNetwork, Surroundings } from '../../props/Ground';
+import { PathNetwork } from '../../props/Ground';
+import { Scenery } from '../../scenery/Scenery';
 import { SignBoard } from '../../props/SignBoard';
 import { AnimalPen } from './pen/AnimalPen';
 import { plantWithMath } from './farm/farmActions';
@@ -85,10 +86,6 @@ export function YardWorld(): React.ReactElement {
     input.tapTarget = { x: event.point.x, z: event.point.z };
   };
 
-  const width = YARD.bounds.maxX - YARD.bounds.minX + 40;
-  const depth = YARD.bounds.maxZ - YARD.bounds.minZ + 40;
-  const centerX = (YARD.bounds.minX + YARD.bounds.maxX) / 2;
-  const centerZ = (YARD.bounds.minZ + YARD.bounds.maxZ) / 2;
   const { door } = YARD.house;
   const pathZ = YARD.mainPathZ;
   const firstPlot = plotPosition(0);
@@ -98,14 +95,10 @@ export function YardWorld(): React.ReactElement {
     <group onClick={onTap} onPointerMove={(event) => decorateFloorHover(event.point.x, event.point.z)}>
       <DecorateSystem rules={YARD_DECORATE_RULES} />
       <PlacedFurnitureLayer area="yard" />
-      <group position={[centerX, 0, centerZ]}>
-        <GrassGround width={width} depth={depth} />
-      </group>
+      {/* 잔디 + 가장자리 숲 언덕 (world/scenery) */}
+      <Scenery bounds={YARD.bounds} />
       {/* 움직이지 않는 것의 그림자는 미리 그려 둔다 (rendering/bakedShadows) */}
       <BakedShadows bounds={YARD_SHADOW_BOUNDS} />
-      <StaticShadow>
-        <Surroundings bounds={YARD.bounds} />
-      </StaticShadow>
 
       {/* 길: 집 문 → 큰길 → 시장 표지판, 큰길에서 위쪽 밭 사이 · 아래쪽 밭 사이로 한 줄씩 */}
       <PathNetwork
