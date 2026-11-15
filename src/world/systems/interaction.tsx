@@ -19,11 +19,29 @@ export interface Interactable {
   position: () => Vec2;
   /** 상호작용 거리 (m). 기본 1.8 */
   range?: number;
+  /**
+   * 원(position · range) 대신 이 네모 안에 들어오면 상호작용한다 (길 끝의 장면 이동처럼).
+   * 안에 들어오면 다른 물건보다 먼저 고른다.
+   */
+  area?: Rect;
   prompts: () => InteractionPrompt[];
   onAction: (actionId: string) => void;
 }
 
 export const DEFAULT_RANGE = 1.8;
+
+export interface Rect {
+  minX: number;
+  maxX: number;
+  minZ: number;
+  maxZ: number;
+}
+
+/** 캐릭터가 네모 안에 있는지 */
+function playerInside(area: Rect): boolean {
+  const { x, z } = player.position;
+  return x >= area.minX && x <= area.maxX && z >= area.minZ && z <= area.maxZ;
+}
 
 const registry = new Map<string, { current: Interactable }>();
 
@@ -63,6 +81,14 @@ export function InteractionSystem(): null {
     let nearest: Interactable | null = null;
     let nearestDistance = Number.POSITIVE_INFINITY;
     for (const { current: item } of registry.values()) {
+      if (item.area) {
+        // 네모 범위: 안에 있으면 가장 먼저 (거리 −1)
+        if (playerInside(item.area) && nearestDistance > -1) {
+          nearest = item;
+          nearestDistance = -1;
+        }
+        continue;
+      }
       const distance = distanceToPlayer(item.position());
       if (distance <= (item.range ?? DEFAULT_RANGE) && distance < nearestDistance) {
         nearest = item;

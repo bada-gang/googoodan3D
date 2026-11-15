@@ -26,6 +26,19 @@ export interface Vec2 {
   z: number;
 }
 
+/**
+ * 장면 이동(시장 가기 · 마을 가기) 범위: 큰길 끝에서 안쪽으로 이만큼, 길 폭에서 위아래로 이만큼 더.
+ * 표지판 둘레가 아니라 길 끝에 닿으면 버튼이 뜬다.
+ */
+const PORTAL_LENGTH = 2;
+const PORTAL_MARGIN = 0.4;
+
+function pathEndPortal(endX: number, inward: 1 | -1, pathZ: number, pathWidth: number) {
+  const x2 = endX + inward * PORTAL_LENGTH;
+  const half = pathWidth / 2 + PORTAL_MARGIN;
+  return { minX: Math.min(endX, x2), maxX: Math.max(endX, x2), minZ: pathZ - half, maxZ: pathZ + half };
+}
+
 
 export const YARD = {
   /** 걸어 다닐 수 있는 범위 */
@@ -58,7 +71,12 @@ export const YARD = {
   mainPathZ: 1.2,
   /** 시장 가는 표지판. 큰길이 오른쪽 끝까지 곧게 가고, 끝머리 위쪽(길 건너, 목장 쪽)에 선다 */
   townGate: { x: 17.6, z: -0.4 } as Vec2,
+  /** 큰길 폭 (m) */
+  mainPathWidth: 1.9,
 } as const;
+
+/** 마당 → 시장: 큰길 오른쪽 끝 */
+export const YARD_TOWN_PORTAL = pathEndPortal(YARD.bounds.maxX, -1, YARD.mainPathZ, YARD.mainPathWidth);
 
 export type FarmFieldKey = keyof typeof YARD.farm.fields;
 
@@ -116,4 +134,9 @@ export const TOWN = {
   /** 가게: 건물 중심, 문 앞(상호작용 자리), 바닥에서 차지하는 반 너비 · 반 깊이 (모델을 재서 맞춤) */
   seedShop: { position: { x: -4.5, z: -3.6 } as Vec2, door: { x: -4.5, z: -0.8 } as Vec2, half: { x: 2.1, z: 2.15 } },
   furnitureShop: { position: { x: 4.5, z: -3.6 } as Vec2, door: { x: 4.5, z: -1.3 } as Vec2, half: { x: 2.3, z: 1.6 } },
+  /** 큰길 폭 (m) */
+  mainPathWidth: 2.2,
 } as const;
+
+/** 시장 → 마을: 큰길 왼쪽 끝 */
+export const TOWN_HOME_PORTAL = pathEndPortal(TOWN.bounds.minX, 1, TOWN.mainPathZ, TOWN.mainPathWidth);

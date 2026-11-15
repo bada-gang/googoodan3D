@@ -7,7 +7,7 @@
 import { useEffect } from 'react';
 import type { ThreeEvent } from '@react-three/fiber';
 import { PALETTE } from '@/config/artTokens';
-import { PLOT_COUNT, YARD, farmFieldRect, plotPosition } from '@/config/layout';
+import { PLOT_COUNT, YARD, YARD_TOWN_PORTAL, farmFieldRect, plotPosition } from '@/config/layout';
 import { MODELS } from '@/config/models';
 import { SHOW_AREA_SIGNS } from '@/config/features';
 import { AREA_NAME } from '@/config/strings';
@@ -112,7 +112,7 @@ export function YardWorld(): React.ReactElement {
         segments={[
           { from: door, to: { x: door.x, z: pathZ } },
           // 큰길은 오른쪽 끝(시장 쪽)까지 곧게
-          { from: { x: door.x, z: pathZ }, to: { x: YARD.bounds.maxX, z: pathZ }, width: 1.9 },
+          { from: { x: door.x, z: pathZ }, to: { x: YARD.bounds.maxX, z: pathZ }, width: YARD.mainPathWidth },
           {
             from: { x: (firstPlot.x + plotPosition(1).x) / 2, z: pathZ },
             to: { x: (firstPlot.x + plotPosition(1).x) / 2, z: firstPlot.z - 0.6 },
@@ -209,7 +209,8 @@ function TownGate(): React.ReactElement {
   useInteractable({
     id: 'town_gate',
     position: () => gate,
-    range: 1.9,
+    // 표지판 둘레가 아니라 큰길 끝에 닿으면
+    area: YARD_TOWN_PORTAL,
     prompts: () => [{ id: 'go_town', label: `${AREA_NAME.market} 가기`, enabled: true }],
     onAction: () => goToScene('TownScene'),
   });

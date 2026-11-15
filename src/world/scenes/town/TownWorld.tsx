@@ -8,7 +8,7 @@
 import { useEffect } from 'react';
 import type { ThreeEvent } from '@react-three/fiber';
 import { PALETTE } from '@/config/artTokens';
-import { TOWN, YARD, type Vec2 } from '@/config/layout';
+import { TOWN, TOWN_HOME_PORTAL, YARD, type Vec2 } from '@/config/layout';
 import { MODELS, furnitureModelKey } from '@/config/models';
 import { AREA_NAME } from '@/config/strings';
 import { gameEvents } from '@/bridge/eventBus';
@@ -117,7 +117,7 @@ export function TownWorld(): React.ReactElement {
       <PathNetwork
         segments={[
           // 큰길은 왼쪽 끝(마을 쪽)부터 곧게
-          { from: { x: bounds.minX, z: mainPathZ }, to: { x: bounds.maxX - 1.5, z: mainPathZ }, width: 2.2 },
+          { from: { x: bounds.minX, z: mainPathZ }, to: { x: bounds.maxX - 1.5, z: mainPathZ }, width: TOWN.mainPathWidth },
           ...[TOWN.seedShop.door, TOWN.furnitureShop.door].map((door) => ({ from: { x: door.x, z: mainPathZ }, to: door })),
           // 분수 둘레의 둥근 돌바닥
           PLAZA,
@@ -170,7 +170,8 @@ function Gate(): React.ReactElement {
   useInteractable({
     id: 'town_gate_home',
     position: () => gate,
-    range: 1.9,
+    // 표지판 둘레가 아니라 큰길 끝에 닿으면
+    area: TOWN_HOME_PORTAL,
     prompts: () => [{ id: 'go_home', label: `${AREA_NAME.village} 가기`, enabled: true }],
     // 마당의 시장 표지판 옆, 큰길 위에 마을 쪽(왼쪽)을 보고 선다
     onAction: () => goToScene('YardScene', { x: YARD.townGate.x - 1.5, z: YARD.mainPathZ, facing: -Math.PI / 2 }),
