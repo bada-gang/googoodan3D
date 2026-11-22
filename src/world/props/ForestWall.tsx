@@ -234,14 +234,15 @@ function buildForest(bounds: Bounds, openings: ForestOpening[]): Map<string, Sid
 
   /** 둘레를 따라 step 간격의 점 (바깥 방향 포함). 남쪽 끝은 조금 남기고 멈춘다 */
   const perimeter = (out: number, step: number, margin: number) => {
-    const points: { side: Side; x: number; z: number; nx: number; nz: number }[] = [];
+    const points: { side: Side; x: number; z: number; nx: number; nz: number; corner: boolean }[] = [];
     const west = bounds.minX - out;
     const east = bounds.maxX + out;
     const north = bounds.minZ - out;
     const southEnd = bounds.maxZ + 2;
-    for (let z = southEnd; z > north; z -= step) if (!inOpening('west', z, margin)) points.push({ side: 'west', x: west, z, nx: -1, nz: 0 });
-    for (let x = west; x < east; x += step) points.push({ side: 'north', x, z: north, nx: 0, nz: -1 });
-    for (let z = north; z < southEnd; z += step) if (!inOpening('east', z, margin)) points.push({ side: 'east', x: east, z, nx: 1, nz: 0 });
+    // corner: 옆 쪽의 첫 점과 거의 같은 자리(반 간격 안)라 겹치는 점. 나무를 두 그루 겹쳐 세우지 않게 건너뛴다
+    for (let z = southEnd; z > north; z -= step) if (!inOpening('west', z, margin)) points.push({ side: 'west', x: west, z, nx: -1, nz: 0, corner: z < north + step / 2 });
+    for (let x = west; x < east; x += step) points.push({ side: 'north', x, z: north, nx: 0, nz: -1, corner: x > east - step / 2 });
+    for (let z = north; z < southEnd; z += step) if (!inOpening('east', z, margin)) points.push({ side: 'east', x: east, z, nx: 1, nz: 0, corner: false });
     return points;
   };
   const jitter = (p: { x: number; z: number; nx: number; nz: number }, along: number, across: number) => {
@@ -251,23 +252,28 @@ function buildForest(bounds: Bounds, openings: ForestOpening[]): Map<string, Sid
   };
 
   // 앞줄 나무 (진짜 모델). 숲 나무가 대부분, 침엽수가 섞인다. 모델이 무거워 간격을 넉넉히
+  // 건너뛰는 나무도 난수는 똑같이 뽑는다 — 그래야 남은 나무들의 자리 · 모양이 그대로다
   for (const p of perimeter(2.6, 3.4, 1.8)) {
     const { x, z } = jitter(p, 1.2, 1.0);
     const kind: ModelKind = random() < 0.3 ? 'pine' : 'tree';
-    chunkOf(p.side, x, z).models[kind].push({ x, z, turn: random() * Math.PI * 2, scale: 0.9 + random() * 0.3 });
+    const placement = { x, z, turn: random() * Math.PI * 2, scale: 0.9 + random() * 0.3 };
+    if (!p.corner) chunkOf(p.side, x, z).models[kind].push(placement);
   }
 
   // 뒷줄 둘도 진짜 모델. 활엽수는 무거워(면 5천) 침엽수(1천 6백)로 채우고, 가까운 뒷줄에만 활엽수를 조금 섞는다.
-  // 뒤로 갈수록 크게 세워 앞 나무 너머를 가린다. [경계에서 거리, 간격, 활엽수 비율, 크기 범위]
-  const rows: [number, number, number, [number, number]][] = [
-    [5, 2.8, 0.2, [1.05, 1.3]],
-    [7.6, 3.2, 0, [1.25, 1.55]],
+  // 뒤로 갈수록 크게 세워 앞 나무 너머를 가린다. [경계에서 거리, 간격, 활엽수 비율, 크기 범위, 세우는 쪽]
+  // 맨 뒷줄은 북쪽에만: 서 · 동쪽 맨 뒷줄은 카메라가 비스듬히 봐서 앞 두 줄에 거의 다 가린다
+  // (마당 곳곳 368 자리에서 재 보니 25 그루 중 15 그루는 한 번도 안 보이고, 나머지도 한 그루 빼고는 화면의 0.15% 이하)
+  const rows: [number, number, number, [number, number], Side[]][] = [
+    [5, 2.8, 0.2, [1.05, 1.3], ['west', 'north', 'east']],
+    [7.6, 3.2, 0, [1.25, 1.55], ['north']],
   ];
-  for (const [out, step, treeShare, [sMin, sMax]] of rows) {
+  for (const [out, step, treeShare, [sMin, sMax], sides] of rows) {
     for (const p of perimeter(out, step, 2.4)) {
       const { x, z } = jitter(p, step * 0.5, 1.2);
       const kind: ModelKind = random() < treeShare ? 'tree' : 'pine';
-      chunkOf(p.side, x, z).models[kind].push({ x, z, turn: random() * Math.PI * 2, scale: sMin + random() * (sMax - sMin) });
+      const placement = { x, z, turn: random() * Math.PI * 2, scale: sMin + random() * (sMax - sMin) };
+      if (!p.corner && sides.includes(p.side)) chunkOf(p.side, x, z).models[kind].push(placement);
     }
   }
   return forest;
