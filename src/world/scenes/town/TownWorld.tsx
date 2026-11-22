@@ -20,7 +20,8 @@ import { useInteractable } from '../../systems/interaction';
 import { placePlayer } from '../../systems/movement';
 import { input, obstacles, walkBounds, type Obstacle } from '../../state/runtime';
 import { goToScene, useWorldScene, type Spawn } from '../../state/scenes';
-import { GrassGround, PathNetwork, Surroundings } from '../../props/Ground';
+import { GrassGround, PathNetwork } from '../../props/Ground';
+import { ForestWall } from '../../props/ForestWall';
 import { SignBoard } from '../../props/SignBoard';
 
 /** 장식: 마당 꾸미기에 쓰는 것과 같은 모델. 광장 분수는 마당 것보다 크게 */
@@ -110,14 +111,15 @@ export function TownWorld(): React.ReactElement {
       {/* 시장은 움직이는 것이 캐릭터뿐이라, 건물 · 장식 · 나무 그림자를 모두 미리 그려 둔다 (rendering/bakedShadows) */}
       <BakedShadows bounds={TOWN_SHADOW_BOUNDS} />
       <StaticShadow>
-        <Surroundings bounds={bounds} />
+        {/* 마을로 돌아가는 큰길이 나가는 자리는 숲을 튼다 */}
+        <ForestWall bounds={bounds} openings={[{ side: 'west', z: mainPathZ, width: TOWN.mainPathWidth + 1 }]} />
       </StaticShadow>
 
       {/* 큰길, 가게 문 앞으로 가는 길, 분수 광장 */}
       <PathNetwork
         segments={[
-          // 큰길은 왼쪽 끝(마을 쪽)부터 곧게
-          { from: { x: bounds.minX, z: mainPathZ }, to: { x: bounds.maxX - 1.5, z: mainPathZ }, width: TOWN.mainPathWidth },
+          // 큰길은 숲 틈 밖(마을 쪽)에서부터 곧게
+          { from: { x: bounds.minX - 12, z: mainPathZ }, to: { x: bounds.maxX - 1.5, z: mainPathZ }, width: TOWN.mainPathWidth },
           ...[TOWN.seedShop.door, TOWN.furnitureShop.door].map((door) => ({ from: { x: door.x, z: mainPathZ }, to: door })),
           // 분수 둘레의 둥근 돌바닥
           PLAZA,

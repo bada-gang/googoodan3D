@@ -40,6 +40,12 @@ export const MODELS = {
     banana: 'model_tree_banana',
     blueberry: 'model_tree_blueberry',
   },
+  /** 맵 가장자리 숲의 앞줄 (world/props/Ground 의 Surroundings). 놓을 때마다 방향 · 크기를 달리한다 */
+  scenery: {
+    tree: 'model_scenery_tree',
+    pine: 'model_scenery_pine',
+    bush: 'model_scenery_bush',
+  },
   /** 씨앗을 심은 뒤 첫 싹 (모든 나무 공통) */
   sprout: 'model_plant_sprout',
   /** 동물 우리의 동물. 뼈대 없이 통째로 움직인다(통통 걷기·고개 숙여 먹기) */
@@ -159,6 +165,9 @@ export const MODEL_MANIFEST: ModelSpec[] = [
     model(key, `models/trees/${id}.glb`, 'medium', TREE_HEIGHT[id] ?? 2.9),
   ),
   model(MODELS.sprout, 'models/trees/sprout.glb', 'small', 0.45),
+  model(MODELS.scenery.tree, 'models/scenery/tree.glb', 'small', 4.2),
+  model(MODELS.scenery.pine, 'models/scenery/pine.glb', 'small', 5),
+  model(MODELS.scenery.bush, 'models/scenery/bush.glb', 'small', 1.1),
 
   ...(Object.entries(ANIMAL_HEIGHT) as [AnimalSpeciesId, number][]).map(([id, height]) => ({
     ...model(MODELS.animals[id], `models/animals/${id}.glb`, 'medium', height),

@@ -173,6 +173,18 @@ export const MODEL_PROMPTS: Record<string, string> = {
     'A blueberry bush: a rounded shrub that is wider than tall, with several thin brown woody stems rising from one base and branching, ' +
       'densely covered with many small oval blue-green leaves (#5f9e55), a few leaf edges tinted soft red.',
   ),
+  /* ---- 맵 가장자리 숲 (열매 없는 숲 나무) ---- */
+  [MODELS.scenery.tree]: realPlant(
+    'A big wild forest tree (not a fruit tree): a sturdy brown trunk and a large lush rounded crown made of several soft leafy clumps, ' +
+      'rich natural greens (#4f8f4a with lighter #6fbf6a highlights). Full and dense, no fruits, no flowers.',
+  ),
+  [MODELS.scenery.pine]: realPlant(
+    'A tall cone-shaped pine tree: a short brown trunk and layered tiers of dark green needle branches (#2f6b45) narrowing to a point. ' +
+      'Chunky soft tiers, no snow, no cones.',
+  ),
+  [MODELS.scenery.bush]: realPlant(
+    'A wide low round wild bush: a dense mound of small leafy clumps in fresh greens (#5f9e55 and #7cbf6a), wider than tall, no flowers, no berries.',
+  ),
   [MODELS.sprout]: item(
     'A tiny young seedling: a short thick green stem with two plump round leaves opening like a little V, no soil, no pot.',
   ),

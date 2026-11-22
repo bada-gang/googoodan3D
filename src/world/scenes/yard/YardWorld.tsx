@@ -21,7 +21,8 @@ import { DecorateSystem, PlacedFurnitureLayer, decorateFloorHover, decorateFloor
 import { placePlayer } from '../../systems/movement';
 import { goToScene, useWorldScene, type Spawn } from '../../state/scenes';
 import { input, obstacles, walkBounds } from '../../state/runtime';
-import { GrassGround, PathNetwork, Surroundings } from '../../props/Ground';
+import { GrassGround, PathNetwork } from '../../props/Ground';
+import { ForestWall } from '../../props/ForestWall';
 import { SignBoard } from '../../props/SignBoard';
 import { AnimalPen } from './pen/AnimalPen';
 import { plantWithMath } from './farm/farmActions';
@@ -104,15 +105,16 @@ export function YardWorld(): React.ReactElement {
       {/* 움직이지 않는 것의 그림자는 미리 그려 둔다 (rendering/bakedShadows) */}
       <BakedShadows bounds={YARD_SHADOW_BOUNDS} />
       <StaticShadow>
-        <Surroundings bounds={YARD.bounds} />
+        {/* 시장 가는 큰길이 나가는 자리는 숲을 튼다 */}
+        <ForestWall bounds={YARD.bounds} openings={[{ side: 'east', z: YARD.mainPathZ, width: YARD.mainPathWidth + 1 }]} />
       </StaticShadow>
 
       {/* 길: 집 문 → 큰길 → 시장 표지판, 큰길에서 위쪽 밭 사이 · 아래쪽 밭 사이로 한 줄씩 */}
       <PathNetwork
         segments={[
           { from: door, to: { x: door.x, z: pathZ } },
-          // 큰길은 오른쪽 끝(시장 쪽)까지 곧게
-          { from: { x: door.x, z: pathZ }, to: { x: YARD.bounds.maxX, z: pathZ }, width: YARD.mainPathWidth },
+          // 큰길은 오른쪽 끝(시장 쪽)을 지나 숲 틈 밖으로 이어진다
+          { from: { x: door.x, z: pathZ }, to: { x: YARD.bounds.maxX + 12, z: pathZ }, width: YARD.mainPathWidth },
           {
             from: { x: (firstPlot.x + plotPosition(1).x) / 2, z: pathZ },
             to: { x: (firstPlot.x + plotPosition(1).x) / 2, z: firstPlot.z - 0.6 },

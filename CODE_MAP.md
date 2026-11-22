@@ -83,7 +83,8 @@ art-src/         생성 원본 (git 에 안 들어감 — 아래 "백업" 참고
 | 동물 움직임 (걷기 · 먹기 · 기뻐하기) | `src/world/scenes/yard/pen/Animal.tsx` |
 | 집 안 (방 크기 · 벽 · 문) | `src/world/scenes/home/HomeWorld.tsx` |
 | 시장 (가게 건물 · 가로등 · 장식) | `src/world/scenes/town/TownWorld.tsx` |
-| 땅 · 흙길 · 멀리 언덕 | `src/world/props/Ground.tsx` |
+| 땅 · 흙길 | `src/world/props/Ground.tsx` |
+| 맵을 둘러싼 숲 벽 (앞줄 3D 나무 · 덤불 · 뒷줄 잎 뭉치 · 숲 바닥, 길 틈) | `src/world/props/ForestWall.tsx` |
 | 표지판 | `src/world/props/SignBoard.tsx` |
 | 내 캐릭터 (걷는 동작 · 밭 위 높이) | `src/world/player/Player.tsx` |
 | 걷는 빠르기 · 부딪힘 | `src/world/systems/movement.ts` |
