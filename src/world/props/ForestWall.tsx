@@ -4,11 +4,11 @@
  * 카메라는 캐릭터 뒤 8m · 높이 5.9m 에서 내려다본다. 화면 맨 위 시선이 경계 바로 너머에서 높이 4m 쯤을 지나므로,
  * 경계 뒤에 그보다 높은 나무를 세 줄(앞줄 낮게 → 뒷줄 높게) 세워 시선을 막는다.
  *  - 앞줄: 진짜 3D 숲 나무 · 침엽수 모델. 놓을 때마다 방향 · 크기가 달라 같은 나무가 반복돼 보이지 않는다
- *  - 뒷줄 둘: 줄기 + 둥근 잎 뭉치로 만든 가벼운 나무 (짙은 색이라 깊은 숲처럼 보인다)
+ *  - 뒷줄 둘: 진짜 침엽수 모델 (가볍다), 가까운 뒷줄에만 활엽수를 조금. 뒤로 갈수록 크게
  *  - 바닥: 같은 잔디 무늬를 바깥으로 갈수록 어둡게 (나무 그늘)
  * 카메라 쪽(남쪽)은 비워 둔다 — 화면을 가린다. 장면 사이를 잇는 길이 나가는 자리(openings)는 숲을 튼다.
  *
- * 그리기를 줄이려고: 같은 모양은 한 번에 그리고(인스턴싱), 서 · 북 · 동 쪽마다 나눠 화면 밖 쪽은 아예 안 그린다.
+ * 그리기를 줄이려고: 같은 모양은 한 번에 그리고(인스턴싱), 쪽마다 12m 토막으로 나눠 화면 밖 토막은 아예 안 그린다.
  * 그림자는 미리 그린다 (부르는 쪽이 StaticShadow 안에 둔다). 위치는 고정된 씨앗이라 매번 같은 숲이다.
  */
 import { useEffect, useLayoutEffect, useMemo, useRef } from 'react';
@@ -22,25 +22,14 @@ import { GRASS_TILE, grassOrigin } from './Ground';
 
 type Bounds = { minX: number; maxX: number; minZ: number; maxZ: number };
 type Side = 'west' | 'north' | 'east';
-const SIDES: Side[] = ['west', 'north', 'east'];
+/** 숲을 이 길이(m) 토막으로 나눠 묶는다. 화면 밖 토막은 통째로 안 그린다 */
+const CHUNK = 12;
 
 export interface ForestOpening {
   side: 'west' | 'east';
   z: number;
   /** 트는 폭 (m) */
   width: number;
-}
-
-/** 모양 하나: 자리 · 크기(축마다) · 돌림 · 색 */
-interface Blob {
-  x: number;
-  y: number;
-  z: number;
-  sx: number;
-  sy: number;
-  sz: number;
-  turn: number;
-  color: string;
 }
 
 type ModelKind = 'tree' | 'pine' | 'bush';
@@ -54,17 +43,8 @@ interface Placement {
 }
 
 interface SideForest {
-  leaves: Blob[];
-  trunks: Blob[];
   models: Record<ModelKind, Placement[]>;
 }
-
-/** 뒷줄 잎 색. 뒤로 갈수록 짙게 (깊은 숲) */
-const LEAF_COLORS = [
-  ['#4a9049', '#458a45', '#3f8242', '#4f944b'],
-  ['#3a7640', '#356f3c', '#3f7a42', '#326a39'],
-];
-const TRUNK_COLORS = ['#8a5e3c', '#7a5236', '#94663f'];
 
 export function ForestWall({ bounds, openings = [] }: { bounds: Bounds; openings?: ForestOpening[] }): React.ReactElement {
   const key = JSON.stringify([bounds, openings]);
@@ -72,8 +52,8 @@ export function ForestWall({ bounds, openings = [] }: { bounds: Bounds; openings
   return (
     <group>
       <ForestFloor bounds={bounds} />
-      {SIDES.map((side) => (
-        <SideGroup key={side} forest={forest[side]} />
+      {[...forest].map(([key, chunk]) => (
+        <SideGroup key={key} forest={chunk} />
       ))}
     </group>
   );
@@ -171,8 +151,6 @@ function smoothstep(a: number, b: number, t: number): number {
 function SideGroup({ forest }: { forest: SideForest }): React.ReactElement {
   return (
     <group>
-      <BlobInstances list={forest.leaves} kind="leaf" />
-      <BlobInstances list={forest.trunks} kind="trunk" />
       {(['tree', 'pine', 'bush'] as ModelKind[]).map((kind) =>
         forest.models[kind].length ? (
           <ModelParts key={kind} modelKey={MODELS.scenery[kind]} fallback={null}>
@@ -191,30 +169,6 @@ const rotation = new Quaternion();
 const euler = new Euler();
 const position = new Vector3();
 const scale = new Vector3();
-const color = new Color();
-
-function BlobInstances({ list, kind }: { list: Blob[]; kind: 'leaf' | 'trunk' }): React.ReactElement | null {
-  const mesh = useRef<InstancedMesh>(null);
-  useLayoutEffect(() => {
-    const target = mesh.current;
-    if (!target) return;
-    list.forEach((item, i) => {
-      rotation.setFromEuler(euler.set(0, item.turn, 0));
-      target.setMatrixAt(i, matrix.compose(position.set(item.x, item.y, item.z), rotation, scale.set(item.sx, item.sy, item.sz)));
-      target.setColorAt(i, color.set(item.color));
-    });
-    target.instanceMatrix.needsUpdate = true;
-    if (target.instanceColor) target.instanceColor.needsUpdate = true;
-    target.computeBoundingSphere();
-  }, [list]);
-  if (!list.length) return null;
-  return (
-    <instancedMesh ref={mesh} args={[undefined, undefined, list.length]} castShadow>
-      {kind === 'leaf' ? <sphereGeometry args={[1, 9, 7]} /> : <cylinderGeometry args={[0.75, 1, 1, 6]} />}
-      <meshStandardMaterial roughness={0.92} />
-    </instancedMesh>
-  );
-}
 
 /** 진짜 모델을 여러 그루 한 번에 (모델 안의 모양마다 인스턴싱 1번) */
 function ModelInstances({ parts, list }: { parts: ModelPart[]; list: Placement[] }): React.ReactElement {
@@ -250,16 +204,20 @@ function ModelInstances({ parts, list }: { parts: ModelPart[]; list: Placement[]
 
 /* --------------------------------- 숲 만들기 --------------------------------- */
 
-function buildForest(bounds: Bounds, openings: ForestOpening[]): Record<Side, SideForest> {
+function buildForest(bounds: Bounds, openings: ForestOpening[]): Map<string, SideForest> {
   let seed = 7;
   const random = () => {
     seed = (seed * 16807) % 2147483647;
     return seed / 2147483647;
   };
-  const pick = <T,>(list: T[]) => list[Math.floor(random() * list.length)];
-  const forest = Object.fromEntries(
-    SIDES.map((side) => [side, { leaves: [], trunks: [], models: { tree: [], pine: [], bush: [] } } as SideForest]),
-  ) as Record<Side, SideForest>;
+  // 쪽(서 · 북 · 동)마다, 그 쪽을 따라 CHUNK m 토막마다 묶는다
+  const forest = new Map<string, SideForest>();
+  const chunkOf = (side: Side, x: number, z: number) => {
+    const key = `${side}_${Math.floor((side === 'north' ? x : z) / CHUNK)}`;
+    let chunk = forest.get(key);
+    if (!chunk) forest.set(key, (chunk = { models: { tree: [], pine: [], bush: [] } }));
+    return chunk;
+  };
 
   /** 길이 나가는 자리인지. margin 은 나무 크기만큼 더 비운다 */
   const inOpening = (side: Side, z: number, margin: number) =>
@@ -287,44 +245,21 @@ function buildForest(bounds: Bounds, openings: ForestOpening[]): Record<Side, Si
   for (const p of perimeter(2.6, 3.4, 1.8)) {
     const { x, z } = jitter(p, 1.2, 1.0);
     const kind: ModelKind = random() < 0.3 ? 'pine' : 'tree';
-    forest[p.side].models[kind].push({ x, z, turn: random() * Math.PI * 2, scale: 0.9 + random() * 0.3 });
+    chunkOf(p.side, x, z).models[kind].push({ x, z, turn: random() * Math.PI * 2, scale: 0.9 + random() * 0.3 });
   }
 
-  // 뒷줄 둘: 줄기 + 잎 뭉치. [경계에서 거리, 간격, 키 범위]
-  const rows: [number, number, [number, number]][] = [
-    [5, 2.8, [5.4, 6.6]],
-    [7.6, 3.2, [6.8, 8.2]],
+  // 뒷줄 둘도 진짜 모델. 활엽수는 무거워(면 5천) 침엽수(1천 6백)로 채우고, 가까운 뒷줄에만 활엽수를 조금 섞는다.
+  // 뒤로 갈수록 크게 세워 앞 나무 너머를 가린다. [경계에서 거리, 간격, 활엽수 비율, 크기 범위]
+  const rows: [number, number, number, [number, number]][] = [
+    [5, 2.8, 0.2, [1.05, 1.3]],
+    [7.6, 3.2, 0, [1.25, 1.55]],
   ];
-  rows.forEach(([out, step, [hMin, hMax]], row) => {
-    for (const p of perimeter(out, step, hMax * 0.3)) {
+  for (const [out, step, treeShare, [sMin, sMax]] of rows) {
+    for (const p of perimeter(out, step, 2.4)) {
       const { x, z } = jitter(p, step * 0.5, 1.2);
-      const height = hMin + random() * (hMax - hMin);
-      const crown = height * (0.26 + random() * 0.05);
-      const crownY = height - crown * 1.05;
-      const side = forest[p.side];
-      side.trunks.push({
-        x, y: crownY / 2, z,
-        sx: 0.16 + height * 0.02, sy: crownY, sz: 0.16 + height * 0.02,
-        turn: random() * Math.PI,
-        color: pick(TRUNK_COLORS),
-      });
-      const clumps = 3 + Math.floor(random() * 2);
-      for (let c = 0; c < clumps; c += 1) {
-        const angle = random() * Math.PI * 2;
-        const spread = c === 0 ? 0 : crown * (0.55 + random() * 0.3);
-        const r = crown * (c === 0 ? 1 : 0.7 + random() * 0.25);
-        side.leaves.push({
-          x: x + Math.cos(angle) * spread,
-          y: crownY + (c === 0 ? crown * 0.25 : (random() - 0.4) * crown * 0.6),
-          z: z + Math.sin(angle) * spread,
-          sx: r * (0.95 + random() * 0.15),
-          sy: r * (0.82 + random() * 0.15),
-          sz: r * (0.95 + random() * 0.15),
-          turn: random() * Math.PI * 2,
-          color: pick(LEAF_COLORS[row]),
-        });
-      }
+      const kind: ModelKind = random() < treeShare ? 'tree' : 'pine';
+      chunkOf(p.side, x, z).models[kind].push({ x, z, turn: random() * Math.PI * 2, scale: sMin + random() * (sMax - sMin) });
     }
-  });
+  }
   return forest;
 }
