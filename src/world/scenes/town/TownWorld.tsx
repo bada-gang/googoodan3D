@@ -21,7 +21,7 @@ import { placePlayer } from '../../systems/movement';
 import { input, obstacles, walkBounds, type Obstacle } from '../../state/runtime';
 import { goToScene, useWorldScene, type Spawn } from '../../state/scenes';
 import { GROUND_MARGIN, GrassGround, PathNetwork } from '../../props/Ground';
-import { ForestWall } from '../../props/ForestWall';
+import { ForestWall, forestShadowBounds } from '../../props/ForestWall';
 import { SignBoard } from '../../props/SignBoard';
 
 /** 장식: 마당 꾸미기에 쓰는 것과 같은 모델. 광장 분수는 마당 것보다 크게 */
@@ -49,13 +49,8 @@ const SHOP_LIGHTS: Record<'seed' | 'furniture', [number, number, number, number]
 /** 분수 둘레의 둥근 돌바닥 (넓은 길 토막) */
 const PLAZA = { from: { x: 0, z: -3.6 }, to: { x: 0, z: TOWN.mainPathZ - 0.4 }, width: 4.2 };
 
-/** 미리 그리는 그림자를 까는 범위 (그림자는 +x · -z 쪽으로 진다) */
-const TOWN_SHADOW_BOUNDS = {
-  minX: TOWN.bounds.minX - 3,
-  maxX: TOWN.bounds.maxX + 5,
-  minZ: TOWN.bounds.minZ - 5,
-  maxZ: TOWN.bounds.maxZ + 3,
-};
+/** 미리 그리는 그림자를 까는 범위: 걸어 다니는 범위 + 둘러싼 숲과 그 그림자 */
+const TOWN_SHADOW_BOUNDS = forestShadowBounds(TOWN.bounds);
 
 /** 뒤쪽 구석의 나무 (열매 없는 사과나무 모델) */
 const TREES: Vec2[] = [

@@ -46,6 +46,8 @@ const MASK_PER_METER = 24;
 const SHADOW_OPACITY = 0.29;
 /** 그림자 색: 검정보다 풀빛이 도는 어두운 색이 잔디 위에서 자연스럽다 */
 const SHADOW_COLOR = new Color('#28351f');
+/** 그림자를 만드는 가장 높은 물체의 키 (m). 숲 뒷줄 침엽수가 8m 쯤이다. 이보다 높은 부분은 그림자가 잘린다 */
+const TALLEST = 10;
 /** 정적 물체가 바뀌었는지 살피는 간격 (초) */
 const CHECK_EVERY = 0.5;
 
@@ -213,7 +215,7 @@ export function BakedShadows({ bounds }: { bounds: ShadowBounds }): null {
   /** 해 방향에서 정적 물체를 깊이로 그리고, 땅 그림자 그림으로 굽는다 */
   const render = () => {
     const { sunCamera, depthTarget, depthMaterial, maskTarget, maskMaterial, maskScene, maskCamera } = bake;
-    // 해 카메라: 범위 가운데를 해 방향에서 내려다본다. 범위 네 귀퉁이(높이 0~6m)가 다 들어가게 크기를 정한다
+    // 해 카메라: 범위 가운데를 해 방향에서 내려다본다. 범위 네 귀퉁이(높이 0~TALLEST m)가 다 들어가게 크기를 정한다
     const center = new Vector3((bounds.minX + bounds.maxX) / 2, 0, (bounds.minZ + bounds.maxZ) / 2);
     const direction = SUN_OFFSET.clone().normalize();
     sunCamera.position.copy(center).addScaledVector(direction, 60);
@@ -228,7 +230,7 @@ export function BakedShadows({ bounds }: { bounds: ShadowBounds }): null {
     let maxZ = -Infinity;
     for (const x of [bounds.minX, bounds.maxX]) {
       for (const z of [bounds.minZ, bounds.maxZ]) {
-        for (const y of [0, 6]) {
+        for (const y of [0, TALLEST]) {
           const p = new Vector3(x, y, z).applyMatrix4(view);
           minX = Math.min(minX, p.x);
           maxX = Math.max(maxX, p.x);

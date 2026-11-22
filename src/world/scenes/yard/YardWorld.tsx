@@ -22,20 +22,15 @@ import { placePlayer } from '../../systems/movement';
 import { goToScene, useWorldScene, type Spawn } from '../../state/scenes';
 import { input, obstacles, walkBounds } from '../../state/runtime';
 import { GROUND_MARGIN, GrassGround, PathNetwork } from '../../props/Ground';
-import { ForestWall } from '../../props/ForestWall';
+import { ForestWall, forestShadowBounds } from '../../props/ForestWall';
 import { SignBoard } from '../../props/SignBoard';
 import { AnimalPen } from './pen/AnimalPen';
 import { plantWithMath } from './farm/farmActions';
 import { FarmPlot } from './farm/FarmPlot';
 import { PlotBeds } from './farm/PlotBeds';
 
-/** 미리 그리는 그림자를 까는 범위: 걸어 다니는 범위 + 외곽 덤불과 그 그림자 (그림자는 +x · -z 쪽으로 진다) */
-const YARD_SHADOW_BOUNDS = {
-  minX: YARD.bounds.minX - 3,
-  maxX: YARD.bounds.maxX + 5,
-  minZ: YARD.bounds.minZ - 5,
-  maxZ: YARD.bounds.maxZ + 3,
-};
+/** 미리 그리는 그림자를 까는 범위: 걸어 다니는 범위 + 둘러싼 숲과 그 그림자 */
+const YARD_SHADOW_BOUNDS = forestShadowBounds(YARD.bounds);
 
 const FARM_RECTS = [farmFieldRect('north'), farmFieldRect('south')];
 /** 큰길에서 아래쪽 밭으로 들어가는 오솔길의 x (가운데 칸 사이) */

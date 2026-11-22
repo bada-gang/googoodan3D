@@ -42,7 +42,12 @@ if (uBakedOpacity > 0.0) {
     (uBakedBounds.w - vBakedWorld.z) / (uBakedBounds.w - uBakedBounds.z)
   );
   if (bakedUv.x > 0.0 && bakedUv.x < 1.0 && bakedUv.y > 0.0 && bakedUv.y < 1.0) {
-    float bakedShadow = texture2D(uBakedMask, bakedUv).g;
+    // 범위 끝 2m 안에서는 그림자를 서서히 옅게 해, 범위 끝에서 그림자가 칼로 자른 듯 끊겨 보이지 않게 한다
+    float bakedEdge = min(
+      min(vBakedWorld.x - uBakedBounds.x, uBakedBounds.y - vBakedWorld.x),
+      min(vBakedWorld.z - uBakedBounds.z, uBakedBounds.w - vBakedWorld.z)
+    );
+    float bakedShadow = texture2D(uBakedMask, bakedUv).g * smoothstep(0.0, 2.0, bakedEdge);
     gl_FragColor.rgb = mix(gl_FragColor.rgb, uBakedColor, bakedShadow * uBakedOpacity);
   }
 }

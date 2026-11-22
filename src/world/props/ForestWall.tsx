@@ -46,6 +46,15 @@ interface SideForest {
   models: Record<ModelKind, Placement[]>;
 }
 
+/**
+ * 미리 그리는 그림자(BakedShadows)를 까는 범위: 걸어 다니는 범위 + 숲 전체와 그 그림자.
+ * 숲 나무는 경계 밖 9m 쯤까지 서 있고, 그림자는 해 반대쪽(+x · -z)으로 5~6m 더 진다.
+ * 범위가 숲보다 좁으면 범위 끝에서 나무 그림자가 칼로 자른 듯 끊긴다.
+ */
+export function forestShadowBounds(bounds: Bounds): Bounds {
+  return { minX: bounds.minX - 10, maxX: bounds.maxX + 15, minZ: bounds.minZ - 15, maxZ: bounds.maxZ + 3 };
+}
+
 export function ForestWall({ bounds, openings = [] }: { bounds: Bounds; openings?: ForestOpening[] }): React.ReactElement {
   const key = JSON.stringify([bounds, openings]);
   const forest = useMemo(() => buildForest(bounds, openings), [key]); // eslint-disable-line react-hooks/exhaustive-deps
