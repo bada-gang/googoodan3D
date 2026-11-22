@@ -11,7 +11,8 @@ export type MathContext =
   | 'SHOP'
   | 'SELL'
   | 'MINIGAME'
-  | 'CHEST';
+  | 'CHEST'
+  | 'FISH';
 
 export type QuestionKind = 'basic' | 'blankRight' | 'blankLeft';
 

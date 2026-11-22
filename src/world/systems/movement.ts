@@ -4,6 +4,7 @@
  * 입력 우선순위: 조이스틱 > 키보드 > 땅 톡 치기.
  * 카메라는 늘 같은 방향(남쪽 위)에서 보므로 화면 위 = 월드 -z 다.
  */
+import { isFishing } from '@/state/fishingStore';
 import { useUiStore } from '@/state/uiStore';
 import { PLAYER_RADIUS, input, obstacles, player, walkBounds } from '../state/runtime';
 
@@ -16,10 +17,10 @@ const ARRIVE_DISTANCE = 0.2;
 
 const velocity = { x: 0, z: 0 };
 
-/** 문제 창이나 가게 창이 열려 있으면 걷지 않는다 (꾸미기 중에는 걸을 수 있다) */
+/** 문제 창이나 가게 창이 열려 있거나 낚시 중이면 걷지 않는다 (꾸미기 중에는 걸을 수 있다) */
 function movementBlocked(): boolean {
   const ui = useUiStore.getState();
-  return ui.math !== null || (ui.overlay !== null && ui.overlay !== 'decorate') || ui.levelUpTo !== null;
+  return ui.math !== null || (ui.overlay !== null && ui.overlay !== 'decorate') || ui.levelUpTo !== null || isFishing();
 }
 
 /** 이번 프레임에 가고 싶은 방향과 세기 (월드 x, z, 길이 0~1) */

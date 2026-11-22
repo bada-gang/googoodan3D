@@ -69,6 +69,16 @@ export const ART_PROMPTS: Record<string, string> = {
   [ASSETS.crops.wool]: 'a fluffy bundle of soft white sheep wool, like a cloud, tied with a pink ribbon',
   [ASSETS.crops.milk]: 'a glass bottle of fresh white milk with a sky-blue cap',
 
+  /* ---- 물고기: 옆모습, 머리가 왼쪽 ---- */
+  [ASSETS.crops.minnow]: 'one tiny slender silver-gray minnow fish (#b9c9d6) with a pale belly and big round eye, side view, head pointing left',
+  [ASSETS.crops.loach]: 'one long slim wiggly olive-brown pond loach fish (#a08a5c) with small speckles and tiny whiskers around the mouth, side view, head pointing left',
+  [ASSETS.crops.crucian]: 'one round chubby golden-olive crucian carp fish (#b8a36a) with a tall back and soft fins, side view, head pointing left',
+  [ASSETS.crops.catfish]: 'one smooth dark gray-brown catfish (#6f6a5e) with a wide flat head and long whiskers, side view, head pointing left',
+  [ASSETS.crops.trout]: 'one rainbow trout fish with a silver body, a soft pink-red stripe along its side (#e59a9a) and small dark spots, side view, head pointing left',
+  [ASSETS.crops.carp]: 'one big plump golden-bronze carp fish (#d9a14a) with large shiny scales and two short whiskers, side view, head pointing left',
+  [ASSETS.crops.goldfish]: 'one bright orange goldfish (#f08a3c) with a round body and a long flowing double tail fin, side view, head pointing left',
+  [ASSETS.crops.salmon]: 'one big majestic legendary salmon fish with silver-pink scales and a coral-orange belly (#f2785a), a soft golden glow and a few small sparkles around it, leaping in a gentle arc, side view, head pointing left',
+
   /* ---- 씨앗 봉투: 글자 대신 열매 그림 ---- */
   [ASSETS.seeds.apple]: 'a small kraft-paper seed packet, folded at the top, with a picture of a red apple printed on the front',
   [ASSETS.seeds.orange]: 'a small kraft-paper seed packet, folded at the top, with a picture of an orange fruit printed on the front',

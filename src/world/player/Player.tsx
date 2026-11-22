@@ -25,6 +25,8 @@ import { useWorldScene } from '../state/sceneStore';
 /** 발소리 간격 (초) */
 const STEP_INTERVAL = 0.32;
 const HAPPY_SECONDS = 0.7;
+/** 낚시할 때 팔을 앞으로 드는 정도 (라디안) */
+const FISHING_ARMS = 0.95;
 const INTERACT_SECONDS = 0.35;
 /**
  * 걸을 때 허벅지를 흔드는 크기 (라디안). 앞으로 내딛는 쪽을 크게 해야 성큼성큼 걷는 것처럼 보인다.
@@ -154,6 +156,13 @@ export function Player(): React.ReactElement {
       } else {
         player.emote = null;
       }
+    }
+
+    // 낚시 자세: 두 팔을 앞으로 내밀어 낚싯대를 쥔다 (낚싯대는 연못 쪽 FishingGear 가 그린다)
+    if (player.pose === 'fishing' && !walking) {
+      armForward = Math.max(armForward, FISHING_ARMS);
+      armSwing = 0;
+      raise = 0.02;
     }
 
     body.current.position.y = bob;

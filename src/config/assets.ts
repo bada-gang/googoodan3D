@@ -36,6 +36,15 @@ export const ASSETS = {
     goatMilk: 'crop_goat_milk',
     wool: 'crop_wool',
     milk: 'crop_milk',
+    // 물고기 (시장 연못에서 낚는다. config/fishing)
+    minnow: 'fish_minnow',
+    loach: 'fish_loach',
+    crucian: 'fish_crucian',
+    catfish: 'fish_catfish',
+    trout: 'fish_trout',
+    carp: 'fish_carp',
+    goldfish: 'fish_goldfish',
+    salmon: 'fish_salmon',
   },
   seeds: {
     apple: 'seedbag_apple',

@@ -17,6 +17,8 @@ export const player = {
   speed: 0,
   /** 짧은 몸짓. 시작 시각과 함께 둔다 */
   emote: null as { kind: Emote; startedAt: number } | null,
+  /** 오래 이어지는 자세. 낚시 중에는 두 팔을 앞으로 내밀어 낚싯대를 쥔다 */
+  pose: null as 'fishing' | null,
 };
 
 export const input = {

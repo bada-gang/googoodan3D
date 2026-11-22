@@ -10,6 +10,7 @@ import { GameHUD } from '../hud/GameHUD';
 import { TouchControls } from '../hud/TouchControls';
 import { DecorateOverlay } from '../overlays/DecorateOverlay';
 import { FarmShopOverlay } from '../overlays/FarmShopOverlay';
+import { FishingOverlay } from '../overlays/FishingOverlay';
 import { FurnitureShopOverlay } from '../overlays/FurnitureShopOverlay';
 import { InventoryOverlay } from '../overlays/InventoryOverlay';
 import { LevelUpOverlay } from '../overlays/LevelUpOverlay';
@@ -46,6 +47,7 @@ export function GameScreen(): React.ReactElement {
       {overlay === 'decorate' && <DecorateOverlay />}
       {overlay === 'settings' && <SettingsOverlay />}
 
+      <FishingOverlay />
       <SeedPickerOverlay />
       <MiniGameOverlay />
       <LevelUpOverlay />

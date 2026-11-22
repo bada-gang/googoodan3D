@@ -1,8 +1,10 @@
 /**
  * 게임 콘텐츠 카탈로그. 가격/해금 레벨 등 밸런스 수치는 balance.ts 와 함께 조정한다.
  */
+import { FISH, FISH_ORDER } from './fishing';
 import type {
   AnimalSpeciesId,
+  FishId,
   FurnitureId,
   PlacementArea,
   ProduceId,
@@ -240,6 +242,7 @@ export const SELL_PRICE: Record<SellableId, number> = {
   goatMilk: ANIMAL_SPECIES.goat.producePrice,
   wool: ANIMAL_SPECIES.sheep.producePrice,
   milk: ANIMAL_SPECIES.cow.producePrice,
+  ...fishRecord((fish) => FISH[fish].price),
 };
 
 export const SELLABLE_NAME: Record<SellableId, string> = {
@@ -255,6 +258,7 @@ export const SELLABLE_NAME: Record<SellableId, string> = {
   goatMilk: '염소젖',
   wool: '양털',
   milk: '우유',
+  ...fishRecord((fish) => FISH[fish].name),
 };
 
 export const SELLABLE_ORDER: SellableId[] = [
@@ -270,7 +274,13 @@ export const SELLABLE_ORDER: SellableId[] = [
   'goatMilk',
   'wool',
   'milk',
+  ...FISH_ORDER,
 ];
+
+/** 물고기마다 값 하나씩 (SELL_PRICE · SELLABLE_NAME 에 물고기를 채운다) */
+function fishRecord<T>(value: (fish: FishId) => T): Record<FishId, T> {
+  return Object.fromEntries(FISH_ORDER.map((fish) => [fish, value(fish)])) as Record<FishId, T>;
+}
 
 /* -------------------------------- 물 · 먹이 -------------------------------- */
 

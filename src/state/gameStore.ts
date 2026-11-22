@@ -12,6 +12,7 @@
  *  - farmSlice      밭 (심기 · 키우기 · 따기)
  *  - animalSlice    동물 (들이기 · 먹이 · 생산물)
  *  - decorateSlice  꾸미기 (가구 놓기 · 벽지 · 바닥)
+ *  - fishingSlice   낚시 (오늘 던진 횟수 · 물고기 도감)
  *  - learningSlice  학습 기록
  *  - saveData       저장 데이터 모양 (처음 상태, 오래된 저장본 메꾸기)
  */
@@ -19,6 +20,7 @@ import { create } from 'zustand';
 import { createAnimalSlice } from './game/animalSlice';
 import { createDecorateSlice } from './game/decorateSlice';
 import { createFarmSlice } from './game/farmSlice';
+import { createFishingSlice } from './game/fishingSlice';
 import { createInventorySlice } from './game/inventorySlice';
 import { createLearningSlice } from './game/learningSlice';
 import { createProgressSlice } from './game/progressSlice';
@@ -35,5 +37,6 @@ export const useGameStore = create<GameStoreState>()((...a) => ({
   ...createFarmSlice(...a),
   ...createAnimalSlice(...a),
   ...createDecorateSlice(...a),
+  ...createFishingSlice(...a),
   ...createLearningSlice(...a),
 }));

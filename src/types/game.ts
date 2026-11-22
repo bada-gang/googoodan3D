@@ -89,7 +89,9 @@ export interface AnimalInstance {
 export type SeedId = `seed_${TreeSpeciesId}`;
 export type FruitId = TreeSpeciesId;
 export type ProduceId = 'egg' | 'wool' | 'milk' | 'goatMilk';
-export type SellableId = FruitId | ProduceId;
+/** 시장 연못에서 낚는 물고기 (config/fishing) */
+export type FishId = 'minnow' | 'loach' | 'crucian' | 'catfish' | 'trout' | 'carp' | 'goldfish' | 'salmon';
+export type SellableId = FruitId | ProduceId | FishId;
 
 /** 쓰면 없어지는 소모품. 농장 가게에서 산다. */
 export type SupplyId = 'water' | 'feed';
@@ -134,6 +136,22 @@ export interface YardState {
   placed: PlacedItem[];
 }
 
+/* ---------------------------------- 낚시 ---------------------------------- */
+
+/** 도감 한 칸: 처음 잡은 날과 지금까지 잡은 수 */
+export interface FishDexEntry {
+  caught: number;
+  /** 처음 잡은 날 (YYYY-MM-DD) */
+  firstCaughtAt: string;
+}
+
+/** 오늘 낚시를 몇 번 던졌는지. 날이 바뀌면 다시 0 부터 */
+export interface FishingDay {
+  /** YYYY-MM-DD. 한 번도 안 던졌으면 null */
+  date: string | null;
+  casts: number;
+}
+
 /* -------------------------------- 저장 데이터 ------------------------------- */
 
 /** 열매 받기 게임 기록 한 판 */
@@ -164,4 +182,7 @@ export interface GameSaveData {
    * 게임은 몇 번이든 할 수 있지만 상자는 하루 한 번만 준다.
    */
   lastMiniGameRewardDate: string | null;
+  /** 물고기 도감 (물고기 id -> 기록). 잡은 적 없는 물고기는 없다 */
+  fishDex: Partial<Record<FishId, FishDexEntry>>;
+  fishingDay: FishingDay;
 }

@@ -1,7 +1,7 @@
 /**
  * 시장. 마당 오른쪽 끝 표지판으로 들어온다. (2D 판 TownScene)
  *
- * 농장 가게 · 가구 가게 두 곳이 길 뒤쪽에 서 있고, 가운데 분수 광장이 있다.
+ * 농장 가게 · 가구 가게 두 곳이 길 뒤쪽에 서 있고, 가운데 분수 광장이 있다. 가구 가게 맞은편(길 앞쪽)에는 낚시터.
  * 가게에 들어가는 것 자체는 자유이고, 실제로 사고팔 때 문제를 낸다 (명세 78 — React 가게 화면이 맡는다).
  * 꾸미기는 집 · 마당에서만 한다.
  */
@@ -23,6 +23,7 @@ import { goToScene, useWorldScene, type Spawn } from '../../state/scenes';
 import { GROUND_MARGIN, GrassGround, PathNetwork } from '../../props/Ground';
 import { ForestWall, forestShadowBounds } from '../../props/ForestWall';
 import { SignBoard } from '../../props/SignBoard';
+import { FishingSpot } from './FishingSpot';
 
 /** 장식: 마당 꾸미기에 쓰는 것과 같은 모델. 광장 분수는 마당 것보다 크게 */
 const DECOR: { id: string; x: number; z: number; rotation?: number; scale?: number; radius: number }[] = [
@@ -120,6 +121,9 @@ export function TownWorld(): React.ReactElement {
           PLAZA,
         ]}
       />
+
+      {/* 가구 가게 맞은편 낚시터 (연못 · 데크 · 낚싯대) */}
+      <FishingSpot />
 
       <StaticShadow>
         <Gate />

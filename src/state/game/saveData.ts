@@ -4,6 +4,7 @@
  */
 import { START_INVENTORY, START_MONEY } from '@/config/balance';
 import { FURNITURE_BY_ID, SELL_PRICE, SUPPLIES, TREE_SPECIES, speciesOfSeed } from '@/config/catalog';
+import { isFishId } from '@/config/fishing';
 import { PLOT_COUNT } from '@/config/layout';
 import type { FarmPlot, GameSaveData, PlayerProfile } from '@/types/game';
 
@@ -46,6 +47,8 @@ export function createInitialSave(profile: PlayerProfile): GameSaveData {
     chests: 0,
     miniGameScores: [],
     lastMiniGameRewardDate: null,
+    fishDex: {},
+    fishingDay: { date: null, casts: 0 },
   };
 }
 
@@ -106,5 +109,8 @@ export function migrate(save: GameSaveData, profile: PlayerProfile): GameSaveDat
     chests: save.chests ?? 0,
     miniGameScores: Array.isArray(save.miniGameScores) ? save.miniGameScores : [],
     lastMiniGameRewardDate: save.lastMiniGameRewardDate ?? null,
+    // 낚시가 생기기 전 저장본에는 없다. 없어진 물고기 종류는 도감에서 뺀다
+    fishDex: Object.fromEntries(Object.entries(save.fishDex ?? {}).filter(([id]) => isFishId(id))),
+    fishingDay: save.fishingDay ?? base.fishingDay,
   };
 }

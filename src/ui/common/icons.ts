@@ -17,6 +17,7 @@ import {
   TREE_SPECIES,
   speciesOfSeed,
 } from '@/config/catalog';
+import { FISH, FISH_ORDER, isFishId } from '@/config/fishing';
 import { AVATARS } from '@/config/strings';
 import type {
   AnimalSpeciesId,
@@ -50,7 +51,8 @@ function fallbackInfoOf(assetKey: string): { label: string; color: string } {
       goatMilk: '#f4ecd8',
       wool: '#fbf7ef',
       milk: '#ffffff',
-    };
+      ...Object.fromEntries(FISH_ORDER.map((fish) => [fish, FISH[fish].color])),
+    } as Record<SellableId, string>;
     for (const [id, key] of Object.entries(ASSETS.crops)) {
       put(key, SELLABLE_NAME[id as SellableId], fruitColor[id as SellableId]);
     }
@@ -168,8 +170,9 @@ export function itemName(itemId: string): string {
 }
 
 /** 인벤토리 아이템 분류 */
-export function itemCategory(itemId: string): 'seed' | 'harvest' | 'supply' | 'furniture' {
+export function itemCategory(itemId: string): 'seed' | 'harvest' | 'fish' | 'supply' | 'furniture' {
   if (itemId.startsWith('seed_')) return 'seed';
+  if (isFishId(itemId)) return 'fish';
   if (itemId in SUPPLIES) return 'supply';
   if (itemId in SELLABLE_NAME) return 'harvest';
   return 'furniture';

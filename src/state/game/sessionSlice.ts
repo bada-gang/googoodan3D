@@ -67,6 +67,8 @@ export const createSessionSlice: GameSlice<SessionSlice> = (set, get) => ({
       chests: save.chests,
       miniGameScores: save.miniGameScores,
       lastMiniGameRewardDate: save.lastMiniGameRewardDate,
+      fishDex: save.fishDex,
+      fishingDay: save.fishingDay,
       stats: savedStats ?? createEmptyLearningStats(),
       recentQuestions: [],
       questionCounter: 0,
@@ -96,6 +98,8 @@ export const createSessionSlice: GameSlice<SessionSlice> = (set, get) => ({
       chests: s.chests,
       miniGameScores: s.miniGameScores,
       lastMiniGameRewardDate: s.lastMiniGameRewardDate,
+      fishDex: s.fishDex,
+      fishingDay: s.fishingDay,
     };
   },
 });

@@ -41,6 +41,7 @@ art-src/         생성 원본 (git 에 안 들어감 — 아래 "백업" 참고
 | --- | --- |
 | 돈 · 경험치 · 레벨 · 수확량 · 상자 보상 · 출제 비율 | `src/config/balance.ts` |
 | 나무 · 동물 · 가구 · 벽지/바닥 · 물/먹이의 이름과 가격 | `src/config/catalog.ts` |
+| 물고기 (이름 · 값 · 무는 정도 · 막대 빠르기와 칸 너비) · 하루 낚시 횟수 | `src/config/fishing.ts` |
 | 마당 · 시장 배치 (밭 자리, 우리 크기, 건물 위치) | `src/config/layout.ts` |
 | 가구의 3D 크기와 놓는 방식 (바닥/벽) | `src/config/furniture3d.ts` |
 | 3D 모델 목록 · 크기 · 색 보정 | `src/config/models.ts` |
@@ -60,6 +61,8 @@ art-src/         생성 원본 (git 에 안 들어감 — 아래 "백업" 참고
 | 먹이 주기 · 생산물 규칙 (상태 변화) | `src/state/game/animalSlice.ts` |
 | 동물에게 뜨는 버튼 · 문제 내기 · 연출 | `src/world/scenes/yard/pen/animalActions.ts` |
 | 사고팔기 · 가방 | `src/state/game/inventorySlice.ts` |
+| 낚시 횟수 · 물고기 도감 (저장되는 것) | `src/state/game/fishingSlice.ts` |
+| 낚시 한 번의 진행 (던지기 → 입질 → 끌어올리기) | `src/state/fishingStore.ts` |
 | 돈 · 경험치 · 레벨업 · 상자 | `src/state/game/progressSlice.ts` |
 | 가구 놓기 · 옮기기 · 돌리기 · 치우기 (저장되는 것) | `src/state/game/decorateSlice.ts` |
 | 꾸미기 조작 (3D 에서 들고 다니기, 놓을 수 있는지) | `src/world/gameplay/decorate.tsx` |
@@ -83,6 +86,7 @@ art-src/         생성 원본 (git 에 안 들어감 — 아래 "백업" 참고
 | 동물 움직임 (걷기 · 먹기 · 기뻐하기) | `src/world/scenes/yard/pen/Animal.tsx` |
 | 집 안 (방 크기 · 벽 · 문) | `src/world/scenes/home/HomeWorld.tsx` |
 | 시장 (가게 건물 · 가로등 · 장식) | `src/world/scenes/town/TownWorld.tsx` |
+| 시장 낚시터 (연못 · 데크 · 낚싯대 · 찌) | `src/world/scenes/town/FishingSpot.tsx` (자리: `config/layout.ts` 의 `TOWN.pond`) |
 | 땅 · 흙길 | `src/world/props/Ground.tsx` |
 | 맵을 둘러싼 숲 벽 (앞줄 3D 나무 · 뒷줄 침엽수 모델, 12m 토막으로 화면 밖 안 그림 · 어두워지는 잔디 숲 바닥, 길 틈) | `src/world/props/ForestWall.tsx` |
 | 표지판 | `src/world/props/SignBoard.tsx` |
@@ -109,6 +113,7 @@ art-src/         생성 원본 (git 에 안 들어감 — 아래 "백업" 참고
 | 조이스틱 · 행동 버튼 | `src/ui/hud/TouchControls.tsx` |
 | 문제 팝업 | `src/ui/overlays/MathQuestionOverlay.tsx` |
 | 농장 가게 · 가구 가게 · 가방 · 꾸미기 · 설정 창 | `src/ui/overlays/` 의 같은 이름 파일 |
+| 낚시 창 (막대 멈추기 · 잡은 물고기 카드) · 물고기 도감(가방 안) | `src/ui/overlays/FishingOverlay.tsx` · `InventoryOverlay.tsx` |
 | 알림(토스트) | `src/ui/overlays/ToastLayer.tsx` |
 | 공통 버튼 · 창 틀 | `src/ui/common/ui.tsx` |
 | 아이콘 고르기 | `src/ui/common/icons.ts` |
@@ -162,4 +167,4 @@ art-src/         생성 원본 (git 에 안 들어감 — 아래 "백업" 참고
 - 물체 재질(MeshStandard)과 환경맵은 유지한다. 가볍게 바꾸면 물체 품질이 눈에 띄게 떨어진다. 땅 · 길만 가벼운 재질.
 - 시간대 안내 문구 · 열매 맺음 안내와 "열매 맺음" 글자 · 흙먼지 · 나뭇잎 효과는 일부러 뺐다.
 - 노을은 "붉은 노을" 시안(`config/dayNight.ts` 의 `SUNSET` · `SUNSET_LIGHT`). 진하기 0.3 을 넘기면 달빛이 섞여 붉은 기운이 빠진다.
-- 미니게임(6단계)은 보류.
+- 미니게임(6단계)은 보류. 낚시는 따로 만들었다: 곱셈 문제를 맞혀 찌를 던지고, 잡기는 막대 멈추기(문제 아님). 하루 10번.
