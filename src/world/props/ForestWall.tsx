@@ -3,17 +3,22 @@
  *
  * 카메라는 캐릭터 뒤 8m · 높이 5.9m 에서 내려다본다. 화면 맨 위 시선이 경계 바로 너머에서 높이 4m 쯤을 지나므로,
  * 경계 뒤에 그보다 높은 나무를 세 줄(앞줄 낮게 → 뒷줄 높게) 세워 시선을 막는다.
- *  - 앞줄: 진짜 3D 숲 나무 · 침엽수 모델. 놓을 때마다 방향 · 크기가 달라 같은 나무가 반복돼 보이지 않는다. 그 앞은 둥근 덤불
+ *  - 앞줄: 진짜 3D 숲 나무 · 침엽수 모델. 놓을 때마다 방향 · 크기가 달라 같은 나무가 반복돼 보이지 않는다
  *  - 뒷줄 둘: 줄기 + 둥근 잎 뭉치로 만든 가벼운 나무 (짙은 색이라 깊은 숲처럼 보인다)
+ *  - 바닥: 같은 잔디 무늬를 바깥으로 갈수록 어둡게 (나무 그늘)
  * 카메라 쪽(남쪽)은 비워 둔다 — 화면을 가린다. 장면 사이를 잇는 길이 나가는 자리(openings)는 숲을 튼다.
  *
  * 그리기를 줄이려고: 같은 모양은 한 번에 그리고(인스턴싱), 서 · 북 · 동 쪽마다 나눠 화면 밖 쪽은 아예 안 그린다.
  * 그림자는 미리 그린다 (부르는 쪽이 StaticShadow 안에 둔다). 위치는 고정된 씨앗이라 매번 같은 숲이다.
  */
-import { useLayoutEffect, useMemo, useRef } from 'react';
-import { Color, Euler, Matrix4, Quaternion, Vector3, type InstancedMesh } from 'three';
+import { useEffect, useLayoutEffect, useMemo, useRef } from 'react';
+import { BufferGeometry, Color, Euler, Float32BufferAttribute, Matrix4, Quaternion, Vector3, type InstancedMesh } from 'three';
+import { ASSETS } from '@/config/assets';
+import { PALETTE } from '@/config/artTokens';
 import { MODELS } from '@/config/models';
-import { ModelParts, type ModelPart } from '../rendering/assets';
+import { ArtTexture, ModelParts, type ModelPart } from '../rendering/assets';
+import { applyGroundShadow } from '../rendering/groundShadow';
+import { GRASS_TILE, grassOrigin } from './Ground';
 
 type Bounds = { minX: number; maxX: number; minZ: number; maxZ: number };
 type Side = 'west' | 'north' | 'east';
@@ -60,14 +65,13 @@ const LEAF_COLORS = [
   ['#3a7640', '#356f3c', '#3f7a42', '#326a39'],
 ];
 const TRUNK_COLORS = ['#8a5e3c', '#7a5236', '#94663f'];
-const BUSH_COLORS = ['#6fbf6a', '#62b35e', '#5aa856', '#529c50', '#7cc472'];
 
 export function ForestWall({ bounds, openings = [] }: { bounds: Bounds; openings?: ForestOpening[] }): React.ReactElement {
   const key = JSON.stringify([bounds, openings]);
   const forest = useMemo(() => buildForest(bounds, openings), [key]); // eslint-disable-line react-hooks/exhaustive-deps
   return (
     <group>
-      <ForestFloor bounds={bounds} openings={openings} />
+      <ForestFloor bounds={bounds} />
       {SIDES.map((side) => (
         <SideGroup key={side} forest={forest[side]} />
       ))}
@@ -75,38 +79,93 @@ export function ForestWall({ bounds, openings = [] }: { bounds: Bounds; openings
   );
 }
 
-/** 숲 바닥: 덤불 줄 뒤의 땅을 그늘진 짙은 색으로 덮는다 (나무 사이로 밝은 잔디가 보이면 숲속 느낌이 안 난다). 가장자리는 덤불이 가린다 */
-const FLOOR_START = 1.1;
-const FLOOR_DEPTH = 14;
-const FLOOR_COLOR = '#45703f';
+/**
+ * 숲 바닥: 경계 밖 땅을 같은 잔디 무늬로 깔되 바깥으로 갈수록 어둡게 한다 (나무 그늘).
+ * 무늬는 잔디 땅판과 같은 자리에서 시작해 이어지고, 경계 가까이는 땅판과 같은 밝기라 이음매가 보이지 않는다.
+ * 미리 그린 그림자도 받는다 (나무 그림자가 숲 바닥에도 진다).
+ */
+/** 이 거리(경계 밖, m)까지는 땅판과 같은 밝기, 그 밖으로 FLOOR_DARK_AT 까지 어두워진다 */
+const FLOOR_FADE_FROM = 0.4;
+const FLOOR_DARK_AT = 3.2;
+/** 경계 밖으로 까는 폭 (m) */
+const FLOOR_DEPTH = 16;
+/** 가장 어두운 곳의 밝기 (잔디 무늬에 곱한다). 살짝 어둡게 */
+const FLOOR_SHADE = new Color(0.62, 0.68, 0.6);
+const FLOOR_STEP = 0.5;
 
-function ForestFloor({ bounds, openings }: { bounds: Bounds; openings: ForestOpening[] }): React.ReactElement {
+function ForestFloor({ bounds }: { bounds: Bounds }): React.ReactElement {
+  const geometry = useMemo(() => forestFloorGeometry(bounds), [bounds]);
+  useEffect(() => () => geometry.dispose(), [geometry]);
+  return (
+    // 땅판 위에 살짝 띄워 깐다. 길(0.012)보다는 낮아 길 틈의 길이 위로 보인다
+    <mesh geometry={geometry} position-y={0.006}>
+      <ArtTexture assetKey={ASSETS.textures.grass} repeat={[1, 1]}>
+        {(map) => (
+          <meshLambertMaterial
+            ref={(material) => void (material && applyGroundShadow(material))}
+            map={map}
+            color={map ? '#ffffff' : PALETTE.grass}
+            vertexColors
+            polygonOffset
+            polygonOffsetFactor={-1}
+          />
+        )}
+      </ArtTexture>
+    </mesh>
+  );
+}
+
+/** 숲 바닥 모양: 경계 밖 띠(서 · 북 · 동). 꼭짓점 색으로 바깥쪽을 어둡게, 질감 좌표는 땅판과 같은 m 단위 */
+function forestFloorGeometry(bounds: Bounds): BufferGeometry {
   const { minX, maxX, minZ, maxZ } = bounds;
+  const origin = grassOrigin(bounds);
   const southEnd = maxZ + 2;
-  const north = minZ - FLOOR_START;
-  // [가운데 x, 가운데 z, 가로, 세로] — 길 틈은 남겨 두고 잘라 깐다
-  const pieces: [number, number, number, number][] = [
-    [(minX + maxX) / 2, north - FLOOR_DEPTH / 2, maxX - minX + (FLOOR_START + FLOOR_DEPTH) * 2, FLOOR_DEPTH],
-  ];
-  for (const side of ['west', 'east'] as const) {
-    const x = side === 'west' ? minX - FLOOR_START - FLOOR_DEPTH / 2 : maxX + FLOOR_START + FLOOR_DEPTH / 2;
-    const gaps = openings.filter((o) => o.side === side).map((o) => [o.z - o.width / 2, o.z + o.width / 2]).sort((a, b) => a[0] - b[0]);
-    let from = north;
-    for (const [a, b] of [...gaps, [southEnd, southEnd]]) {
-      if (a > from) pieces.push([x, (from + a) / 2, FLOOR_DEPTH, a - from]);
-      from = Math.max(from, b);
+  const x0 = minX - FLOOR_DEPTH;
+  const z0 = minZ - FLOOR_DEPTH;
+  const cols = Math.ceil((maxX + FLOOR_DEPTH - x0) / FLOOR_STEP);
+  const rows = Math.ceil((southEnd - z0) / FLOOR_STEP);
+  const outside = (x: number, z: number) => Math.max(minX - x, x - maxX, minZ - z);
+  const positions: number[] = [];
+  const uvs: number[] = [];
+  const colors: number[] = [];
+  const tint = new Color();
+  const white = new Color(1, 1, 1);
+  for (let j = 0; j <= rows; j += 1) {
+    for (let i = 0; i <= cols; i += 1) {
+      const x = x0 + i * FLOOR_STEP;
+      const z = Math.min(z0 + j * FLOOR_STEP, southEnd);
+      positions.push(x, 0, z);
+      uvs.push((x - origin.x) / GRASS_TILE, (origin.z - z) / GRASS_TILE);
+      // 바깥으로 갈수록 어둡게. 남쪽 끝(카메라 쪽)에서는 다시 땅판 밝기로 돌아와 끝선이 보이지 않게
+      const dark = smoothstep(FLOOR_FADE_FROM, FLOOR_DARK_AT, outside(x, z)) * smoothstep(southEnd, maxZ - 2, z);
+      tint.copy(white).lerp(FLOOR_SHADE, dark);
+      colors.push(tint.r, tint.g, tint.b);
     }
   }
-  return (
-    <group>
-      {pieces.map(([x, z, w, d], i) => (
-        <mesh key={i} position={[x, 0.006, z]} rotation-x={-Math.PI / 2}>
-          <planeGeometry args={[w, d]} />
-          <meshLambertMaterial color={FLOOR_COLOR} polygonOffset polygonOffsetFactor={-1} />
-        </mesh>
-      ))}
-    </group>
-  );
+  const index: number[] = [];
+  for (let j = 0; j < rows; j += 1) {
+    for (let i = 0; i < cols; i += 1) {
+      // 걸어 다니는 범위 안쪽 칸은 건너뛴다 (땅판이 그대로 보인다)
+      const cx = x0 + (i + 0.5) * FLOOR_STEP;
+      const cz = z0 + (j + 0.5) * FLOOR_STEP;
+      if (outside(cx, cz) < FLOOR_FADE_FROM - FLOOR_STEP) continue;
+      const a = j * (cols + 1) + i;
+      const c = a + cols + 1;
+      index.push(a, c, a + 1, a + 1, c, c + 1);
+    }
+  }
+  const geometry = new BufferGeometry();
+  geometry.setAttribute('position', new Float32BufferAttribute(positions, 3));
+  geometry.setAttribute('uv', new Float32BufferAttribute(uvs, 2));
+  geometry.setAttribute('color', new Float32BufferAttribute(colors, 3));
+  geometry.setAttribute('normal', new Float32BufferAttribute(new Array(positions.length / 3).fill([0, 1, 0]).flat(), 3));
+  geometry.setIndex(index);
+  return geometry;
+}
+
+function smoothstep(a: number, b: number, t: number): number {
+  const k = Math.min(1, Math.max(0, (t - a) / (b - a)));
+  return k * k * (3 - 2 * k);
 }
 
 function SideGroup({ forest }: { forest: SideForest }): React.ReactElement {
@@ -224,17 +283,6 @@ function buildForest(bounds: Bounds, openings: ForestOpening[]): Record<Side, Si
     return { x: p.x + p.nx * depth + p.nz * slide, z: p.z + p.nz * depth + p.nx * slide };
   };
 
-  // 앞줄 덤불: 둥근 잎 뭉치 (덤불 모델은 면이 많아 수십 개 놓기엔 무겁다). 나무 줄기 사이를 메운다
-  for (const p of perimeter(0.9, 1.25, 0.4)) {
-    const { x, z } = jitter(p, 0.8, 0.6);
-    const r = 0.55 + random() * 0.45;
-    forest[p.side].leaves.push({
-      x, y: r * 0.55, z,
-      sx: r * (1.05 + random() * 0.35), sy: r * (0.8 + random() * 0.25), sz: r * (1.05 + random() * 0.35),
-      turn: random() * Math.PI * 2,
-      color: pick(BUSH_COLORS),
-    });
-  }
   // 앞줄 나무 (진짜 모델). 숲 나무가 대부분, 침엽수가 섞인다. 모델이 무거워 간격을 넉넉히
   for (const p of perimeter(2.6, 3.4, 1.8)) {
     const { x, z } = jitter(p, 1.2, 1.0);

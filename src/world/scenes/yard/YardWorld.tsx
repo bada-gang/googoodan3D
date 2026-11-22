@@ -21,7 +21,7 @@ import { DecorateSystem, PlacedFurnitureLayer, decorateFloorHover, decorateFloor
 import { placePlayer } from '../../systems/movement';
 import { goToScene, useWorldScene, type Spawn } from '../../state/scenes';
 import { input, obstacles, walkBounds } from '../../state/runtime';
-import { GrassGround, PathNetwork } from '../../props/Ground';
+import { GROUND_MARGIN, GrassGround, PathNetwork } from '../../props/Ground';
 import { ForestWall } from '../../props/ForestWall';
 import { SignBoard } from '../../props/SignBoard';
 import { AnimalPen } from './pen/AnimalPen';
@@ -86,8 +86,8 @@ export function YardWorld(): React.ReactElement {
     input.tapTarget = { x: event.point.x, z: event.point.z };
   };
 
-  const width = YARD.bounds.maxX - YARD.bounds.minX + 40;
-  const depth = YARD.bounds.maxZ - YARD.bounds.minZ + 40;
+  const width = YARD.bounds.maxX - YARD.bounds.minX + GROUND_MARGIN * 2;
+  const depth = YARD.bounds.maxZ - YARD.bounds.minZ + GROUND_MARGIN * 2;
   const centerX = (YARD.bounds.minX + YARD.bounds.maxX) / 2;
   const centerZ = (YARD.bounds.minZ + YARD.bounds.maxZ) / 2;
   const { door } = YARD.house;

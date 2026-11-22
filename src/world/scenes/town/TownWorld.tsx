@@ -20,7 +20,7 @@ import { useInteractable } from '../../systems/interaction';
 import { placePlayer } from '../../systems/movement';
 import { input, obstacles, walkBounds, type Obstacle } from '../../state/runtime';
 import { goToScene, useWorldScene, type Spawn } from '../../state/scenes';
-import { GrassGround, PathNetwork } from '../../props/Ground';
+import { GROUND_MARGIN, GrassGround, PathNetwork } from '../../props/Ground';
 import { ForestWall } from '../../props/ForestWall';
 import { SignBoard } from '../../props/SignBoard';
 
@@ -100,8 +100,8 @@ export function TownWorld(): React.ReactElement {
   };
 
   const { bounds, mainPathZ } = TOWN;
-  const width = bounds.maxX - bounds.minX + 40;
-  const depth = bounds.maxZ - bounds.minZ + 40;
+  const width = bounds.maxX - bounds.minX + GROUND_MARGIN * 2;
+  const depth = bounds.maxZ - bounds.minZ + GROUND_MARGIN * 2;
 
   return (
     <group onClick={onTap}>

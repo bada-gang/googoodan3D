@@ -11,7 +11,17 @@ import { applyGroundShadow } from '../rendering/groundShadow';
 import { TEST_FLAGS } from '../debug/testFlags';
 
 /** 잔디 질감 한 장이 덮는 크기 (m). 작으면 무늬가 반복되는 게 보이고, 크면 흐릿하다 */
-const GRASS_TILE = 4;
+export const GRASS_TILE = 4;
+/** 잔디 땅판은 걸어 다니는 범위보다 사방으로 이만큼 넓다 */
+export const GROUND_MARGIN = 20;
+
+/**
+ * 잔디 땅판의 무늬 기준점 (질감 좌표 0,0 이 놓이는 땅 자리). 땅판은 서쪽 끝 · 남쪽 끝에서 무늬가 시작한다.
+ * 숲 바닥처럼 땅판 위에 겹쳐 까는 것이 무늬를 이어 맞출 때 쓴다 (ForestWall).
+ */
+export function grassOrigin(bounds: { minX: number; maxZ: number }): { x: number; z: number } {
+  return { x: bounds.minX - GROUND_MARGIN, z: bounds.maxZ + GROUND_MARGIN };
+}
 const PATH_TILE = 2;
 /** 땅 좌표 1m 당 무늬 반복 (모든 길이 같아야 겹친 곳이 똑같이 보인다) */
 const PATH_REPEAT: [number, number] = [1 / PATH_TILE, 1 / PATH_TILE];
