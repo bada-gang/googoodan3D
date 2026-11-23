@@ -27,14 +27,14 @@ export interface FishDef {
 }
 
 export const FISH: Record<FishId, FishDef> = {
-  minnow: { id: 'minnow', name: '송사리', price: 3, weight: 26, size: 'small', speed: 0.55, zone: 0.3, color: '#b9c9d6' },
-  loach: { id: 'loach', name: '미꾸라지', price: 4, weight: 22, size: 'small', speed: 0.65, zone: 0.27, color: '#a08a5c' },
-  crucian: { id: 'crucian', name: '붕어', price: 6, weight: 18, size: 'medium', speed: 0.7, zone: 0.24, color: '#b8a36a' },
-  catfish: { id: 'catfish', name: '메기', price: 10, weight: 12, size: 'medium', speed: 0.85, zone: 0.2, color: '#6f6a5e' },
-  trout: { id: 'trout', name: '무지개송어', price: 12, weight: 9, size: 'big', speed: 0.95, zone: 0.18, color: '#e59a9a' },
-  carp: { id: 'carp', name: '잉어', price: 15, weight: 7, size: 'big', speed: 1, zone: 0.16, color: '#d9a14a' },
-  goldfish: { id: 'goldfish', name: '금붕어', price: 25, weight: 4, size: 'big', speed: 1.1, zone: 0.14, color: '#f08a3c' },
-  salmon: { id: 'salmon', name: '전설의 연어', price: 60, weight: 2, size: 'legend', speed: 1.35, zone: 0.11, color: '#f2785a' },
+  minnow: { id: 'minnow', name: '송사리', price: 3, weight: 26, size: 'small', speed: 1.1, zone: 0.27, color: '#b9c9d6' },
+  loach: { id: 'loach', name: '미꾸라지', price: 4, weight: 22, size: 'small', speed: 1.3, zone: 0.243, color: '#a08a5c' },
+  crucian: { id: 'crucian', name: '붕어', price: 6, weight: 18, size: 'medium', speed: 1.4, zone: 0.216, color: '#b8a36a' },
+  catfish: { id: 'catfish', name: '메기', price: 10, weight: 12, size: 'medium', speed: 1.7, zone: 0.18, color: '#6f6a5e' },
+  trout: { id: 'trout', name: '무지개송어', price: 12, weight: 9, size: 'big', speed: 1.9, zone: 0.162, color: '#e59a9a' },
+  carp: { id: 'carp', name: '잉어', price: 15, weight: 7, size: 'big', speed: 2, zone: 0.144, color: '#d9a14a' },
+  goldfish: { id: 'goldfish', name: '금붕어', price: 25, weight: 4, size: 'big', speed: 2.2, zone: 0.126, color: '#f08a3c' },
+  salmon: { id: 'salmon', name: '전설의 연어', price: 60, weight: 2, size: 'legend', speed: 2.7, zone: 0.099, color: '#f2785a' },
 };
 
 /** 도감 · 가게에 보이는 순서 (흔한 것부터) */

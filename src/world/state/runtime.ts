@@ -19,6 +19,9 @@ export const player = {
   emote: null as { kind: Emote; startedAt: number } | null,
   /** 오래 이어지는 자세. 낚시 중에는 두 팔을 앞으로 내밀어 낚싯대를 쥔다 */
   pose: null as 'fishing' | null,
+  /** 오른손 자리 (월드 좌표). 낚싯대를 쥐여 준다. 뼈대가 없는 임시 캐릭터면 handReady 가 false */
+  hand: new Vector3(),
+  handReady: false,
 };
 
 export const input = {

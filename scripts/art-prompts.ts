@@ -106,6 +106,8 @@ export const ART_PROMPTS: Record<string, string> = {
   [ASSETS.textures.wallStar]: 'interior wallpaper, almost pure white (#f6f6f6) background with a scattered pattern of small light-gray five-pointed stars',
   [ASSETS.textures.floor]: 'light wooden floor planks running horizontally, very pale near-white wood (#f2f2f2) with faint light-gray grain lines',
   [ASSETS.textures.floorCheck]: 'floor tiles in a checkerboard pattern of near-white (#f6f6f6) and light gray (#d8d8d8) squares, 4 by 4 squares',
+  [ASSETS.textures.water]:
+    'clear stylized pond water surface like the water in a cozy toy fountain: bright clear turquoise (#4fc3e0) with soft lighter cyan wavy ripple highlights and gentle rounded caustic light patterns, a few tiny white sparkles',
   [ASSETS.textures.floorCarpet]: 'a soft woven carpet, near-white (#f4f4f4) with a subtle light-gray diamond weave pattern',
 
   /* ---- 배경 ---- */

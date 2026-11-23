@@ -12,7 +12,7 @@
  */
 import { useCallback, useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
-import type { Bone, Group } from 'three';
+import { Vector3, type Bone, type Group, type SkinnedMesh } from 'three';
 import { MODELS } from '@/config/models';
 import { useGameStore } from '@/state/gameStore';
 import { characterOf, type CharacterId } from '@/types/game';
@@ -25,8 +25,8 @@ import { useWorldScene } from '../state/sceneStore';
 /** 발소리 간격 (초) */
 const STEP_INTERVAL = 0.32;
 const HAPPY_SECONDS = 0.7;
-/** 낚시할 때 팔을 앞으로 드는 정도 (라디안) */
-const FISHING_ARMS = 0.95;
+/** 낚시할 때 오른팔을 앞으로 드는 정도 (라디안). 낚싯대는 오른손에 쥔다 */
+const FISHING_ARM = 0.95;
 const INTERACT_SECONDS = 0.35;
 /**
  * 걸을 때 허벅지를 흔드는 크기 (라디안). 앞으로 내딛는 쪽을 크게 해야 성큼성큼 걷는 것처럼 보인다.
@@ -69,7 +69,10 @@ export function Player(): React.ReactElement {
   const walkPhase = useRef(0);
   const stepTimer = useRef(0);
   const limbs = useRef<Limbs>({});
+  /** 오른팔 뼈 기준 손 자리. 모델을 불러온 뒤 한 번 잰다 (handInArm) */
+  const hand = useRef<Vector3 | null>(null);
   const onBones = useCallback((bones: Record<string, Bone> | null) => {
+    hand.current = null;
     limbs.current = bones
       ? {
           legL: bones.leg_L,
@@ -158,12 +161,9 @@ export function Player(): React.ReactElement {
       }
     }
 
-    // 낚시 자세: 두 팔을 앞으로 내밀어 낚싯대를 쥔다 (낚싯대는 연못 쪽 FishingGear 가 그린다)
-    if (player.pose === 'fishing' && !walking) {
-      armForward = Math.max(armForward, FISHING_ARMS);
-      armSwing = 0;
-      raise = 0.02;
-    }
+    // 낚시 자세: 오른팔을 앞으로 내밀어 낚싯대를 쥔다 (낚싯대는 연못 쪽 FishingGear 가 오른손 자리에 그린다)
+    const fishing = player.pose === 'fishing' && !walking;
+    if (fishing) armSwing = 0;
 
     body.current.position.y = bob;
     body.current.rotation.set(lean, spin, tilt);
@@ -179,7 +179,12 @@ export function Player(): React.ReactElement {
     ease(shinL, kneeL, 0, k);
     ease(shinR, kneeR, 0, k);
     ease(armL, armSwing - armForward, raise, k);
-    ease(armR, -armSwing - armForward, -raise, k);
+    ease(armR, fishing ? -FISHING_ARM : -armSwing - armForward, -raise, k);
+
+    // 오른손 자리를 알린다 (낚싯대). 뼈 위치는 지난 프레임 것이지만 서 있을 때만 쓰므로 괜찮다
+    if (armR && !hand.current && body.current) hand.current = handInArm(body.current, armR);
+    player.handReady = !!(armR && hand.current);
+    if (armR && hand.current) player.hand.copy(hand.current).applyMatrix4(armR.matrixWorld);
   });
 
   return (
@@ -193,6 +198,39 @@ export function Player(): React.ReactElement {
       </group>
     </group>
   );
+}
+
+/**
+ * 오른팔 뼈 기준 손 자리. 오른팔에 붙은 점들 중 가장 아래(팔 끝)에 모인 점들의 가운데.
+ * 뼈는 회전 없이 위치만 있으므로(autorig) 뼈 역행렬로 옮기면 바로 뼈 기준 좌표다.
+ */
+function handInArm(root: Group, armR: Bone): Vector3 | null {
+  let mesh: SkinnedMesh | null = null;
+  root.traverse((node) => {
+    const skinned = node as SkinnedMesh;
+    if (!mesh && skinned.isSkinnedMesh && skinned.skeleton.bones.includes(armR)) mesh = skinned;
+  });
+  if (!mesh) return null;
+  const { geometry, skeleton, bindMatrix } = mesh as SkinnedMesh;
+  const bone = skeleton.bones.indexOf(armR);
+  const toBone = skeleton.boneInverses[bone].clone().multiply(bindMatrix);
+  const position = geometry.getAttribute('position');
+  const skinIndex = geometry.getAttribute('skinIndex');
+  const skinWeight = geometry.getAttribute('skinWeight');
+  const points: Vector3[] = [];
+  for (let i = 0; i < position.count; i++) {
+    let weight = 0;
+    for (let j = 0; j < 4; j++) if (skinIndex.getComponent(i, j) === bone) weight += skinWeight.getComponent(i, j);
+    if (weight < 0.6) continue;
+    points.push(new Vector3().fromBufferAttribute(position, i).applyMatrix4(toBone));
+  }
+  if (points.length === 0) return null;
+  const lowest = Math.min(...points.map((p) => p.y));
+  const tip = points.filter((p) => p.y < lowest + 0.05);
+  const center = tip.reduce((sum, p) => sum.add(p), new Vector3()).divideScalar(tip.length);
+  // 손끝보다 조금 위를 쥔다
+  center.y += 0.03;
+  return center;
 }
 
 /** 모델이 아직 없을 때의 임시 캐릭터. 캐릭터마다 옷 색만 다르다 */

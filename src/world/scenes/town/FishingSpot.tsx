@@ -4,7 +4,7 @@
  * 데크 위에서만 "낚시하기" 버튼이 뜬다 (연못 둘레는 물에 들어갈 수 없고 낚시도 못 한다).
  * 버튼 → 곱셈 문제를 맞히면 찌를 달아 던진다 → 입질 → React 낚시 창(막대 멈추기)이 잡을지 정한다.
  * 진행 단계는 state/fishingStore 에 있고, 여기는 그 단계에 맞춰 낚싯대 · 찌를 움직인다.
- * 물은 움직이지 않는다 (찌 둘레 물결만 잠깐 퍼진다).
+ * 물은 움직이지 않는다 (찌 둘레 물결만 잠깐 퍼진다). 물 무늬는 분수대 물 같은 그림(tex_water).
  */
 import { useEffect, useMemo, useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
@@ -29,12 +29,14 @@ import {
   Vector3,
 } from 'three';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
+import { ASSETS } from '@/config/assets';
 import { FISHING } from '@/config/fishing';
 import { TOWN } from '@/config/layout';
 import { useFishing } from '@/state/fishingStore';
 import { useGameStore } from '@/state/gameStore';
 import { applyGroundShadow } from '../../rendering/groundShadow';
 import { StaticShadow } from '../../rendering/bakedShadows';
+import { ArtTexture } from '../../rendering/assets';
 import { useInteractable } from '../../systems/interaction';
 import { groundHeight, obstacles, player, playEmote, raisedAreas } from '../../state/runtime';
 import { mergedBoxGeometry, type BoxSpec } from '../../props/mergedBoxes';
@@ -51,14 +53,19 @@ const WATER_Y = 0.03;
 /** 낚시할 때 서는 자리: 데크 앞쪽 끝에서 이만큼 안쪽 */
 const STAND_BACK = 0.32;
 /** 낚시할 때 바라보는 방향: 카메라 쪽(+z)에서 오른쪽으로 조금 돌아, 낚싯대가 옆모습으로 보이게 */
-const FISHING_FACING = 0.45;
+const FISHING_FACING = 0.8;
+/** 낚싯대는 몸 앞을 가로지르지 않게 오른손 바깥쪽(캐릭터의 오른쪽 = −각)으로 조금 돌려 내민다 */
+const ROD_YAW = -0.3;
+/** 찌를 던지는 방향 = 캐릭터가 보는 쪽 + 낚싯대를 돌린 만큼 */
+const CAST_ANGLE = FISHING_FACING + ROD_YAW;
 /** 찌가 떨어지는 거리 (캐릭터에서) */
 const CAST_DISTANCE = 1.6;
 
 const COLORS = {
   shore: '#d9c18f',
   water: '#7fcfdc',
-  deepWater: '#58b4cf',
+  /** 깊은 가운데에 곱하는 색 (물 무늬가 짙은 청록이 된다) */
+  deepTint: '#7fb4cc',
   plank: '#c99a64',
   frame: '#9a6d45',
   stones: ['#b9b3a6', '#a7a196', '#c8c1b1', '#9d978b'],
@@ -179,8 +186,8 @@ function startFishing(): void {
     player.facing = FISHING_FACING;
     const { center, half } = POND;
     const target = {
-      x: Math.min(center.x + half.x - 0.5, Math.max(center.x - half.x + 0.5, x + Math.sin(FISHING_FACING) * CAST_DISTANCE)),
-      z: Math.min(center.z + half.z - 0.3, z + Math.cos(FISHING_FACING) * CAST_DISTANCE),
+      x: Math.min(center.x + half.x - 0.5, Math.max(center.x - half.x + 0.5, x + Math.sin(CAST_ANGLE) * CAST_DISTANCE)),
+      z: Math.min(center.z + half.z - 0.3, z + Math.cos(CAST_ANGLE) * CAST_DISTANCE),
     };
     useFishing.getState().start(target);
   });
@@ -191,15 +198,13 @@ function startFishing(): void {
 function Pond(): React.ReactElement {
   const { center, half, corner } = POND;
   const shore = useMemo(() => roundedRect(half.x + 0.38, half.z + 0.38, corner + 0.38), [half.x, half.z, corner]);
-  const water = useMemo(() => roundedRect(half.x, half.z, corner), [half.x, half.z, corner]);
-  const deep = useMemo(() => roundedRect(half.x - 0.7, half.z - 0.55, corner - 0.4), [half.x, half.z, corner]);
+  const water = useMemo(() => waterGeometry(), []);
   useEffect(
     () => () => {
       shore.dispose();
       water.dispose();
-      deep.dispose();
     },
-    [shore, water, deep],
+    [shore, water],
   );
   return (
     <group position={[center.x, 0, center.z]}>
@@ -207,15 +212,91 @@ function Pond(): React.ReactElement {
       <mesh geometry={shore} position-y={0.008}>
         <meshLambertMaterial ref={(m) => void (m && applyGroundShadow(m))} color={COLORS.shore} polygonOffset polygonOffsetFactor={-1} />
       </mesh>
-      {/* 물: 가장자리는 밝게, 가운데는 깊은 색. 살짝 반짝이게 거칠기를 낮춘다 */}
+      {/* 물: 분수대 물과 같은 물결 무늬 그림. 가장자리는 밝고 가운데로 갈수록 깊은 색 (꼭짓점 색). 살짝 반짝이게 */}
       <mesh geometry={water} position-y={WATER_Y}>
-        <meshStandardMaterial ref={(m) => void (m && applyGroundShadow(m))} color={COLORS.water} roughness={0.22} metalness={0.05} />
-      </mesh>
-      <mesh geometry={deep} position-y={WATER_Y + 0.002}>
-        <meshStandardMaterial ref={(m) => void (m && applyGroundShadow(m))} color={COLORS.deepWater} roughness={0.2} metalness={0.05} />
+        <ArtTexture assetKey={ASSETS.textures.water} repeat={[1 / WATER_TILE, 1 / WATER_TILE]}>
+          {(map) => (
+            <meshStandardMaterial
+              ref={(m) => void (m && applyGroundShadow(m))}
+              map={map}
+              color={map ? '#ffffff' : COLORS.water}
+              vertexColors
+              roughness={0.18}
+              metalness={0.05}
+            />
+          )}
+        </ArtTexture>
       </mesh>
     </group>
   );
+}
+
+/** 물 무늬 한 장이 덮는 크기 (m) */
+const WATER_TILE = 2.2;
+/** 깊은 가운데가 가장자리에서 들어가는 거리 (m) */
+const DEEP_INSET = 0.75;
+
+/**
+ * 물 모양: 바깥 둘레 → 안쪽 둘레 고리 + 안쪽 판. 바깥 둘레는 흰색(무늬 그대로), 안쪽은 깊은 색을 곱해
+ * 가장자리는 얕고 밝게, 가운데는 깊게 부드럽게 이어진다. 무늬 좌표는 m 단위 (WATER_TILE 로 반복).
+ */
+function waterGeometry(): BufferGeometry {
+  const { half, corner } = POND;
+  const outlineOf = (hx: number, hz: number, r: number): Vector3[] => {
+    const rr = Math.min(r, hx, hz);
+    const path = new Shape();
+    path.moveTo(-hx + rr, -hz);
+    path.lineTo(hx - rr, -hz);
+    path.quadraticCurveTo(hx, -hz, hx, -hz + rr);
+    path.lineTo(hx, hz - rr);
+    path.quadraticCurveTo(hx, hz, hx - rr, hz);
+    path.lineTo(-hx + rr, hz);
+    path.quadraticCurveTo(-hx, hz, -hx, hz - rr);
+    path.lineTo(-hx, -hz + rr);
+    path.quadraticCurveTo(-hx, -hz, -hx + rr, -hz);
+    // 둘레를 같은 수로 나눈 점들. 바닥(xz)에 놓는다 (모양의 y → z)
+    return path.getSpacedPoints(96).slice(0, 96).map((p) => new Vector3(p.x, 0, p.y));
+  };
+  const outer = outlineOf(half.x, half.z, corner);
+  const inner = outlineOf(half.x - DEEP_INSET, half.z - DEEP_INSET * 0.7, corner - DEEP_INSET * 0.6);
+  const deep = new Color(COLORS.deepTint);
+  const positions: number[] = [];
+  const colors: number[] = [];
+  const uvs: number[] = [];
+  const put = (p: Vector3, c: Color) => {
+    positions.push(p.x, 0, p.z);
+    colors.push(c.r, c.g, c.b);
+    uvs.push(p.x, -p.z);
+  };
+  const white = new Color(1, 1, 1);
+  for (const p of outer) put(p, white);
+  for (const p of inner) put(p, deep);
+  const n = outer.length;
+  const index: number[] = [];
+  for (let i = 0; i < n; i += 1) {
+    const a = i;
+    const b = (i + 1) % n;
+    // 위에서 봤을 때 반시계로 감아 윗면이 하늘을 보게
+    index.push(a, n + a, b, b, n + a, n + b);
+  }
+  // 안쪽 판: 안쪽 둘레의 가운데로 부채꼴
+  const centerIndex = positions.length / 3;
+  put(new Vector3(0, 0, 0), deep);
+  for (let i = 0; i < n; i += 1) index.push(centerIndex, n + ((i + 1) % n), n + i);
+  const geometry = new BufferGeometry();
+  geometry.setAttribute('position', new Float32BufferAttribute(positions, 3));
+  geometry.setAttribute('color', new Float32BufferAttribute(colors, 3));
+  geometry.setAttribute('uv', new Float32BufferAttribute(uvs, 2));
+  geometry.setIndex(index);
+  geometry.computeVertexNormals();
+  // 감는 방향이 뒤집혔으면 법선이 아래를 본다 — 그때는 삼각형을 뒤집는다
+  const normal = geometry.getAttribute('normal');
+  if (normal.getY(0) < 0) {
+    for (let i = 0; i < index.length; i += 3) [index[i + 1], index[i + 2]] = [index[i + 2], index[i + 1]];
+    geometry.setIndex(index);
+    geometry.computeVertexNormals();
+  }
+  return geometry;
 }
 
 /** 물가 둘레의 둥근 돌. 데크가 놓인 자리는 비운다 */
@@ -487,11 +568,14 @@ function Deck(): React.ReactElement {
 
 /* ------------------------------ 낚싯대 · 찌 ------------------------------ */
 
-/** 낚싯대를 쥐는 자리와 길이 (캐릭터 기준, 앞이 +z) */
-const GRIP = new Vector3(0.04, 0.6, 0.28);
+/**
+ * 낚싯대는 캐릭터 오른손(player.hand — Player 가 오른팔 뼈에서 잰다)에 쥔다.
+ * 뼈대가 없는 임시 캐릭터일 때만 이 자리(캐릭터 기준 오른쪽 앞, 오른쪽이 −x)를 쓴다
+ */
+const FALLBACK_GRIP = new Vector3(-0.2, 0.6, 0.25);
 const ROD_LENGTH = 1.45;
 /** 낚싯대 기울기: 세운 것(0)에서 앞으로 숙인 각도 */
-const ROD_REST = 0.95;
+const ROD_REST = 0.8;
 const ROD_BACK = -0.55;
 
 function FishingGear(): React.ReactElement {
@@ -545,8 +629,14 @@ function FishingGear(): React.ReactElement {
       return;
     }
 
-    // 캐릭터 자리 · 방향을 따라간다 (낚시 중에는 서 있다)
-    rig.current.position.set(player.position.x, groundHeight(player.position.x, player.position.z), player.position.z);
+    // 오른손에서 나와 손을 따라 움직인다. 방향은 캐릭터가 보는 쪽
+    if (player.handReady) {
+      rig.current.position.copy(player.hand);
+      rod.current.position.set(0, 0, 0);
+    } else {
+      rig.current.position.set(player.position.x, groundHeight(player.position.x, player.position.z), player.position.z);
+      rod.current.position.copy(FALLBACK_GRIP);
+    }
     rig.current.rotation.y = player.facing;
 
     // 낚싯대 기울기
@@ -562,10 +652,12 @@ function FishingGear(): React.ReactElement {
     } else if (phase === 'escaped') {
       pitch = ROD_REST - 0.4;
     }
-    rod.current.rotation.x = pitch;
+    // 먼저 바깥쪽으로 돌리고(y) 그 방향으로 숙인다(x)
+    rod.current.rotation.set(pitch, ROD_YAW, 0, 'YXZ');
+    rig.current.updateMatrixWorld();
 
     // 낚싯대 끝 (월드 좌표)
-    const tip = new Vector3(0, ROD_LENGTH, 0).applyAxisAngle(new Vector3(1, 0, 0), pitch).add(GRIP);
+    const tip = new Vector3(0, ROD_LENGTH, 0).applyEuler(rod.current.rotation).add(rod.current.position);
     rig.current.localToWorld(tip);
 
     // 찌 자리
@@ -627,17 +719,17 @@ function FishingGear(): React.ReactElement {
     <group>
       <group ref={rig} visible={false}>
         {/* 낚싯대: 쥔 자리에서 위(+y)로 뻗은 것을 앞으로 숙인다 */}
-        <group ref={rod} position={GRIP}>
+        <group ref={rod}>
           <mesh position-y={ROD_LENGTH / 2} castShadow>
             <cylinderGeometry args={[0.012, 0.024, ROD_LENGTH, 6]} />
             <meshStandardMaterial color="#7a5232" roughness={0.7} />
           </mesh>
-          {/* 손잡이 · 릴 */}
-          <mesh position-y={0.1}>
+          {/* 손잡이 (손이 가운데를 쥔다) · 릴 */}
+          <mesh position-y={0.01}>
             <cylinderGeometry args={[0.032, 0.032, 0.22, 8]} />
             <meshStandardMaterial color="#3f6fa8" roughness={0.6} />
           </mesh>
-          <mesh position={[0.05, 0.26, 0]} rotation-z={Math.PI / 2}>
+          <mesh position={[0.05, 0.17, 0]} rotation-z={Math.PI / 2}>
             <cylinderGeometry args={[0.045, 0.045, 0.04, 12]} />
             <meshStandardMaterial color="#d9d4c8" roughness={0.5} />
           </mesh>

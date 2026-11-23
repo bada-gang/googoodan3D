@@ -86,6 +86,8 @@ export const ASSETS = {
     floor: 'tex_floor',
     floorCheck: 'tex_floor_check',
     floorCarpet: 'tex_floor_carpet',
+    /** 시장 낚시터 연못 물 (분수대 물과 같은 느낌) */
+    water: 'tex_water',
   },
   environment: {
     /** 시작 화면 배경 그림 */

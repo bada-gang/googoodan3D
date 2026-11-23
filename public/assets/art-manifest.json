@@ -49,6 +49,7 @@
     "tex_floor",
     "tex_floor_check",
     "tex_floor_carpet",
+    "tex_water",
     "env_title",
     "particle_star",
     "particle_sparkle",
