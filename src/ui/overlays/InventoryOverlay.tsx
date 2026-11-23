@@ -28,8 +28,6 @@ export function InventoryOverlay(): React.ReactElement {
   const chests = useGameStore((s) => s.chests);
   const sellableTotal = useGameStore((s) => s.sellableTotal());
   const closeOverlay = useUiStore((s) => s.closeOverlay);
-  const openOverlay = useUiStore((s) => s.openOverlay);
-  const scene = useUiStore((s) => s.currentScene);
   const [tab, setTab] = useState<Tab>('harvest');
 
   const entries = Object.entries(inventory).filter(([, count]) => count > 0);
@@ -46,11 +44,7 @@ export function InventoryOverlay(): React.ReactElement {
             팔 수 있는 물건 값어치
           </span>
           <MoneyTag amount={sellableTotal} size={26} />
-          {scene === 'TownScene' && sellableTotal > 0 && (
-            <GameButton tone="gold" onClick={() => openOverlay('shopSeed')}>
-              농장 가게에서 팔기
-            </GameButton>
-          )}
+          {/* 팔기는 시장의 농장 가게에 직접 가서 한다 (가방에서 바로 가게로 가는 버튼은 없앴다) */}
         </div>
       }
     >
