@@ -9,7 +9,7 @@
  * 잡은 물고기를 가방 · 도감에 넣는 것은 게임 스토어(fishingSlice)가 한다.
  */
 import { create } from 'zustand';
-import { FISHING, rollFish } from '@/config/fishing';
+import { FISHING, isFishId, rollFish } from '@/config/fishing';
 import type { FishId } from '@/types/game';
 import { audio } from '@/audio/sfx';
 import { useGameStore } from './gameStore';
@@ -39,6 +39,13 @@ interface FishingState {
 
 let timer: number | undefined;
 
+/** 개발 서버에서만: 주소에 ?dev-fish=crown 처럼 붙이면 늘 그것이 문다 (막대 빠르기 시험용) */
+const DEV_FISH = (() => {
+  if (!import.meta.env.DEV || typeof location === 'undefined') return null;
+  const id = new URLSearchParams(location.search).get('dev-fish');
+  return id && isFishId(id) ? id : null;
+})();
+
 function later(seconds: number, run: () => void): void {
   window.clearTimeout(timer);
   timer = window.setTimeout(run, seconds * 1000);
@@ -63,7 +70,7 @@ export const useFishing = create<FishingState>()((set, get) => {
         go('waiting');
         const wait = FISHING.biteMinSeconds + Math.random() * (FISHING.biteMaxSeconds - FISHING.biteMinSeconds);
         later(wait, () => {
-          go('bite', { fish: rollFish() });
+          go('bite', { fish: DEV_FISH ?? rollFish() });
           audio.play('place');
         });
       });

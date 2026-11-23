@@ -149,6 +149,7 @@ art-src/         생성 원본 (git 에 안 들어감 — 아래 "백업" 참고
 | `?noshadow` `?noaa` `?pbrground` `?cap30` | 성능 비교용으로 하나씩 끄거나 바꾸기 | 모두 |
 | `?debug` | 오류 자세히 보기, 콘솔 손잡이 | 모두 |
 | `?dev-animals` `?dev-furniture` `?dev-ready` | 동물 · 가구 · 다 자란 나무를 바로 받기 | 개발 서버만 |
+| `?dev-fish=crown` | 낚시할 때 늘 그것이 문다 (물고기 id: `config/fishing.ts`. 막대 빠르기 시험용) | 개발 서버만 |
 | `?daytime=day` / `sunset` / `night` | 시간대 고정 | 개발 서버만 |
 | `?fastday=20` | 밤낮을 20배 빠르게 | 개발 서버만 |
 
