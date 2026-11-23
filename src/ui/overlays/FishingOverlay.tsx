@@ -1,7 +1,7 @@
 /**
  * 낚시 창. 낚시 중에는 화면 아래에 작은 판을 띄우고, 3D 연못(찌)이 보이게 가운데는 비워 둔다.
  *
- *  - 기다리기: "입질을 기다려요" + 그만하기
+ *  - 던지기 · 기다리기 · 끌어올리기 · 놓침: 글 한 줄 안내 (기다리는 동안 그만두기는 없다. 2~5초면 문다)
  *  - 입질: 막대 멈추기 게임. 표시가 좌우로 오가고, 초록 칸에서 멈추면 잡는다 (화면 어디를 눌러도 멈춘다).
  *          물고기마다 표시 빠르기와 칸 너비가 다르다 (config/fishing). 한 번만 멈출 수 있다.
  *  - 잡음: 물고기 카드 (도감에 처음 오르면 알려 준다)
@@ -12,7 +12,6 @@ import { useEffect, useRef, useState } from 'react';
 import { BITE_MESSAGE, FISH, caughtMessage } from '@/config/fishing';
 import { CURRENCY } from '@/config/strings';
 import { useFishing } from '@/state/fishingStore';
-import { useGameStore } from '@/state/gameStore';
 import { cropIcon } from '../common/icons';
 import { GameButton, Icon } from '../common/ui';
 
@@ -35,11 +34,9 @@ export function FishingOverlay(): React.ReactElement | null {
   );
 }
 
-/** 던지기 · 기다리기 · 끌어올리기 · 놓침 안내 */
+/** 던지기 · 기다리기 · 끌어올리기 · 놓침 안내. 모두 글 한 줄짜리 같은 높이의 판 */
 function StatusPanel(): React.ReactElement {
   const phase = useFishing((s) => s.phase);
-  const cancel = useFishing((s) => s.cancel);
-  const left = useGameStore((s) => s.fishingCastsLeft());
   const text =
     phase === 'casting'
       ? '찌를 던졌어요!'
@@ -51,12 +48,6 @@ function StatusPanel(): React.ReactElement {
   return (
     <BottomPanel>
       <p className="font-game text-ink text-[1.5rem]">{text}</p>
-      {phase === 'waiting' && (
-        <div className="flex items-center gap-4">
-          <span className="font-game text-ink-soft text-[1.1rem]">오늘 {left}번 남았어요</span>
-          <GameButton onClick={cancel}>그만하기</GameButton>
-        </div>
-      )}
     </BottomPanel>
   );
 }

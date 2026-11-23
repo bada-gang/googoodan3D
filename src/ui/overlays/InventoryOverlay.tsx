@@ -99,25 +99,20 @@ export function InventoryOverlay(): React.ReactElement {
 }
 
 /**
- * 물고기 도감: 물고기 12칸 + 물속 보물 4칸. 잡아 본 것은 그림 · 이름 · 잡은 수 · 가진 수 · 값,
- * 아직 못 잡은 것은 까만 그림자와 크기만 보여 준다.
+ * 물고기 도감: 물고기 12 + 물속 보물 4 를 나누지 않고 한 판(4 × 4)에 FISH_ORDER 순서로.
+ * 잡아 본 것은 그림 · 이름 · 잡은 수 · 가진 수 · 값, 아직 못 잡은 것은 까만 그림자와 크기만 보여 준다.
  */
 function FishDex(): React.ReactElement {
   const dex = useGameStore((s) => s.fishDex);
-  const fishes = FISH_ORDER.filter((id) => FISH[id].kind === 'fish');
-  const treasures = FISH_ORDER.filter((id) => FISH[id].kind === 'treasure');
-  const foundFish = fishes.filter((id) => dex[id]).length;
-  const foundTreasure = treasures.filter((id) => dex[id]).length;
+  const found = FISH_ORDER.filter((id) => dex[id]).length;
   return (
     <div>
       <p className="font-game text-ink-soft mb-3 text-center text-[1.2rem]">
-        {foundFish + foundTreasure === 0
+        {found === 0
           ? '아직 잡은 것이 없어요. 시장 낚시터에서 낚아 보세요.'
-          : `물고기 ${fishes.length}마리 중 ${foundFish}마리 · 보물 ${treasures.length}개 중 ${foundTreasure}개를 찾았어요`}
+          : `${FISH_ORDER.length}개 중 ${found}개를 찾았어요`}
       </p>
-      <DexGrid ids={fishes} />
-      <p className="font-game text-ink mt-5 mb-2 text-center text-[1.3rem]">물속 보물</p>
-      <DexGrid ids={treasures} />
+      <DexGrid ids={FISH_ORDER} />
     </div>
   );
 }
