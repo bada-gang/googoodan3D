@@ -12,14 +12,15 @@ import type { SellableId } from '@/types/game';
 import { chestIcon, cropIcon, itemCategory, itemIcon, itemName } from '../common/icons';
 import { EmptyNote, GameButton, Icon, ItemCard, MoneyTag, OverlayShell } from '../common/ui';
 
-type Tab = 'harvest' | 'fish' | 'seed' | 'supply' | 'furniture';
+type Tab = 'harvest' | 'seed' | 'supply' | 'furniture' | 'fish';
 
+/** 칸 버튼은 이 순서로 놓인다 (물고기 도감은 맨 오른쪽) */
 const TAB_LABEL: Record<Tab, string> = {
   harvest: '수확물',
-  fish: '물고기 도감',
   seed: '씨앗',
   supply: '물 · 먹이',
   furniture: '가구 · 장식',
+  fish: '물고기 도감',
 };
 
 export function InventoryOverlay(): React.ReactElement {
