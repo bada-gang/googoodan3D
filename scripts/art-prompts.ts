@@ -77,6 +77,14 @@ export const ART_PROMPTS: Record<string, string> = {
   [ASSETS.crops.trout]: 'one rainbow trout fish with a silver body, a soft pink-red stripe along its side (#e59a9a) and small dark spots, side view, head pointing left',
   [ASSETS.crops.carp]: 'one big plump golden-bronze carp fish (#d9a14a) with large shiny scales and two short whiskers, side view, head pointing left',
   [ASSETS.crops.goldfish]: 'one bright orange goldfish (#f08a3c) with a round body and a long flowing double tail fin, side view, head pointing left',
+  [ASSETS.crops.mackerel]: 'one sleek mackerel fish with a shiny blue-green back with dark wavy stripes (#5f8fae) and a bright silver belly, a forked tail, side view, head pointing left',
+  [ASSETS.crops.squid]: 'one cute pale pink-cream squid (#f0c9b8) with a pointed triangular head fin, big round eyes and ten short curly tentacles, side view, head pointing up-left',
+  [ASSETS.crops.eel]: 'one long smooth wavy dark olive eel (#5f6b4e) with a pale yellow belly and a small friendly face, curved in a gentle S shape, side view, head pointing left',
+  [ASSETS.crops.octopus]: 'one cute round reddish-orange octopus (#d9775f) with a big soft head, friendly eyes and eight curly tentacles with small pale suction cups',
+  [ASSETS.crops.treasureMap]: 'one old rolled-open parchment treasure map (#d9b77a) with slightly torn edges, a dotted path and a big red X mark, tied with a small brown string, a few water drops on it',
+  [ASSETS.crops.bottle]: 'one small clear sea-green glass bottle (#9fd3c7) with a cork, a rolled paper letter tied with a red string inside it',
+  [ASSETS.crops.pearl]: 'one huge giant clam shell, open, with a thick wavy pink-and-cream rim (#f3d9e2), holding one very big shiny round white pearl inside, with a soft glow and sparkles',
+  [ASSETS.crops.crown]: 'one magnificent golden crown of the Dragon King of the sea from Korean folk tales: a gold crown with a small coiled friendly dragon on the front, decorated with sea-blue jade, pink coral and white pearls, with a soft golden glow and a few sparkles',
   [ASSETS.crops.salmon]: 'one big majestic legendary salmon fish with silver-pink scales and a coral-orange belly (#f2785a), a soft golden glow and a few small sparkles around it, leaping in a gentle arc, side view, head pointing left',
 
   /* ---- 씨앗 봉투: 글자 대신 열매 그림 ---- */

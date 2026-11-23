@@ -9,7 +9,7 @@
  * 낚시 중에는 화면 전체를 덮어(투명) 다른 버튼 · 조이스틱을 막는다.
  */
 import { useEffect, useRef, useState } from 'react';
-import { FISH, FISH_SIZE_LABEL } from '@/config/fishing';
+import { BITE_MESSAGE, FISH, caughtMessage } from '@/config/fishing';
 import { CURRENCY } from '@/config/strings';
 import { useFishing } from '@/state/fishingStore';
 import { useGameStore } from '@/state/gameStore';
@@ -105,7 +105,7 @@ function BiteGame(): React.ReactElement {
     <div className="absolute inset-0" onPointerDown={stop}>
       <BottomPanel wide>
         <p className="font-game text-ink text-[1.6rem]">
-          {def ? `${FISH_SIZE_LABEL[def.size]}가 물었어요!` : ''}
+          {def ? BITE_MESSAGE[def.size] : ''}
         </p>
         <p className="font-game text-ink-soft -mt-1 text-[1.1rem]">움직이는 표시가 초록 칸에 왔을 때 멈추세요</p>
         <div className="relative my-1 h-[46px] w-full rounded-full border-4 border-[var(--color-ink)] bg-[#e9dcc0]">
@@ -131,7 +131,7 @@ function BiteGame(): React.ReactElement {
   );
 }
 
-/** 잡은 물고기 카드 */
+/** 잡은 물고기 · 건진 보물 카드 */
 function CaughtCard(): React.ReactElement | null {
   const fish = useFishing((s) => s.fish);
   const firstTime = useFishing((s) => s.firstTime);
@@ -148,7 +148,7 @@ function CaughtCard(): React.ReactElement | null {
           </span>
         )}
         <Icon src={cropIcon(fish)} size={170} alt={def.name} />
-        <p className="font-game text-ink text-[2.1rem]">{def.name}를 잡았어요!</p>
+        <p className="font-game text-ink text-[2.1rem]">{caughtMessage(fish)}</p>
         <p className="font-game text-ink-soft text-[1.2rem]">
           가방에 넣었어요 · 팔면 {def.price}
           {CURRENCY}

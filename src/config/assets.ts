@@ -45,6 +45,15 @@ export const ASSETS = {
     carp: 'fish_carp',
     goldfish: 'fish_goldfish',
     salmon: 'fish_salmon',
+    mackerel: 'fish_mackerel',
+    squid: 'fish_squid',
+    eel: 'fish_eel',
+    octopus: 'fish_octopus',
+    // 물속 보물
+    treasureMap: 'catch_treasure_map',
+    bottle: 'catch_bottle',
+    pearl: 'catch_pearl',
+    crown: 'catch_crown',
   },
   seeds: {
     apple: 'seedbag_apple',
