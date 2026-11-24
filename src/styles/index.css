@@ -107,9 +107,13 @@ button {
   }
 
   /** 크림색이 아닌 새하얀 버튼 (이름 · 캐릭터 바꾸기 같은 보조 버튼) */
-  .btn-white,
-  .hud-pill.pill-white {
+  .btn-white {
     background: #ffffff;
+  }
+
+  /** 밝은 주황 (선택 취소) */
+  .btn-orange {
+    background: linear-gradient(180deg, #ffd9a8 0%, #ffad5c 100%);
   }
 
   .btn-gold {

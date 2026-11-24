@@ -7,11 +7,12 @@ import { coinIcon } from './icons';
 import { formatMoney } from '@/config/strings';
 import { audio } from '@/audio/sfx';
 
-type ButtonTone = 'plain' | 'white' | 'gold' | 'leaf' | 'sky' | 'berry';
+type ButtonTone = 'plain' | 'white' | 'orange' | 'gold' | 'leaf' | 'sky' | 'berry';
 
 const TONE_CLASS: Record<ButtonTone, string> = {
   plain: '',
   white: 'btn-white',
+  orange: 'btn-orange',
   gold: 'btn-gold',
   leaf: 'btn-leaf',
   sky: 'btn-sky',

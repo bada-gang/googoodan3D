@@ -158,7 +158,8 @@ export function ScreenShell({
   subtitle,
   children,
 }: {
-  title: string;
+  /** 보통은 글자, 연습 고르기 화면처럼 그림을 넣을 때는 요소 */
+  title: React.ReactNode;
   subtitle?: string;
   children: React.ReactNode;
 }): React.ReactElement {

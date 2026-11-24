@@ -188,13 +188,20 @@ export function TableSelectScreen({
   }
 
   return (
-    <ScreenShell title="오늘은 무엇을 연습할까요?">
+    <ScreenShell
+      title={
+        // 이름이 길면(8글자) 쉼표 뒤에서 두 줄로 나뉜다
+        <span className="inline-flex flex-wrap items-center justify-center gap-x-3 gap-y-2 text-[2.3rem]">
+          <span className="inline-flex items-center gap-2">
+            <Icon src={avatarIcon(profile.avatarId)} size={52} alt="" />
+            {profile.displayName}님,
+          </span>
+          <span>오늘은 무엇을 공부할까요?</span>
+        </span>
+      }
+    >
       <div className="flex flex-col items-center gap-4 pt-1">
         <div className="flex items-center gap-3">
-          <div className="hud-pill pill-white">
-            <Icon src={avatarIcon(profile.avatarId)} size={38} alt="" />
-            {profile.displayName}
-          </div>
           <GameButton
             tone="white"
             onClick={() => {
@@ -300,7 +307,7 @@ export function TableSelectScreen({
           </GameButton>
           {/* 늘 같은 자리에 둔다. 고른 게 없으면 흐리게만 */}
           <GameButton
-            tone="white"
+            tone="orange"
             disabled={selected.length === 0 && sets.length === 0}
             onClick={() => {
               audio.play('tap');
