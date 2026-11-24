@@ -58,9 +58,9 @@ export const FISH: Record<FishId, FishDef> = {
   goldfish: fish({ id: 'goldfish', name: '금붕어', price: 35, weight: 3.5, size: 'small', speed: 1.5, zone: 0.18, color: '#f08a3c' }),
   salmon: fish({ id: 'salmon', name: '전설의 연어', price: 120, weight: 2.5, size: 'legend', speed: 1.5, zone: 0.17, color: '#f2785a' }),
   bottle: treasure({ id: 'bottle', name: '유리병 편지', price: 15, weight: 5.5, size: 'thing', speed: 1.3, zone: 0.24, color: '#9fd3c7' }),
-  treasureMap: treasure({ id: 'treasureMap', name: '보물 지도', price: 100, weight: 3, size: 'thing', speed: 1.6, zone: 0.21, color: '#d9b77a' }),
-  pearl: treasure({ id: 'pearl', name: '대왕 진주 조개', price: 140, weight: 2.5, size: 'thing', speed: 1.6, zone: 0.18, color: '#f3d9e2' }),
-  crown: treasure({ id: 'crown', name: '간이 필요한 용왕의 왕관', price: 300, weight: 1.5, size: 'legend', speed: 1.8, zone: 0.17, color: '#f6c453' }),
+  treasureMap: treasure({ id: 'treasureMap', name: '보물 지도', price: 100, weight: 3, size: 'thing', speed: 1.4, zone: 0.21, color: '#d9b77a' }),
+  pearl: treasure({ id: 'pearl', name: '대왕 진주 조개', price: 140, weight: 2.5, size: 'thing', speed: 1.5, zone: 0.18, color: '#f3d9e2' }),
+  crown: treasure({ id: 'crown', name: '간이 필요한 용왕의 왕관', price: 300, weight: 1.5, size: 'legend', speed: 1.5, zone: 0.17, color: '#f6c453' }),
 };
 
 /** 도감 · 가게에 보이는 순서: 물고기(흔하고 싼 것부터) → 보물 */
