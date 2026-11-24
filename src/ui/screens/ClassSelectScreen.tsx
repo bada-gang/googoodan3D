@@ -97,7 +97,7 @@ export function ClassSelectScreen({
                 key={room.id}
                 type="button"
                 onClick={() => choose(room)}
-                className="panel-paper font-game flex min-h-[110px] items-center justify-center px-4 py-3 text-center text-[1.8rem] leading-tight text-ink transition active:translate-y-[3px]"
+                className="panel-paper font-game flex min-h-[84px] items-center justify-center px-4 py-2 text-center text-[1.7rem] leading-tight text-ink transition active:translate-y-[3px]"
               >
                 {room.name}
               </button>
