@@ -183,7 +183,7 @@ export function SettingsOverlay(): React.ReactElement {
         {/* 출처 표기가 필요한 음원 (config/credits.ts). 맨 아래 게임 종료 버튼 밑에 작게 */}
         <div className="px-2 text-center">
           {CREDITS.map((line) => (
-            <p key={line} className="text-[0.8rem] text-ink-soft">
+            <p key={line} className="text-[0.4rem] text-ink-soft">
               {line}
             </p>
           ))}
