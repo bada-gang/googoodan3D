@@ -106,6 +106,12 @@ button {
     opacity: 0.7;
   }
 
+  /** 크림색이 아닌 새하얀 버튼 (이름 · 캐릭터 바꾸기 같은 보조 버튼) */
+  .btn-white,
+  .hud-pill.pill-white {
+    background: #ffffff;
+  }
+
   .btn-gold {
     background: linear-gradient(180deg, #ffe08a 0%, var(--color-gold) 100%);
   }

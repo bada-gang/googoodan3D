@@ -191,11 +191,12 @@ export function TableSelectScreen({
     <ScreenShell title="오늘은 무엇을 연습할까요?">
       <div className="flex flex-col items-center gap-4 pt-1">
         <div className="flex items-center gap-3">
-          <div className="hud-pill">
+          <div className="hud-pill pill-white">
             <Icon src={avatarIcon(profile.avatarId)} size={38} alt="" />
             {profile.displayName}
           </div>
           <GameButton
+            tone="white"
             onClick={() => {
               audio.play('tap');
               setAvatar(profile.avatarId);
@@ -206,6 +207,7 @@ export function TableSelectScreen({
             캐릭터 바꾸기
           </GameButton>
           <GameButton
+            tone="white"
             onClick={() => {
               audio.play('tap');
               setNewName(profile.displayName);
@@ -220,15 +222,7 @@ export function TableSelectScreen({
         <div className="flex items-stretch gap-6">
           {/* 곱셈구구: 단 여덟 개(4 × 2) + 퀵버튼. 2학년이 여덟 개를 보고 약한 단을 스스로 고르기는 어렵다. */}
           <div className="flex flex-col items-center gap-3">
-            <div className="flex min-h-[56px] items-center gap-3">
-              <span className="font-game text-[1.35rem] text-ink">곱셈구구</span>
-              <GameButton tone="sky" onClick={selectAll}>
-                구구단 전체
-              </GameButton>
-              <GameButton tone="berry" onClick={selectPractice}>
-                연습 필요
-              </GameButton>
-            </div>
+            <span className="font-game text-[1.35rem] text-ink">곱셈구구</span>
             <div className="grid grid-cols-4 gap-2.5">
               {TABLES.map((table) => {
                 const on = selected.includes(table);
@@ -248,15 +242,21 @@ export function TableSelectScreen({
                 );
               })}
             </div>
+            <div className="flex items-center gap-3">
+              <GameButton tone="sky" onClick={selectAll}>
+                구구단 전체
+              </GameButton>
+              <GameButton tone="berry" onClick={selectPractice}>
+                연습 필요
+              </GameButton>
+            </div>
           </div>
-  
+
           <div className="w-[3px] self-stretch rounded-full bg-ink/15" aria-hidden />
-  
+
           {/* 다른 문제 묶음 (2 × 2) */}
           <div className="flex flex-col items-center gap-3">
-            <div className="flex min-h-[56px] items-center">
-              <span className="font-game text-[1.35rem] text-ink">나눗셈 · 뺄셈</span>
-            </div>
+            <span className="font-game text-[1.35rem] text-ink">나눗셈 · 뺄셈</span>
             <div className="grid grid-cols-2 gap-2.5">
               {PROBLEM_SETS.map((set) => {
                 const on = sets.includes(set);
