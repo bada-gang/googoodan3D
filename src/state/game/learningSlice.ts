@@ -1,7 +1,7 @@
-/** 학습 기록: 문제별 · 단별 정답률, 오답 복습 줄, 최근에 낸 문제. */
+/** 학습 기록: 문제별 · 단별 · 묶음별 정답률, 오답 복습 줄, 최근에 낸 문제. */
 import { RECENT_MEMORY, WRONG_REVIEW_MAX_GAP } from '@/config/balance';
 import type { LearningStats, MathQuestion } from '@/types/learning';
-import { createEmptyLearningStats, problemKey } from '@/types/learning';
+import { createEmptyLearningStats } from '@/types/learning';
 import type { GameSlice } from './types';
 
 export interface LearningSlice {
@@ -22,7 +22,7 @@ export const createLearningSlice: GameSlice<LearningSlice> = (set, get) => ({
 
   noteQuestionAsked: (question) =>
     set((s) => ({
-      recentQuestions: [problemKey(question.left, question.right), ...s.recentQuestions].slice(
+      recentQuestions: [question.key, ...s.recentQuestions].slice(
         0,
         RECENT_MEMORY * 2,
       ),
@@ -32,7 +32,7 @@ export const createLearningSlice: GameSlice<LearningSlice> = (set, get) => ({
   recordAttempt: (question, isCorrect) => {
     const profile = get().profile;
     if (!profile) return;
-    const key = problemKey(question.left, question.right);
+    const key = question.key;
     const now = new Date().toISOString();
 
     set((s) => {
@@ -41,6 +41,7 @@ export const createLearningSlice: GameSlice<LearningSlice> = (set, get) => ({
         key,
         left: question.left,
         right: question.right,
+        op: question.op,
         attempts: 0,
         correct: 0,
         streak: 0,
@@ -54,7 +55,10 @@ export const createLearningSlice: GameSlice<LearningSlice> = (set, get) => ({
         lastAttemptedAt: now,
       };
 
-      const table = stats.byTable[question.table] ?? { attempts: 0, correct: 0 };
+      const bump = (row: { attempts: number; correct: number } | undefined) => ({
+        attempts: (row?.attempts ?? 0) + 1,
+        correct: (row?.correct ?? 0) + (isCorrect ? 1 : 0),
+      });
       const wrongQueue = isCorrect
         ? stats.wrongQueue.filter((k) => k !== key)
         : [key, ...stats.wrongQueue.filter((k) => k !== key)].slice(0, WRONG_REVIEW_MAX_GAP);
@@ -64,13 +68,15 @@ export const createLearningSlice: GameSlice<LearningSlice> = (set, get) => ({
           totalAttempts: stats.totalAttempts + 1,
           totalCorrect: stats.totalCorrect + (isCorrect ? 1 : 0),
           totalWrong: stats.totalWrong + (isCorrect ? 0 : 1),
-          byTable: {
-            ...stats.byTable,
-            [question.table]: {
-              attempts: table.attempts + 1,
-              correct: table.correct + (isCorrect ? 1 : 0),
-            },
-          },
+          // 곱셈구구는 단별로, 나머지 묶음은 묶음별로 모은다
+          byTable:
+            question.set === 'mul'
+              ? { ...stats.byTable, [question.table]: bump(stats.byTable[question.table]) }
+              : stats.byTable,
+          bySet:
+            question.set === 'mul'
+              ? (stats.bySet ?? {})
+              : { ...(stats.bySet ?? {}), [question.set]: bump(stats.bySet?.[question.set]) },
           byProblem: { ...stats.byProblem, [key]: record },
           wrongQueue,
         },

@@ -4,9 +4,9 @@
  * 화면 컴포넌트에서 계산하지 않고 여기로 모은다.
  * 저장소도 React 도 모르는 코드라, 집계 규칙이 의심스러우면 여기만 보면 된다. (개발원칙 9)
  */
-import { TABLES } from '@/config/curriculum';
+import { PROBLEM_SETS, TABLES, type ProblemSet } from '@/config/curriculum';
 import type { GameSaveData, PlayerProfile } from '@/types/game';
-import type { LearningStats, ProblemRecord } from '@/types/learning';
+import { formatProblem, type LearningStats, type ProblemRecord } from '@/types/learning';
 
 /** 단 목록은 @/config/curriculum 한 곳에만 있다. 교사 화면 코드는 그대로 다시 내보낸다. */
 export { TABLES };
@@ -19,10 +19,19 @@ export interface TableAccuracy {
   accuracy: number | null;
 }
 
+export interface SetAccuracy {
+  set: ProblemSet;
+  attempts: number;
+  correct: number;
+  accuracy: number | null;
+}
+
 export interface WeakProblem {
   key: string;
   left: number;
   right: number;
+  /** 화면에 보일 식. "6 × 7", "42 ÷ 6", "43 − 7" */
+  label: string;
   attempts: number;
   wrong: number;
   accuracy: number;
@@ -41,6 +50,8 @@ export interface StudentRow {
   totalCorrect: number;
   accuracy: number | null;
   byTable: TableAccuracy[];
+  /** 나눗셈 · 뺄셈 묶음별 정답률 */
+  bySet: SetAccuracy[];
   /** 틀린 횟수 순 전체 목록. 화면에서 필요한 만큼 잘라 쓴다. */
   weakProblems: WeakProblem[];
   /** 이 학생 데이터를 읽다가 실패했으면 그 사유 */
@@ -55,6 +66,7 @@ export interface ClassSummary {
   totalCorrect: number;
   accuracy: number | null;
   byTable: TableAccuracy[];
+  bySet: SetAccuracy[];
   weakProblems: WeakProblem[];
 }
 
@@ -77,12 +89,23 @@ export function tableAccuracies(byTable: LearningStats['byTable']): TableAccurac
   });
 }
 
+/** 네 묶음을 모두 돌려준다 (안 푼 묶음도 줄에 남긴다) */
+export function setAccuracies(bySet: LearningStats['bySet']): SetAccuracy[] {
+  return PROBLEM_SETS.map((set) => {
+    const row = bySet?.[set];
+    const attempts = row?.attempts ?? 0;
+    const correct = row?.correct ?? 0;
+    return { set, attempts, correct, accuracy: percent(correct, attempts) };
+  });
+}
+
 function toWeakProblem(record: ProblemRecord): WeakProblem {
   const wrong = Math.max(0, record.attempts - record.correct);
   return {
     key: record.key,
     left: record.left,
     right: record.right,
+    label: formatProblem(record),
     attempts: record.attempts,
     wrong,
     accuracy: percent(record.correct, record.attempts) ?? 0,
@@ -119,6 +142,7 @@ export function buildStudentRow(
     totalCorrect,
     accuracy: percent(totalCorrect, totalAttempts),
     byTable: tableAccuracies(stats?.byTable ?? {}),
+    bySet: setAccuracies(stats?.bySet),
     weakProblems: weakProblems(stats?.byProblem ?? {}),
     loadError,
   };
@@ -130,6 +154,7 @@ export function buildStudentRow(
  */
 export function summarizeClass(rows: StudentRow[]): ClassSummary {
   const byTable = TABLES.map((table) => ({ table, attempts: 0, correct: 0, accuracy: null as number | null }));
+  const bySet = PROBLEM_SETS.map((set) => ({ set, attempts: 0, correct: 0, accuracy: null as number | null }));
   const byProblem = new Map<string, WeakProblem>();
 
   let totalAttempts = 0;
@@ -146,6 +171,11 @@ export function summarizeClass(rows: StudentRow[]): ClassSummary {
       byTable[index].correct += t.correct;
     });
 
+    row.bySet.forEach((t, index) => {
+      bySet[index].attempts += t.attempts;
+      bySet[index].correct += t.correct;
+    });
+
     for (const problem of row.weakProblems) {
       const found = byProblem.get(problem.key);
       if (found) {
@@ -158,6 +188,7 @@ export function summarizeClass(rows: StudentRow[]): ClassSummary {
   }
 
   for (const t of byTable) t.accuracy = percent(t.correct, t.attempts);
+  for (const t of bySet) t.accuracy = percent(t.correct, t.attempts);
 
   const classWeak = [...byProblem.values()]
     .map((p) => ({ ...p, accuracy: percent(p.attempts - p.wrong, p.attempts) ?? 0 }))
@@ -171,6 +202,7 @@ export function summarizeClass(rows: StudentRow[]): ClassSummary {
     totalCorrect,
     accuracy: percent(totalCorrect, totalAttempts),
     byTable,
+    bySet,
     weakProblems: classWeak,
   };
 }

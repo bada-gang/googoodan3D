@@ -68,14 +68,17 @@ export function AccuracyBar({
   value,
   attempts,
   label,
+  labelClass = 'w-12',
 }: {
   value: number | null;
   attempts: number;
   label: ReactNode;
+  /** 이름 칸 너비 (묶음 이름처럼 긴 이름은 넓게) */
+  labelClass?: string;
 }): React.ReactElement {
   return (
     <div className="flex items-center gap-3">
-      <span className="font-game w-12 shrink-0 text-[1.05rem] text-ink">{label}</span>
+      <span className={`font-game shrink-0 text-[1.05rem] text-ink ${labelClass}`}>{label}</span>
       <div className="relative h-5 flex-1 overflow-hidden rounded-full bg-ink/10">
         <div
           className={['h-full rounded-full transition-all', accuracyColor(value)].join(' ')}

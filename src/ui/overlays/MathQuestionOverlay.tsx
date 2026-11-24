@@ -1,11 +1,12 @@
 /**
- * 곱셈 문제 팝업. (명세 15, 19, 55, 56, 57)
+ * 문제 팝업 (곱셈구구 · 나눗셈 · 뺄셈). (명세 15, 19, 55, 56, 57)
  *
  * - 시험지가 아니라 게임 세계의 종이 카드처럼 보이게 한다.
  * - 문제는 아주 크게, 선택지는 2×2 큰 버튼.
  * - 오답이어도 잃는 것은 없다. 다만 두 번 틀리면 정답을 알려주고 새 문제로 넘어간다. (요청 2)
  */
 import { useEffect, useMemo, useState } from 'react';
+import { hasFinal } from '@/math/problemSets';
 import { hintFor } from '@/math/questionGenerator';
 import { useUiStore } from '@/state/uiStore';
 import { cancelMath, completeMath, retryWithNewQuestion, submitAnswer } from '../mathFlow';
@@ -17,9 +18,9 @@ type Phase = 'asking' | 'correct' | 'failed';
 export function MathQuestionOverlay(): React.ReactElement | null {
   const request = useUiStore((s) => s.math);
   const [phase, setPhase] = useState<Phase>('asking');
-  const [wrongChoices, setWrongChoices] = useState<number[]>([]);
-  const [shaking, setShaking] = useState<number | null>(null);
-  const [chosen, setChosen] = useState<number | null>(null);
+  const [wrongChoices, setWrongChoices] = useState<string[]>([]);
+  const [shaking, setShaking] = useState<string | null>(null);
+  const [chosen, setChosen] = useState<string | null>(null);
 
   const questionId = request?.question.id;
 
@@ -35,7 +36,7 @@ export function MathQuestionOverlay(): React.ReactElement | null {
   if (!request) return null;
   const { question, title } = request;
 
-  const pick = (value: number) => {
+  const pick = (value: string) => {
     if (phase !== 'asking' || wrongChoices.includes(value)) return;
     const result = submitAnswer(value);
     if (result === 'correct') {
@@ -53,7 +54,7 @@ export function MathQuestionOverlay(): React.ReactElement | null {
     if (result === 'failed') setPhase('failed');
   };
 
-  const solved = `${question.left} × ${question.right} = ${question.product}`;
+  const solved = question.solved;
 
   return (
     <div className="pointer-events-auto absolute inset-0 z-50 flex items-center justify-center p-[2%]">
@@ -80,7 +81,7 @@ export function MathQuestionOverlay(): React.ReactElement | null {
             {/* 꾸짖지 않는다. 답을 알려주고 새 문제로 넘긴다. (명세 57) */}
             <p className="font-game animate-pop-in text-center text-[1.9rem] text-ink">
               정답은 <span className="text-berry">{question.correctAnswer}</span>
-              이에요. {hint}
+              {answerEnding(question.correctAnswer)}. {hint}
             </p>
             <p className="font-game text-center text-[1.25rem] text-ink-soft">
               새 문제를 맞히면 계속할 수 있어요
@@ -161,4 +162,10 @@ function StarBurst(): React.ReactElement {
       ))}
     </div>
   );
+}
+
+/** "12예요" / "7 … 3이에요": 마지막 수의 받침에 맞춘 끝말 */
+function answerEnding(answer: string): string {
+  const last = Number(answer.split(' … ').pop());
+  return Number.isFinite(last) && !hasFinal(last) ? '예요' : '이에요';
 }

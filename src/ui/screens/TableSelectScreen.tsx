@@ -1,12 +1,13 @@
 /**
- * 구구단 선택 화면. 게임에 들어갈 때마다 반드시 표시한다. (명세 11, 12)
+ * 연습할 문제 고르기 화면. 게임에 들어갈 때마다 반드시 표시한다. (명세 11, 12)
+ * 곱셈구구 단(여러 개)과 다른 문제 묶음(나눗셈 · 받아내림 뺄셈, 여러 개)을 함께 고를 수 있다.
  * 이 선택은 현재 세션에만 적용되고 저장하지 않는다.
  *
  * 캐릭터 바꾸기 · 이름 바꾸기도 여기 둔다. 이름을 이미 고른 뒤라 "누구 것을 바꿀까요"를 물을 필요가 없고,
  * 이름 카드가 "게임 시작"과 "캐릭터 바꾸기" 두 가지를 겸하지 않아도 된다.
  */
 import { useEffect, useState } from 'react';
-import { TABLES } from '@/config/curriculum';
+import { PROBLEM_SETS, PROBLEM_SET_EXAMPLE, PROBLEM_SET_LABEL, TABLES, type ProblemSet } from '@/config/curriculum';
 import { pickPracticeTables } from '@/math/practiceNeeds';
 import { repositories } from '@/data';
 import type { AvatarId, CharacterId, PlayerProfile } from '@/types/game';
@@ -26,12 +27,13 @@ export function TableSelectScreen({
   onProfileChanged,
 }: {
   profile: PlayerProfile;
-  onStart: (tables: number[]) => void;
+  onStart: (tables: number[], sets: ProblemSet[]) => void;
   onBack: () => void;
   /** 바뀐 모습 · 이름을 위(App)에도 알린다 — 게임 안 캐릭터와 저장 데이터가 같이 바뀌어야 한다. */
   onProfileChanged: (patch: Partial<Pick<PlayerProfile, 'avatarId' | 'characterId' | 'displayName'>>) => void;
 }): React.ReactElement {
   const [selected, setSelected] = useState<number[]>([]);
+  const [sets, setSets] = useState<ProblemSet[]>([]);
   const [picking, setPicking] = useState(false);
   const [renaming, setRenaming] = useState(false);
   const [newName, setNewName] = useState(profile.displayName);
@@ -66,6 +68,11 @@ export function TableSelectScreen({
     setSelected((prev) =>
       prev.includes(table) ? prev.filter((t) => t !== table) : [...prev, table],
     );
+  };
+
+  const toggleSet = (set: ProblemSet) => {
+    audio.play('tap');
+    setSets((prev) => (prev.includes(set) ? prev.filter((s) => s !== set) : [...prev, set]));
   };
 
   const selectAll = () => {
@@ -181,8 +188,8 @@ export function TableSelectScreen({
   }
 
   return (
-    <ScreenShell title="오늘은 어떤 구구단을 연습할까요?">
-      <div className="flex flex-col items-center gap-5 pt-1">
+    <ScreenShell title="오늘은 무엇을 연습할까요?">
+      <div className="flex flex-col items-center gap-4 pt-1">
         <div className="flex items-center gap-3">
           <div className="hud-pill">
             <Icon src={avatarIcon(profile.avatarId)} size={38} alt="" />
@@ -209,39 +216,80 @@ export function TableSelectScreen({
           </GameButton>
         </div>
 
-        <div className="grid grid-cols-4 gap-4">
-          {TABLES.map((table) => {
-            const on = selected.includes(table);
-            return (
-              <button
-                key={table}
-                type="button"
-                onClick={() => toggle(table)}
-                aria-pressed={on}
-                className={[
-                  'btn-game h-[104px] w-[128px] text-[2.1rem]',
-                  on ? 'btn-gold ring-4 ring-white/70' : '',
-                ].join(' ')}
-              >
-                {table}단
-              </button>
-            );
-          })}
+        {/* 곱셈구구: 단 여덟 개 한 줄 + 퀵버튼. 2학년이 여덟 개를 보고 약한 단을 스스로 고르기는 어렵다. */}
+        <div className="flex w-full flex-col items-center gap-2">
+          <div className="flex items-center gap-3">
+            <span className="font-game text-[1.35rem] text-ink">곱셈구구</span>
+            <GameButton tone="sky" onClick={selectAll}>
+              구구단 전체
+            </GameButton>
+            <GameButton tone="berry" onClick={selectPractice}>
+              연습 필요
+            </GameButton>
+          </div>
+          <div className="flex gap-2.5">
+            {TABLES.map((table) => {
+              const on = selected.includes(table);
+              return (
+                <button
+                  key={table}
+                  type="button"
+                  onClick={() => toggle(table)}
+                  aria-pressed={on}
+                  className={[
+                    'btn-game h-[76px] w-[92px] whitespace-nowrap !px-0 text-[1.8rem]',
+                    on ? 'btn-gold ring-4 ring-white/70' : '',
+                  ].join(' ')}
+                >
+                  {table}단
+                </button>
+              );
+            })}
+          </div>
         </div>
 
-        {/* 퀵버튼. 2학년이 여덟 개를 보고 약한 단을 스스로 고르기는 어렵다. */}
-        <div className="flex gap-3">
-          <GameButton tone="sky" onClick={selectAll}>
-            전체 선택
-          </GameButton>
-          <GameButton tone="berry" onClick={selectPractice}>
-            연습 필요
-          </GameButton>
-          {selected.length > 0 && (
+        {/* 다른 문제 묶음: 곱셈구구와 함께 여러 개 고를 수 있다 */}
+        <div className="flex w-full flex-col items-center gap-2">
+          <span className="font-game text-[1.35rem] text-ink">나눗셈 · 뺄셈</span>
+          <div className="flex gap-2.5">
+            {PROBLEM_SETS.map((set) => {
+              const on = sets.includes(set);
+              return (
+                <button
+                  key={set}
+                  type="button"
+                  onClick={() => toggleSet(set)}
+                  aria-pressed={on}
+                  className={[
+                    'btn-game flex h-[84px] w-[196px] flex-col items-center justify-center !gap-0 !px-2 leading-tight',
+                    on ? 'btn-gold ring-4 ring-white/70' : '',
+                  ].join(' ')}
+                >
+                  <span className="text-[1.2rem]">{PROBLEM_SET_LABEL[set]}</span>
+                  <span className="text-[0.95rem] opacity-75">{PROBLEM_SET_EXAMPLE[set]}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        <div className="flex min-h-[2.6rem] items-center gap-3">
+          <p className="font-game text-center text-[1.2rem] text-ink-soft">
+            {selected.length === 0 && sets.length === 0 ? (
+              '연습할 것을 하나 이상 골라 주세요'
+            ) : (
+              <>
+                <span className="text-ink">{describeChoice(selected, sets)}</span>을 연습해요
+                {pickNote && <span className="text-ink"> — {pickNote}</span>}
+              </>
+            )}
+          </p>
+          {!(selected.length === 0 && sets.length === 0) && (
             <GameButton
               onClick={() => {
                 audio.play('tap');
                 setSelected([]);
+                setSets([]);
                 setPickNote('');
               }}
             >
@@ -250,28 +298,14 @@ export function TableSelectScreen({
           )}
         </div>
 
-        <p className="font-game min-h-[2rem] text-center text-[1.2rem] text-ink-soft">
-          {selected.length === 0 ? (
-            '연습할 단을 하나 이상 골라 주세요'
-          ) : selected.length === TABLES.length ? (
-            // 여덟 단을 다 늘어놓으면 길기만 하다
-            <span className="text-ink">전체를 골랐어요</span>
-          ) : (
-            <>
-              {`${[...selected].sort((a, b) => a - b).join('단, ')}단을 연습해요`}
-              {pickNote && <span className="text-ink"> — {pickNote}</span>}
-            </>
-          )}
-        </p>
-
         <div className="flex gap-4">
           <GameButton onClick={onBack}>이름 다시 고르기</GameButton>
           <GameButton
             tone="leaf"
             big
-            glow={selected.length > 0}
-            disabled={selected.length === 0}
-            onClick={() => onStart([...selected].sort((a, b) => a - b))}
+            glow={!(selected.length === 0 && sets.length === 0)}
+            disabled={selected.length === 0 && sets.length === 0}
+            onClick={() => onStart([...selected].sort((a, b) => a - b), PROBLEM_SETS.filter((set) => sets.includes(set)))}
           >
             마을로 출발!
           </GameButton>
@@ -279,4 +313,13 @@ export function TableSelectScreen({
       </div>
     </ScreenShell>
   );
+}
+
+/** "2단, 3단 · 받아내림 뺄셈" 처럼 고른 것을 한 줄로 */
+function describeChoice(tables: number[], sets: ProblemSet[]): string {
+  const parts: string[] = [];
+  if (tables.length === TABLES.length) parts.push('구구단 전체');
+  else if (tables.length > 0) parts.push(`${[...tables].sort((a, b) => a - b).join('단, ')}단`);
+  for (const set of PROBLEM_SETS) if (sets.includes(set)) parts.push(PROBLEM_SET_LABEL[set]);
+  return parts.join(' · ');
 }

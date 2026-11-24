@@ -8,7 +8,7 @@
 src/
   config/        숫자 · 목록 · 이름 (밸런스, 상품 목록, 배치, 모델 목록) ← 내용 바꾸기는 대부분 여기
   types/         게임 데이터 모양 (타입)
-  math/          곱셈 문제 출제기 · 오답 선택지 · 연습 필요 판단
+  math/          문제 출제기(곱셈구구 · 나눗셈 · 받아내림 뺄셈) · 오답 선택지 · 연습 필요 판단
   state/         게임 상태(저장되는 것) · UI 상태 · 기기 설정 · 자동 저장
     game/          게임 상태를 주제별로 나눈 조각 (세션 · 진행 · 가방 · 밭 · 동물 · 꾸미기 · 학습)
   data/          저장소 (Firebase 서버 저장, 안 되면 이 기기 localStorage 로 자동 전환)
@@ -68,7 +68,10 @@ art-src/         생성 원본 (git 에 안 들어감 — 아래 "백업" 참고
 | 꾸미기 조작 (3D 에서 들고 다니기, 놓을 수 있는지) | `src/world/gameplay/decorate.tsx` |
 | 저장 데이터 모양 · 옛 저장본 고치기 | `src/state/game/saveData.ts` |
 | 자동 저장 시점 | `src/state/persistence.ts` |
-| 문제 출제 (어떤 문제를 낼지) | `src/math/questionGenerator.ts` |
+| 문제 출제 (어떤 문제를 낼지, 고른 묶음끼리 같은 확률) | `src/math/questionGenerator.ts` |
+| 나눗셈 · 뺄셈 묶음 (문제 범위 · 헷갈리는 오답 · 힌트) | `src/math/problemSets.ts` |
+| 묶음 이름 · 예시 (선택 화면 · 교사 화면) | `src/config/curriculum.ts` |
+| 출제기 점검 (정답 · 선택지 확인, 유형별 비율): `npx tsx --tsconfig tsconfig.scripts.json scripts/check-questions.ts` | `scripts/check-questions.ts` |
 | 오답 선택지 | `src/math/distractors.ts` |
 | 정답/오답 처리 흐름 | `src/ui/mathFlow.ts` |
 | 학습 기록 (정답률 · 오답 복습) | `src/state/game/learningSlice.ts` |
@@ -108,8 +111,8 @@ art-src/         생성 원본 (git 에 안 들어감 — 아래 "백업" 참고
 
 | 하고 싶은 것 | 파일 |
 | --- | --- |
-| 반 고르기 → 반 비밀번호(숫자 4자리, 있으면) → 이름 고르기 → 구구단 고르기 → 게임 (학급이 없으면 반 고르기를 건너뜀) | `src/App.tsx`, `src/ui/screens/` |
-| 학생이 이름 · 캐릭터 바꾸기 (구구단 고르기 화면) | `src/ui/screens/TableSelectScreen.tsx` |
+| 반 고르기 → 반 비밀번호(숫자 4자리, 있으면) → 이름 고르기 → 연습할 것 고르기(구구단 · 나눗셈 · 뺄셈) → 게임 (학급이 없으면 반 고르기를 건너뜀) | `src/App.tsx`, `src/ui/screens/` |
+| 학생이 이름 · 캐릭터 바꾸기 (연습할 것 고르기 화면) | `src/ui/screens/TableSelectScreen.tsx` |
 | 학급 만들기 · 이름 · 비밀번호 바꾸기 · 지우기, 학생 반 옮기기 (선생님 화면) | `src/teacher/ClassBar.tsx`, `src/teacher/StudentDetail.tsx` |
 | 위쪽 HUD (돈 · 레벨) | `src/ui/hud/GameHUD.tsx` |
 | 조이스틱 · 행동 버튼 | `src/ui/hud/TouchControls.tsx` |

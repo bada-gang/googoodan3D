@@ -6,6 +6,7 @@
  * 무엇을 지우는지(이름은 남는지) 글로 보여 줄 수 있어서다.
  */
 import { useEffect, useState } from 'react';
+import { PROBLEM_SET_LABEL } from '@/config/curriculum';
 import { CURRENCY, avatarName, formatMoney } from '@/config/strings';
 import { MAX_STUDENTS_PER_CLASS, type ClassRoom } from '@/types/game';
 import { formatAccuracy, formatLastPlayed, type StudentRow } from './summary';
@@ -123,6 +124,18 @@ export function StudentDetail({
                 />
               ))}
             </div>
+              <h3 className="font-game mt-5 text-[1.1rem] text-ink">나눗셈 · 뺄셈 정답률</h3>
+              <div className="mt-3 flex flex-col gap-2">
+                {row.bySet.map((row) => (
+                  <AccuracyBar
+                    key={row.set}
+                    label={PROBLEM_SET_LABEL[row.set]}
+                    labelClass="w-40"
+                    value={row.accuracy}
+                    attempts={row.attempts}
+                  />
+                ))}
+              </div>
           </section>
 
           <section>
@@ -137,7 +150,7 @@ export function StudentDetail({
                     className="rounded-lg border border-berry/30 bg-berry/10 px-3 py-2"
                   >
                     <span className="font-game block text-[1.15rem] leading-tight text-ink">
-                      {problem.left} × {problem.right}
+                      {problem.label}
                     </span>
                     <span className="block text-[0.8rem] text-ink-soft tabular-nums">
                       {problem.wrong}번 틀림 · {problem.accuracy}%

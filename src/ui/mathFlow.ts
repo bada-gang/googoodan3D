@@ -48,6 +48,7 @@ function serveQuestion(): void {
   const store = useGameStore.getState();
   const question = generateQuestion({
     tables: store.selectedTables,
+    sets: store.selectedSets,
     stats: store.stats,
     recent: store.recentQuestions,
   });
@@ -96,7 +97,7 @@ export type AnswerResult = 'correct' | 'wrong' | 'failed';
  * - `wrong`    아직 기회가 남았다.
  * - `failed`   두 번 틀렸다. 이 문제는 끝이고 새 문제를 받아야 한다.
  */
-export function submitAnswer(value: number): AnswerResult {
+export function submitAnswer(value: string): AnswerResult {
   const active = useUiStore.getState().math;
   if (!active) return 'wrong';
 

@@ -5,6 +5,7 @@
  */
 import { useState } from 'react';
 import { missingArtCount } from '@/config/artReady';
+import { PROBLEM_SET_LABEL } from '@/config/curriculum';
 import { useGameStore } from '@/state/gameStore';
 import { flushSave, stopAutoSave } from '@/state/persistence';
 import { useSettingsStore } from '@/state/settingsStore';
@@ -62,6 +63,8 @@ export function SettingsOverlay(): React.ReactElement {
   const settings = useSettingsStore();
   const stats = useGameStore((s) => s.stats);
   const tables = useGameStore((s) => s.selectedTables);
+  const sets = useGameStore((s) => s.selectedSets);
+  const practicing = [...(tables.length > 0 ? [tables.join(', ') + '단'] : []), ...sets.map((set) => PROBLEM_SET_LABEL[set])];
   const level = useGameStore((s) => s.level);
   const [confirming, setConfirming] = useState(false);
   const [ending, setEnding] = useState(false);
@@ -135,7 +138,7 @@ export function SettingsOverlay(): React.ReactElement {
             </span>
           </p>
           <p className="font-game text-[1.15rem] text-ink-soft">
-            지금 연습하는 단: {tables.length > 0 ? `${tables.join(', ')}단` : '없음'} · 레벨 {level}
+            지금 연습하는 것: {practicing.length > 0 ? practicing.join(' · ') : '없음'} · 레벨 {level}
           </p>
         </div>
 

@@ -66,9 +66,10 @@ export function factorDistractorPool(answer: number): number[] {
 
 /**
  * 정답 1개 + 오답 3개를 만들어 무작위 순서로 돌려준다. (명세 15)
+ * 선택지는 글자다 — 나머지가 있는 나눗셈은 "7 … 3" 처럼 숫자 둘을 함께 고른다.
  */
-export function buildChoices(correct: number, pool: number[], count = 4): number[] {
-  const choices = new Set<number>([correct]);
+export function buildChoices(correct: string, pool: string[], count = 4): string[] {
+  const choices = new Set<string>([correct]);
   // 가까운 후보 중에서 고르되 매번 같은 3개만 나오지 않도록 상위 후보를 섞는다.
   const near = shuffle(pool.slice(0, Math.max(count + 1, 5)));
   const rest = pool.slice(Math.max(count + 1, 5));
@@ -76,11 +77,13 @@ export function buildChoices(correct: number, pool: number[], count = 4): number
     if (choices.size >= count) break;
     choices.add(value);
   }
-  // 후보가 모자라면 정답 주변 값으로 채운다.
+  // 후보가 모자라면 정답 주변 값으로 채운다 ("몫 … 나머지" 면 몫을 바꿔 가며)
+  const [head, ...tail] = correct.split(' … ');
+  const base = Number(head);
   let fill = 1;
-  while (choices.size < count) {
-    const candidate = correct + fill;
-    if (candidate > 0) choices.add(candidate);
+  while (choices.size < count && fill < 50) {
+    const candidate = base + fill;
+    if (candidate > 0) choices.add([String(candidate), ...tail].join(' … '));
     fill += 1;
   }
   return shuffle([...choices]);

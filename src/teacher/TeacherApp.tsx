@@ -5,6 +5,7 @@
  * 학생 데이터는 게임과 똑같은 저장소 인터페이스로만 읽는다.
  */
 import { useEffect, useMemo, useState } from 'react';
+import { PROBLEM_SET_LABEL } from '@/config/curriculum';
 import { GAME_TITLE } from '@/config/strings';
 import { MAX_STUDENTS_PER_CLASS } from '@/types/game';
 import { AddStudentForm } from './AddStudentForm';
@@ -163,6 +164,18 @@ export function TeacherApp(): React.ReactElement {
                   />
                 ))}
               </div>
+              <h3 className="font-game mt-5 text-[1.1rem] text-ink">나눗셈 · 뺄셈 정답률</h3>
+              <div className="mt-3 flex flex-col gap-2">
+                {summary.bySet.map((row) => (
+                  <AccuracyBar
+                    key={row.set}
+                    label={PROBLEM_SET_LABEL[row.set]}
+                    labelClass="w-40"
+                    value={row.accuracy}
+                    attempts={row.attempts}
+                  />
+                ))}
+              </div>
             </div>
 
             <div>
@@ -177,7 +190,7 @@ export function TeacherApp(): React.ReactElement {
                       className="rounded-lg border border-berry/30 bg-berry/10 px-3 py-2"
                     >
                       <span className="font-game block text-[1.15rem] leading-tight text-ink">
-                        {problem.left} × {problem.right}
+                        {problem.label}
                       </span>
                       <span className="block text-[0.8rem] text-ink-soft tabular-nums">
                         {problem.wrong}번 틀림

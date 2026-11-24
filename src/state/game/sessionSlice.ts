@@ -1,4 +1,5 @@
 /** 세션: 학생이 들어오고 나가기, 저장본 불러오기, 저장할 데이터 만들기. */
+import { PROBLEM_SETS, type ProblemSet } from '@/config/curriculum';
 import type { GameSaveData, PlayerProfile } from '@/types/game';
 import { createEmptyLearningStats } from '@/types/learning';
 import { repositories } from '@/data';
@@ -9,8 +10,10 @@ export interface SessionSlice {
   status: 'empty' | 'loading' | 'ready';
   profile: PlayerProfile | null;
   selectedTables: number[];
+  /** 곱셈구구 말고 고른 문제 묶음 (이번 판에만) */
+  selectedSets: ProblemSet[];
 
-  beginSession: (profile: PlayerProfile, tables: number[]) => Promise<void>;
+  beginSession: (profile: PlayerProfile, tables: number[], sets?: ProblemSet[]) => Promise<void>;
   leaveSession: () => void;
   toSaveData: () => GameSaveData | null;
 }
@@ -29,8 +32,9 @@ export const createSessionSlice: GameSlice<SessionSlice> = (set, get) => ({
   status: 'empty',
   profile: null,
   selectedTables: [],
+  selectedSets: [],
 
-  beginSession: async (profile, tables) => {
+  beginSession: async (profile, tables, sets = []) => {
     set({ status: 'loading' });
     const repos = repositories();
 
@@ -54,6 +58,7 @@ export const createSessionSlice: GameSlice<SessionSlice> = (set, get) => ({
       status: 'ready',
       profile,
       selectedTables: [...tables].sort((a, b) => a - b),
+      selectedSets: PROBLEM_SETS.filter((set) => sets.includes(set)),
       money: save.money,
       experience: save.experience,
       level: save.level,
@@ -76,7 +81,7 @@ export const createSessionSlice: GameSlice<SessionSlice> = (set, get) => ({
   },
 
   leaveSession: () => {
-    set({ status: 'empty', profile: null, selectedTables: [] });
+    set({ status: 'empty', profile: null, selectedTables: [], selectedSets: [] });
   },
 
   toSaveData: () => {

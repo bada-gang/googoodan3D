@@ -6,6 +6,7 @@
  * React UI 는 LogicalLayer 로 같은 좌표계에서 그린 뒤 통째로 배율 조정한다.
  */
 import { useCallback, useEffect, useRef, useState } from 'react';
+import type { ProblemSet } from '@/config/curriculum';
 import { GAME_HEIGHT, GAME_WIDTH } from '@/config/layout';
 import { useGameStore } from '@/state/gameStore';
 import { startAutoSave, stopAutoSave } from '@/state/persistence';
@@ -56,14 +57,14 @@ export function App(): React.ReactElement {
   );
 
   const start = useCallback(
-    async (tables: number[]) => {
+    async (tables: number[], sets: ProblemSet[]) => {
       if (!profile) return;
       audio.unlock();
       const { bgmOn, sfxOn } = useSettingsStore.getState();
       audio.setSfxEnabled(sfxOn);
       audio.setBgmEnabled(bgmOn);
 
-      await beginSession(profile, tables);
+      await beginSession(profile, tables, sets);
       startAutoSave();
       setScreen('game');
     },
@@ -115,7 +116,7 @@ export function App(): React.ReactElement {
           {screen === 'tables' && profile && (
             <TableSelectScreen
               profile={profile}
-              onStart={(tables) => void start(tables)}
+              onStart={(tables, sets) => void start(tables, sets)}
               onBack={() => {
                 setProfile(null);
                 setScreen('profile');
