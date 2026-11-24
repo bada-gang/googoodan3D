@@ -108,14 +108,19 @@ export function ClassBar({
     <Card
       title="학급"
       right={
-        <Button
-          tone="primary"
-          disabled={full}
-          title={full ? `학급은 ${MAX_CLASSES}개까지 만들 수 있어요` : undefined}
-          onClick={() => open({ mode: 'create' })}
-        >
-          학급 만들기 ({classes.length}/{MAX_CLASSES})
-        </Button>
+        <div className="flex items-center gap-3">
+          <span className="text-[0.9rem] text-ink-soft tabular-nums">
+            {classes.length}/{MAX_CLASSES}개
+          </span>
+          <Button
+            tone="primary"
+            disabled={full}
+            title={full ? `학급은 ${MAX_CLASSES}개까지 만들 수 있어요` : undefined}
+            onClick={() => open({ mode: 'create' })}
+          >
+            학급 만들기
+          </Button>
+        </div>
       }
     >
       {full && (
