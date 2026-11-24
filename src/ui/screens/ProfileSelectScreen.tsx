@@ -1,5 +1,6 @@
 /**
  * 학생 이름 선택 / 만들기 화면. (명세 8, 9, 10)
+ * 앞 화면에서 고른 반의 학생만 보여 준다 (학급이 없으면 모두).
  * 이메일·비밀번호 로그인은 쓰지 않고, 이름과 캐릭터로 구분한다.
  *
  * 캐릭터 바꾸기는 여기가 아니라 구구단 선택 화면에 있다 —
@@ -10,7 +11,7 @@ import { ASSETS } from '@/config/assets';
 import { ALLOW_NEW_PROFILE } from '@/config/features';
 import { GAME_TITLE } from '@/config/strings';
 import { repositories } from '@/data';
-import type { AvatarId, CharacterId, PlayerProfile } from '@/types/game';
+import type { AvatarId, CharacterId, ClassRoom, PlayerProfile } from '@/types/game';
 import { AvatarGrid } from '../common/AvatarGrid';
 import { CharacterPicker } from '../common/CharacterPicker';
 import { avatarIcon, realImageUrl } from '../common/icons';
@@ -18,9 +19,15 @@ import { EmptyNote, GameButton, Icon } from '../common/ui';
 import { audio } from '@/audio/sfx';
 
 export function ProfileSelectScreen({
+  classRoom,
   onReady,
+  onBack,
 }: {
+  /** 앞 화면에서 고른 반. null 이면 반 구분 없이 모두 */
+  classRoom: ClassRoom | null;
   onReady: (profile: PlayerProfile) => void;
+  /** 반 다시 고르기. 반 고르기를 건너뛰었으면 없다 */
+  onBack?: () => void;
 }): React.ReactElement {
   const [profiles, setProfiles] = useState<PlayerProfile[] | null>(null);
   const [creating, setCreating] = useState(false);
@@ -32,7 +39,8 @@ export function ProfileSelectScreen({
   useEffect(() => {
     void repositories()
       .player.listProfiles()
-      .then((list) => {
+      .then((all) => {
+        const list = classRoom ? all.filter((p) => p.classId === classRoom.id) : all;
         setProfiles(list);
         // 이름이 하나도 없으면 만들기 화면부터 보여 준다. 만들기를 막아 둔 학기에는
         // 그냥 빈 목록을 보여 주고 선생님을 부르게 한다.
@@ -44,7 +52,7 @@ export function ProfileSelectScreen({
         setProfiles([]);
         if (ALLOW_NEW_PROFILE) setCreating(true);
       });
-  }, []);
+  }, [classRoom]);
 
   const create = async () => {
     const trimmed = name.trim();
@@ -52,7 +60,7 @@ export function ProfileSelectScreen({
     setBusy(true);
     audio.unlock();
     try {
-      const profile = await repositories().player.createProfile(trimmed, avatar, character);
+      const profile = await repositories().player.createProfile(trimmed, avatar, character, classRoom?.id ?? null);
       onReady(profile);
     } catch (error) {
       console.error('[profile] 이름을 저장하지 못했습니다.', error);
@@ -61,7 +69,7 @@ export function ProfileSelectScreen({
   };
 
   return (
-    <ScreenShell title={GAME_TITLE}>
+    <ScreenShell title={GAME_TITLE} subtitle={classRoom?.name}>
       {profiles === null ? (
         <EmptyNote>친구들을 불러오는 중이에요…</EmptyNote>
       ) : creating && ALLOW_NEW_PROFILE ? (
@@ -120,12 +128,24 @@ export function ProfileSelectScreen({
             ))}
           </div>
 
-          {/* 학기 초에 이름을 다 만든 뒤에는 이 버튼을 감춘다. (요청 1) */}
-          {ALLOW_NEW_PROFILE && (
-            <GameButton tone="gold" big onClick={() => setCreating(true)}>
-              새 친구 만들기
-            </GameButton>
-          )}
+          <div className="flex gap-4">
+            {onBack && (
+              <GameButton
+                onClick={() => {
+                  audio.play('tap');
+                  onBack();
+                }}
+              >
+                반 다시 고르기
+              </GameButton>
+            )}
+            {/* 학기 초에 이름을 다 만든 뒤에는 이 버튼을 감춘다. (요청 1) */}
+            {ALLOW_NEW_PROFILE && (
+              <GameButton tone="gold" big onClick={() => setCreating(true)}>
+                새 친구 만들기
+              </GameButton>
+            )}
+          </div>
         </div>
       )}
     </ScreenShell>

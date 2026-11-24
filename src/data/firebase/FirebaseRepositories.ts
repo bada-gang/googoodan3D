@@ -5,7 +5,8 @@
  * 2D 판(googoodan)과 같은 Firebase 프로젝트를 쓰므로, 3D 판은 이름 끝에 3d 를 붙인 컬렉션에 따로 둔다.
  * 저장 데이터 모양이 달라서 섞이면 안 된다. 두 판의 학생 명단도 따로다.
  *
- *   players3d/{playerId}                이름 · 캐릭터 · 마지막 접속
+ *   classes3d/{classId}                 학급 이름 (여러 반이 같은 프로젝트를 쓴다)
+ *   players3d/{playerId}                이름 · 캐릭터 · 반(classId) · 마지막 접속
  *   saves3d/{playerId}                  진행도 (돈 · 밭 · 동물 · 가방 · 집 · 마당)
  *   stats3d/{playerId}                  학습 통계 (문제별 정답률)
  *
@@ -21,16 +22,17 @@ import {
   setDoc,
   updateDoc,
 } from 'firebase/firestore';
-import type { AvatarId, CharacterId, GameSaveData, PlayerProfile } from '@/types/game';
+import { sortClasses, type AvatarId, type CharacterId, type ClassRoom, type GameSaveData, type PlayerProfile } from '@/types/game';
 import type { LearningStats } from '@/types/learning';
 import type {
+  ClassRepository,
   GameStateRepository,
   LearningRepository,
   PlayerRepository,
   RepositoryBundle,
 } from '../repositories';
 import { firestore } from './app';
-import { PLAYERS, SAVES, STATS } from './collections';
+import { CLASSES, PLAYERS, SAVES, STATS } from './collections';
 
 function newPlayerId(): string {
   const random = Math.random().toString(36).slice(2, 8);
@@ -55,6 +57,7 @@ export class FirebasePlayerRepository implements PlayerRepository {
     displayName: string,
     avatarId: AvatarId,
     characterId: CharacterId = 'boy',
+    classId: string | null = null,
   ): Promise<PlayerProfile> {
     const now = new Date().toISOString();
     const profile: PlayerProfile = {
@@ -64,6 +67,7 @@ export class FirebasePlayerRepository implements PlayerRepository {
       characterId,
       createdAt: now,
       lastPlayedAt: null,
+      classId,
     };
     const { id, ...body } = profile;
     await setDoc(doc(firestore(), PLAYERS, id), body);
@@ -78,6 +82,14 @@ export class FirebasePlayerRepository implements PlayerRepository {
     const patch = Object.fromEntries(Object.entries(look).filter(([, v]) => v !== undefined));
     if (Object.keys(patch).length === 0) return;
     await updateDoc(doc(firestore(), PLAYERS, playerId), patch);
+  }
+
+  async rename(playerId: string, displayName: string): Promise<void> {
+    await updateDoc(doc(firestore(), PLAYERS, playerId), { displayName: displayName.trim() });
+  }
+
+  async setClass(playerId: string, classId: string | null): Promise<void> {
+    await updateDoc(doc(firestore(), PLAYERS, playerId), { classId });
   }
 
   async touchLastPlayed(playerId: string): Promise<void> {
@@ -124,9 +136,36 @@ export class FirebaseLearningRepository implements LearningRepository {
 
 }
 
+export class FirebaseClassRepository implements ClassRepository {
+  async listClasses(): Promise<ClassRoom[]> {
+    const snapshot = await getDocs(collection(firestore(), CLASSES));
+    return sortClasses(snapshot.docs.map((d) => ({ id: d.id, ...d.data() }) as ClassRoom));
+  }
+
+  async createClass(name: string): Promise<ClassRoom> {
+    const room: ClassRoom = {
+      id: `class_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 6)}`,
+      name: name.trim(),
+      createdAt: new Date().toISOString(),
+    };
+    const { id, ...body } = room;
+    await setDoc(doc(firestore(), CLASSES, id), body);
+    return room;
+  }
+
+  async renameClass(classId: string, name: string): Promise<void> {
+    await updateDoc(doc(firestore(), CLASSES, classId), { name: name.trim() });
+  }
+
+  async deleteClass(classId: string): Promise<void> {
+    await deleteDoc(doc(firestore(), CLASSES, classId));
+  }
+}
+
 export function createFirebaseRepositories(): RepositoryBundle {
   return {
     player: new FirebasePlayerRepository(),
+    classes: new FirebaseClassRepository(),
     gameState: new FirebaseGameStateRepository(),
     learning: new FirebaseLearningRepository(),
   };

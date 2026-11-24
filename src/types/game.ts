@@ -16,6 +16,23 @@ export type AvatarId =
 /** 게임 안에서 움직이는 내 캐릭터. 목록에서 고르는 아바타 아이콘과는 별개다. */
 export type CharacterId = 'boy' | 'girl' | 'farmer' | 'dino' | 'bunny' | 'astro';
 
+/** 학급. 선생님이 만들고, 학생은 게임 첫 화면에서 자기 반을 고른다. */
+export interface ClassRoom {
+  id: string;
+  /** "2학년 3반" 처럼 화면에 보이는 이름 */
+  name: string;
+  createdAt: string;
+}
+
+/** 학급 · 학생 이름 길이 한도 */
+export const MAX_CLASS_NAME_LENGTH = 12;
+export const MAX_PLAYER_NAME_LENGTH = 8;
+
+/** 학급 목록 순서: "2학년 2반" 이 "2학년 10반" 보다 앞에 오게 숫자를 숫자로 비교한다 */
+export function sortClasses(list: ClassRoom[]): ClassRoom[] {
+  return [...list].sort((a, b) => a.name.localeCompare(b.name, 'ko', { numeric: true }));
+}
+
 export interface PlayerProfile {
   /** 내부 식별자. 이름을 DB 키로 쓰지 않는다. (명세 9) */
   id: string;
@@ -29,6 +46,11 @@ export interface PlayerProfile {
   createdAt: string;
   /** 아직 한 번도 게임에 들어가지 않았으면 null. 교사가 미리 만든 이름이 그렇다. (명세 10, 73) */
   lastPlayedAt: string | null;
+  /**
+   * 어느 반 학생인지 (ClassRoom.id). 학급 기능이 생기기 전에 만든 학생에게는 없다 —
+   * 선생님이 첫 학급을 만들 때 그 반으로 옮겨진다.
+   */
+  classId?: string | null;
 }
 
 /** characterId 가 없는 프로필(교사가 미리 만든 이름 등)은 남자아이로 시작한다. */

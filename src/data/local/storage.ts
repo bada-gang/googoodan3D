@@ -82,6 +82,7 @@ export function writeJson(key: string, value: unknown): void {
 
 export const KEYS = {
   profiles: `${NS}:profiles`,
+  classes: `${NS}:classes`,
   save: (playerId: string) => `${NS}:save:${playerId}`,
   stats: (playerId: string) => `${NS}:stats:${playerId}`,
   attempts: (playerId: string) => `${NS}:attempts:${playerId}`,

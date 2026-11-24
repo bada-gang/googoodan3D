@@ -9,7 +9,7 @@
  * (자동 저장, 명세 36) 하나의 GameStateRepository 애그리게이트로 다룬다.
  * Firestore 에서는 이 구현체 내부에서 하위 문서로 나눌 수 있다.
  */
-import type { AvatarId, CharacterId, GameSaveData, PlayerProfile } from '@/types/game';
+import type { AvatarId, CharacterId, ClassRoom, GameSaveData, PlayerProfile } from '@/types/game';
 import type { LearningStats } from '@/types/learning';
 
 export interface PlayerRepository {
@@ -19,11 +19,25 @@ export interface PlayerRepository {
     displayName: string,
     avatarId: AvatarId,
     characterId?: CharacterId,
+    classId?: string | null,
   ): Promise<PlayerProfile>;
   /** 학생이 자기 모습을 바꾼다. 아바타와 캐릭터를 한 번에 다룬다. (명세 9, 10) */
   updateLook(playerId: string, look: { avatarId?: AvatarId; characterId?: CharacterId }): Promise<void>;
+  /** 학생이 자기 이름을 바꾼다 */
+  rename(playerId: string, displayName: string): Promise<void>;
+  /** 선생님이 학생을 다른 반으로 옮긴다 */
+  setClass(playerId: string, classId: string | null): Promise<void>;
   touchLastPlayed(playerId: string): Promise<void>;
   deleteProfile(playerId: string): Promise<void>;
+}
+
+/** 학급 목록. 선생님 화면에서 만들고 고치며, 게임 첫 화면은 읽기만 한다. */
+export interface ClassRepository {
+  listClasses(): Promise<ClassRoom[]>;
+  createClass(name: string): Promise<ClassRoom>;
+  renameClass(classId: string, name: string): Promise<void>;
+  /** 학급만 지운다. 학생이 남아 있는 반은 화면에서 지우지 못하게 막는다. */
+  deleteClass(classId: string): Promise<void>;
 }
 
 export interface GameStateRepository {
@@ -39,6 +53,7 @@ export interface LearningRepository {
 
 export interface RepositoryBundle {
   player: PlayerRepository;
+  classes: ClassRepository;
   gameState: GameStateRepository;
   learning: LearningRepository;
 }

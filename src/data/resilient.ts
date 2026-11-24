@@ -10,6 +10,7 @@
  * 그런 오류까지 이 기기 저장으로 내려버리면 다시 연결돼도 서버로 올라가지 않는다.
  */
 import type {
+  ClassRepository,
   GameStateRepository,
   LearningRepository,
   PlayerRepository,
@@ -53,14 +54,32 @@ export function createResilientBundle(
     }
   }
 
+  /**
+   * 학급은 갈아타기 없이 그대로 부른다. 학급 컬렉션은 나중에 생겨서, 서버 규칙을 올리기 전이면
+   * 거부(permission-denied)가 난다 — 그 때문에 학생 저장까지 이 기기로 내려가면 안 된다.
+   * 오류는 부른 쪽(학급 고르기 화면 · 선생님 화면)이 받아서 처리한다.
+   */
+  function direct<T>(pick: (bundle: RepositoryBundle) => Promise<T>): Promise<T> {
+    return pick(fallback ?? primary);
+  }
+
   const player: PlayerRepository = {
     listProfiles: () => run((b) => b.player.listProfiles()),
     getProfile: (id) => run((b) => b.player.getProfile(id)),
-    createProfile: (name, avatar, character) =>
-      run((b) => b.player.createProfile(name, avatar, character)),
+    createProfile: (name, avatar, character, classId) =>
+      run((b) => b.player.createProfile(name, avatar, character, classId)),
     updateLook: (id, look) => run((b) => b.player.updateLook(id, look)),
+    rename: (id, name) => run((b) => b.player.rename(id, name)),
+    setClass: (id, classId) => run((b) => b.player.setClass(id, classId)),
     touchLastPlayed: (id) => run((b) => b.player.touchLastPlayed(id)),
     deleteProfile: (id) => run((b) => b.player.deleteProfile(id)),
+  };
+
+  const classes: ClassRepository = {
+    listClasses: () => direct((b) => b.classes.listClasses()),
+    createClass: (name) => direct((b) => b.classes.createClass(name)),
+    renameClass: (id, name) => direct((b) => b.classes.renameClass(id, name)),
+    deleteClass: (id) => direct((b) => b.classes.deleteClass(id)),
   };
 
   const gameState: GameStateRepository = {
@@ -74,5 +93,5 @@ export function createResilientBundle(
     saveStats: (id, stats) => run((b) => b.learning.saveStats(id, stats)),
   };
 
-  return { player, gameState, learning };
+  return { player, classes, gameState, learning };
 }

@@ -6,3 +6,5 @@
 export const PLAYERS = 'players3d';
 export const SAVES = 'saves3d';
 export const STATS = 'stats3d';
+/** 학급 목록 (선생님이 만든 반들). 학생 문서의 classId 가 이 문서 id 를 가리킨다 */
+export const CLASSES = 'classes3d';

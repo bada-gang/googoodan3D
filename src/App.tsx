@@ -1,5 +1,6 @@
 /**
- * 앱 흐름: 이름 선택 -> 구구단 선택 -> 게임. (명세 8)
+ * 앱 흐름: 반 선택 -> 이름 선택 -> 구구단 선택 -> 게임. (명세 8)
+ * 학급이 하나도 없으면 반 선택은 건너뛴다.
  *
  * 게임 셸은 항상 논리 해상도 비율(1280×800)을 유지하고,
  * React UI 는 LogicalLayer 로 같은 좌표계에서 그린 뒤 통째로 배율 조정한다.
@@ -10,10 +11,11 @@ import { useGameStore } from '@/state/gameStore';
 import { startAutoSave, stopAutoSave } from '@/state/persistence';
 import { useSettingsStore } from '@/state/settingsStore';
 import { useUiStore } from '@/state/uiStore';
-import type { PlayerProfile } from '@/types/game';
+import type { ClassRoom, PlayerProfile } from '@/types/game';
 import { audio } from '@/audio/sfx';
 import { enterFullscreenOnFirstTouch } from '@/ui/fullscreen';
 import { LogicalLayer, useShellScale } from '@/ui/common/LogicalLayer';
+import { ClassSelectScreen } from '@/ui/screens/ClassSelectScreen';
 import { GameEndScreen } from '@/ui/screens/GameEndScreen';
 import { GameScreen } from '@/ui/screens/GameScreen';
 import { ProfileSelectScreen } from '@/ui/screens/ProfileSelectScreen';
@@ -26,6 +28,9 @@ export function App(): React.ReactElement {
   const setScreen = useUiStore((s) => s.setScreen);
   const beginSession = useGameStore((s) => s.beginSession);
   const [profile, setProfile] = useState<PlayerProfile | null>(null);
+  const [classRoom, setClassRoom] = useState<ClassRoom | null>(null);
+  /** 학급이 없어 반 고르기를 건너뛰었는지 (그러면 '반 다시 고르기'도 없다) */
+  const [classSkipped, setClassSkipped] = useState(false);
   const [portrait, setPortrait] = useState(false);
   const shellRef = useRef<HTMLDivElement>(null);
   const scale = useShellScale(shellRef);
@@ -79,8 +84,27 @@ export function App(): React.ReactElement {
         {screen === 'game' && <GameScreen.Canvas />}
 
         <LogicalLayer scale={scale}>
+          {screen === 'class' && (
+            <ClassSelectScreen
+              onReady={(room, skipped) => {
+                setClassRoom(room);
+                setClassSkipped(skipped);
+                setScreen('profile');
+              }}
+            />
+          )}
+
           {screen === 'profile' && (
             <ProfileSelectScreen
+              classRoom={classRoom}
+              onBack={
+                classSkipped
+                  ? undefined
+                  : () => {
+                      setClassRoom(null);
+                      setScreen('class');
+                    }
+              }
               onReady={(selected) => {
                 setProfile(selected);
                 setScreen('tables');
@@ -96,9 +120,9 @@ export function App(): React.ReactElement {
                 setProfile(null);
                 setScreen('profile');
               }}
-              // 바뀐 모습으로 세션을 시작해야 게임 안 캐릭터와 저장 데이터가 어긋나지 않는다
-              onLookChanged={(look) =>
-                setProfile((current) => (current ? { ...current, ...look } : current))
+              // 바뀐 모습 · 이름으로 세션을 시작해야 게임 안 캐릭터와 저장 데이터가 어긋나지 않는다
+              onProfileChanged={(patch) =>
+                setProfile((current) => (current ? { ...current, ...patch } : current))
               }
             />
           )}

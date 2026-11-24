@@ -2,7 +2,7 @@
  * 구구단 선택 화면. 게임에 들어갈 때마다 반드시 표시한다. (명세 11, 12)
  * 이 선택은 현재 세션에만 적용되고 저장하지 않는다.
  *
- * 캐릭터 바꾸기도 여기 둔다. 이름을 이미 고른 뒤라 "누구 것을 바꿀까요"를 물을 필요가 없고,
+ * 캐릭터 바꾸기 · 이름 바꾸기도 여기 둔다. 이름을 이미 고른 뒤라 "누구 것을 바꿀까요"를 물을 필요가 없고,
  * 이름 카드가 "게임 시작"과 "캐릭터 바꾸기" 두 가지를 겸하지 않아도 된다.
  */
 import { useEffect, useState } from 'react';
@@ -10,7 +10,7 @@ import { TABLES } from '@/config/curriculum';
 import { pickPracticeTables } from '@/math/practiceNeeds';
 import { repositories } from '@/data';
 import type { AvatarId, CharacterId, PlayerProfile } from '@/types/game';
-import { characterOf } from '@/types/game';
+import { MAX_PLAYER_NAME_LENGTH, characterOf } from '@/types/game';
 import type { LearningStats } from '@/types/learning';
 import { AvatarGrid } from '../common/AvatarGrid';
 import { CharacterPicker } from '../common/CharacterPicker';
@@ -23,16 +23,18 @@ export function TableSelectScreen({
   profile,
   onStart,
   onBack,
-  onLookChanged,
+  onProfileChanged,
 }: {
   profile: PlayerProfile;
   onStart: (tables: number[]) => void;
   onBack: () => void;
-  /** 바뀐 모습을 위(App)에도 알린다 — 게임 안 캐릭터와 저장 데이터가 같이 바뀌어야 한다. */
-  onLookChanged: (look: { avatarId: AvatarId; characterId: CharacterId }) => void;
+  /** 바뀐 모습 · 이름을 위(App)에도 알린다 — 게임 안 캐릭터와 저장 데이터가 같이 바뀌어야 한다. */
+  onProfileChanged: (patch: Partial<Pick<PlayerProfile, 'avatarId' | 'characterId' | 'displayName'>>) => void;
 }): React.ReactElement {
   const [selected, setSelected] = useState<number[]>([]);
   const [picking, setPicking] = useState(false);
+  const [renaming, setRenaming] = useState(false);
+  const [newName, setNewName] = useState(profile.displayName);
   const [avatar, setAvatar] = useState<AvatarId>(profile.avatarId);
   const [character, setCharacter] = useState<CharacterId>(characterOf(profile));
   const [busy, setBusy] = useState(false);
@@ -84,7 +86,7 @@ export function TableSelectScreen({
     setBusy(true);
     try {
       await repositories().player.updateLook(profile.id, { avatarId: avatar, characterId: character });
-      onLookChanged({ avatarId: avatar, characterId: character });
+      onProfileChanged({ avatarId: avatar, characterId: character });
       setPicking(false);
     } catch (error) {
       console.error('[profile] 캐릭터를 바꾸지 못했습니다.', error);
@@ -92,6 +94,62 @@ export function TableSelectScreen({
       setBusy(false);
     }
   };
+
+  const trimmedName = newName.trim();
+  const saveName = async () => {
+    if (busy || !trimmedName || trimmedName === profile.displayName) return;
+    setBusy(true);
+    try {
+      await repositories().player.rename(profile.id, trimmedName);
+      onProfileChanged({ displayName: trimmedName });
+      setRenaming(false);
+    } catch (error) {
+      console.error('[profile] 이름을 바꾸지 못했습니다.', error);
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  if (renaming) {
+    return (
+      <ScreenShell title="새 이름을 적어 주세요">
+        <div className="flex flex-col items-center gap-5 pt-2">
+          <p className="font-game text-[1.2rem] text-ink-soft">
+            지금 이름: {profile.displayName} · {MAX_PLAYER_NAME_LENGTH}글자까지 쓸 수 있어요
+          </p>
+          <input
+            value={newName}
+            autoFocus
+            onChange={(event) => setNewName(event.target.value.slice(0, MAX_PLAYER_NAME_LENGTH))}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter') void saveName();
+            }}
+            placeholder="이름"
+            aria-label="새 이름"
+            className="panel-paper font-game w-[380px] max-w-full px-6 py-4 text-center text-[2rem] text-ink outline-none focus:ring-4 focus:ring-gold"
+          />
+          <div className="flex gap-4">
+            <GameButton
+              onClick={() => {
+                setNewName(profile.displayName);
+                setRenaming(false);
+              }}
+            >
+              돌아가기
+            </GameButton>
+            <GameButton
+              tone="leaf"
+              big
+              disabled={busy || !trimmedName || trimmedName === profile.displayName}
+              onClick={() => void saveName()}
+            >
+              이걸로 할래요
+            </GameButton>
+          </div>
+        </div>
+      </ScreenShell>
+    );
+  }
 
   if (picking) {
     return (
@@ -139,6 +197,15 @@ export function TableSelectScreen({
             }}
           >
             캐릭터 바꾸기
+          </GameButton>
+          <GameButton
+            onClick={() => {
+              audio.play('tap');
+              setNewName(profile.displayName);
+              setRenaming(true);
+            }}
+          >
+            이름 바꾸기
           </GameButton>
         </div>
 

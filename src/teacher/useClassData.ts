@@ -6,13 +6,18 @@
  */
 import { useCallback, useEffect, useState } from 'react';
 import { repositories, storageMode, type StorageMode } from '@/data';
-import type { AvatarId, PlayerProfile } from '@/types/game';
+import type { AvatarId, ClassRoom, PlayerProfile } from '@/types/game';
 import { createEmptyLearningStats } from '@/types/learning';
 import { buildStudentRow, summarizeClass, type ClassSummary, type StudentRow } from './summary';
 
 export interface ClassData {
+  /** 모든 반의 학생 */
   rows: StudentRow[];
+  /** 모든 반을 합친 요약. 반별 요약은 화면에서 rows 를 걸러 summarizeClass 로 만든다 */
   summary: ClassSummary;
+  classes: ClassRoom[];
+  /** 학급 목록을 못 읽은 경우 (서버 규칙에 classes3d 를 아직 안 올렸을 때 등) */
+  classError: string | null;
 }
 
 export interface UseClassData {
@@ -23,7 +28,19 @@ export interface UseClassData {
   storage: StorageMode;
   refresh: () => Promise<void>;
   /** 명단을 한 번에 등록한다. 다 끝난 뒤 한 번만 다시 읽는다. */
-  addStudents: (entries: { displayName: string; avatarId: AvatarId }[]) => Promise<void>;
+  addStudents: (
+    entries: { displayName: string; avatarId: AvatarId }[],
+    classId: string | null,
+  ) => Promise<void>;
+  /**
+   * 학급을 만든다. 처음 만드는 학급이면 반이 없는 학생(학급 기능 전에 만든 학생)을 모두 그 반으로 옮긴다.
+   * 만든 학급을 돌려준다.
+   */
+  createClass: (name: string) => Promise<ClassRoom>;
+  renameClass: (classId: string, name: string) => Promise<void>;
+  deleteClass: (classId: string) => Promise<void>;
+  /** 학생을 다른 반으로 옮긴다 */
+  moveStudent: (playerId: string, classId: string | null) => Promise<void>;
   /** 이름은 남기고 진행도·학습 기록만 지운다 */
   resetStudent: (playerId: string) => Promise<void>;
   /** 학생을 통째로 지운다 */
@@ -58,7 +75,14 @@ export function useClassData(enabled: boolean): UseClassData {
     setLoading(true);
     setError(null);
     try {
-      const profiles = await repositories().player.listProfiles();
+      const repos = repositories();
+      const [profiles, classResult] = await Promise.all([
+        repos.player.listProfiles(),
+        repos.classes
+          .listClasses()
+          .then((classes) => ({ classes, classError: null }))
+          .catch((e) => ({ classes: [] as ClassRoom[], classError: message(e) })),
+      ]);
 
       // 한 학생을 못 읽어도 나머지는 보여준다. 그 학생 줄에만 사유를 남긴다.
       const rows = await Promise.all(
@@ -69,7 +93,7 @@ export function useClassData(enabled: boolean): UseClassData {
         ),
       );
 
-      setData({ rows, summary: summarizeClass(rows) });
+      setData({ rows, summary: summarizeClass(rows), ...classResult });
     } catch (e) {
       setError(message(e));
     } finally {
@@ -82,11 +106,11 @@ export function useClassData(enabled: boolean): UseClassData {
   }, [enabled, refresh]);
 
   const addStudents = useCallback(
-    async (entries: { displayName: string; avatarId: AvatarId }[]) => {
+    async (entries: { displayName: string; avatarId: AvatarId }[], classId: string | null) => {
       const repos = repositories();
       // 순서대로 만든다. 한꺼번에 던지면 실패한 이름이 어느 것인지 알기 어렵다.
       for (const entry of entries) {
-        await repos.player.createProfile(entry.displayName, entry.avatarId);
+        await repos.player.createProfile(entry.displayName, entry.avatarId, undefined, classId);
       }
       await refresh();
     },
@@ -118,6 +142,51 @@ export function useClassData(enabled: boolean): UseClassData {
     [refresh],
   );
 
+  const createClass = useCallback(
+    async (name: string) => {
+      const repos = repositories();
+      const first = (data?.classes.length ?? 0) === 0;
+      const room = await repos.classes.createClass(name);
+      if (first) {
+        // 학급 기능 전에 만든 학생들은 첫 학급의 학생이다
+        const profiles = await repos.player.listProfiles();
+        for (const profile of profiles.filter((p) => !p.classId)) {
+          await repos.player.setClass(profile.id, room.id);
+        }
+      }
+      await refresh();
+      return room;
+    },
+    [data, refresh],
+  );
+
+  const renameClass = useCallback(
+    async (classId: string, name: string) => {
+      await repositories().classes.renameClass(classId, name);
+      await refresh();
+    },
+    [refresh],
+  );
+
+  const deleteClass = useCallback(
+    async (classId: string) => {
+      // 학생이 남은 반은 지우지 않는다 — 그 학생들이 어느 반 이름 목록에도 안 나오게 된다
+      const profiles = await repositories().player.listProfiles();
+      if (profiles.some((p) => p.classId === classId)) throw new Error('학생이 남아 있는 반은 지울 수 없어요');
+      await repositories().classes.deleteClass(classId);
+      await refresh();
+    },
+    [refresh],
+  );
+
+  const moveStudent = useCallback(
+    async (playerId: string, classId: string | null) => {
+      await repositories().player.setClass(playerId, classId);
+      await refresh();
+    },
+    [refresh],
+  );
+
   const removeStudent = useCallback(
     async (playerId: string) => {
       await repositories().player.deleteProfile(playerId);
@@ -133,6 +202,10 @@ export function useClassData(enabled: boolean): UseClassData {
     storage: storageMode(),
     refresh,
     addStudents,
+    createClass,
+    renameClass,
+    deleteClass,
+    moveStudent,
     resetStudent,
     removeStudent,
     setMoney,

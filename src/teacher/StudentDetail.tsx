@@ -7,6 +7,7 @@
  */
 import { useEffect, useState } from 'react';
 import { CURRENCY, avatarName, formatMoney } from '@/config/strings';
+import type { ClassRoom } from '@/types/game';
 import { formatAccuracy, formatLastPlayed, type StudentRow } from './summary';
 import { AccuracyBar, Button, EmptyNote } from './ui';
 
@@ -18,8 +19,13 @@ export function StudentDetail({
   onReset,
   onRemove,
   onSetMoney,
+  classes,
+  onMove,
 }: {
   row: StudentRow;
+  /** 옮길 수 있는 반들. 비어 있으면 반 옮기기를 보여 주지 않는다 */
+  classes: ClassRoom[];
+  onMove: (playerId: string, classId: string | null) => Promise<void>;
   onClose: () => void;
   onReset: (playerId: string) => Promise<void>;
   onRemove: (playerId: string) => Promise<void>;
@@ -144,6 +150,32 @@ export function StudentDetail({
 
             {failed && (
               <p className="mt-2 text-[0.9rem] text-berry">처리하지 못했어요 ({failed}).</p>
+            )}
+
+            {classes.length > 0 && (
+              <div className="mt-3 border-b border-ink/10 pb-4">
+                <label className="flex flex-wrap items-center gap-2 text-[0.95rem] text-ink">
+                  반
+                  <select
+                    value={row.profile.classId ?? ''}
+                    disabled={busy}
+                    onChange={(event) =>
+                      void run(() => onMove(row.profile.id, event.target.value || null), false)
+                    }
+                    className="font-body rounded-lg border border-ink/25 bg-white px-3 py-2 text-[1rem] outline-none focus:border-leaf focus:ring-2 focus:ring-leaf/40"
+                  >
+                    {!row.profile.classId && <option value="">반 없음</option>}
+                    {classes.map((room) => (
+                      <option key={room.id} value={room.id}>
+                        {room.name}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <p className="mt-1 text-[0.85rem] text-ink-soft">
+                  다른 반으로 옮기면 그 반 이름 목록에 나타나요. 진행도는 그대로예요.
+                </p>
+              </div>
             )}
 
             <div className="mt-3 border-b border-ink/10 pb-4">

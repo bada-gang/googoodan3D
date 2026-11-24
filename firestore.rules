@@ -2,8 +2,9 @@ rules_version = '2';
 
 // 구구 마을 — 한 학급이 하나의 프로젝트를 함께 쓴다.
 // 2D 판(googoodan)과 3D 판(googoodan3D)이 같은 프로젝트를 쓴다. 3D 판은 이름 끝에 3d 가 붙은 컬렉션을 쓴다.
-// ⚠ 이 파일은 두 저장소에 똑같이 있다. 한쪽을 고치면 다른 쪽도 같이 고친다 (규칙은 프로젝트에 한 벌이라
-//   한쪽 파일만 올리면 다른 판이 막힌다).
+// ⚠ 규칙은 프로젝트에 한 벌이다. 2D 저장소에도 예전 사본이 있지만 2D 판은 더 고치지 않으므로
+//   이 파일(3D 저장소)이 기준이다. 2D 판 경로(players · saves · stats)도 여기 그대로 두어야 2D 판이 막히지 않는다.
+//   2D 저장소의 사본은 classes3d 가 없으니 그 파일로 올리면 안 된다.
 //
 // 학생은 계정을 만들지 않는다. 대신 앱이 자동으로 익명 로그인을 하고,
 // 규칙은 "로그인한 기기인지"만 확인한다.
@@ -43,6 +44,10 @@ service cloud.firestore {
       allow read, write: if signedIn();
     }
     match /stats3d/{playerId} {
+      allow read, write: if signedIn();
+    }
+    // 학급 목록 (여러 반이 같이 쓴다)
+    match /classes3d/{classId} {
       allow read, write: if signedIn();
     }
 

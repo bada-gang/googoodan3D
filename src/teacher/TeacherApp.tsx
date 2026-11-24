@@ -4,26 +4,67 @@
  * 학생 게임과 분리된 페이지다 (teacher.html). 그래서 three.js 도 게임 스토어도 여기 없다.
  * 학생 데이터는 게임과 똑같은 저장소 인터페이스로만 읽는다.
  */
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { GAME_TITLE } from '@/config/strings';
 import { AddStudentForm } from './AddStudentForm';
+import { ClassBar, type ClassPick } from './ClassBar';
 import { PasscodeGate, useUnlocked } from './PasscodeGate';
 import { StudentDetail } from './StudentDetail';
 import { StudentTable } from './StudentTable';
-import { formatAccuracy, type StudentRow } from './summary';
+import { formatAccuracy, summarizeClass, type StudentRow } from './summary';
 import { useClassData } from './useClassData';
 import { AccuracyBar, Banner, Button, Card, EmptyNote } from './ui';
+
+/** 마지막으로 본 반 (이 브라우저에만 기억) */
+const PICK_KEY = 'googoo3d:teacher-class';
+
+function rememberedPick(): ClassPick | null {
+  try {
+    return localStorage.getItem(PICK_KEY);
+  } catch {
+    return null;
+  }
+}
 
 export function TeacherApp(): React.ReactElement {
   const [unlocked, unlock] = useUnlocked();
   const state = useClassData(unlocked);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [adding, setAdding] = useState(false);
+  const [pick, setPick] = useState<ClassPick | null>(rememberedPick);
+
+  const allRows = useMemo(() => state.data?.rows ?? [], [state.data]);
+  const classes = useMemo(() => state.data?.classes ?? [], [state.data]);
+  const unassigned = allRows.filter((r) => !r.profile.classId).length;
+  const counts: Record<string, number> = {};
+  for (const r of allRows) if (r.profile.classId) counts[r.profile.classId] = (counts[r.profile.classId] ?? 0) + 1;
+
+  // 고른 반이 없어졌거나 아직 안 골랐으면 첫 반으로
+  const validPick =
+    pick !== null && (classes.some((c) => c.id === pick) || (pick === 'none' && unassigned > 0));
+  const activePick: ClassPick | null = classes.length === 0 ? null : validPick ? pick : classes[0].id;
+  const activeClass = classes.find((c) => c.id === activePick) ?? null;
+
+  useEffect(() => {
+    if (activePick === null) return;
+    try {
+      localStorage.setItem(PICK_KEY, activePick);
+    } catch {
+      // 기억 못 해도 괜찮다
+    }
+  }, [activePick]);
+
+  // 학급이 없으면 모든 학생, 있으면 고른 반 학생만
+  const rows = useMemo(
+    () =>
+      activePick === null
+        ? allRows
+        : allRows.filter((r) => (activePick === 'none' ? !r.profile.classId : r.profile.classId === activePick)),
+    [allRows, activePick],
+  );
+  const summary = useMemo(() => (state.data ? summarizeClass(rows) : undefined), [state.data, rows]);
 
   if (!unlocked) return <PasscodeGate onUnlock={unlock} />;
-
-  const rows = state.data?.rows ?? [];
-  const summary = state.data?.summary;
   const selected: StudentRow | undefined = rows.find((r) => r.profile.id === selectedId);
 
   return (
@@ -56,8 +97,25 @@ export function TeacherApp(): React.ReactElement {
         <Banner tone="error">학생 목록을 읽지 못했어요 ({state.error}).</Banner>
       )}
 
+      {state.data && (
+        <ClassBar
+          classes={classes}
+          selected={activePick}
+          counts={counts}
+          unassigned={unassigned}
+          classError={state.data.classError}
+          onSelect={setPick}
+          onCreate={async (name) => {
+            const room = await state.createClass(name);
+            setPick(room.id);
+          }}
+          onRename={state.renameClass}
+          onDelete={state.deleteClass}
+        />
+      )}
+
       {summary && (
-        <Card title="반 전체">
+        <Card title={activePick === 'none' ? '반 없는 학생 전체' : activeClass ? `${activeClass.name} 전체` : '반 전체'}>
           <p className="text-[1rem] text-ink">
             학생 {summary.studentCount}명
             {summary.studentCount > 0 && ` (${summary.activeCount}명이 문제를 풀었어요)`} · 푼 문제{' '}
@@ -105,7 +163,7 @@ export function TeacherApp(): React.ReactElement {
         </Card>
       )}
 
-      <Card title="학생">
+      <Card title={activeClass ? `${activeClass.name} 학생` : '학생'}>
         {state.data === null && state.loading ? (
           <EmptyNote>불러오는 중이에요…</EmptyNote>
         ) : (
@@ -124,13 +182,16 @@ export function TeacherApp(): React.ReactElement {
           onReset={state.resetStudent}
           onRemove={state.removeStudent}
           onSetMoney={state.setMoney}
+          classes={classes}
+          onMove={state.moveStudent}
         />
       )}
 
       {adding && (
         <AddStudentForm
           existing={rows.map((row) => row.profile)}
-          onAdd={state.addStudents}
+          className={activeClass?.name}
+          onAdd={(entries) => state.addStudents(entries, activeClass?.id ?? null)}
           onClose={() => setAdding(false)}
         />
       )}

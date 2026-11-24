@@ -12,10 +12,13 @@ import { Button } from './ui';
 
 export function AddStudentForm({
   existing,
+  className,
   onAdd,
   onClose,
 }: {
   existing: PlayerProfile[];
+  /** 학생을 넣을 반 이름 (학급이 없으면 없음) */
+  className?: string;
   onAdd: (entries: { displayName: string; avatarId: PlayerProfile['avatarId'] }[]) => Promise<void>;
   onClose: () => void;
 }): React.ReactElement {
@@ -47,7 +50,7 @@ export function AddStudentForm({
         onClick={(event) => event.stopPropagation()}
         className="flex max-h-full w-full max-w-lg flex-col overflow-y-auto rounded-2xl bg-sky-soft p-6 shadow-2xl"
       >
-        <h2 className="font-game text-[1.5rem] text-ink">학생 추가</h2>
+        <h2 className="font-game text-[1.5rem] text-ink">{className ? `${className}에 학생 추가` : '학생 추가'}</h2>
         <p className="mt-1 text-[0.9rem] text-ink-soft">
           이름을 한 줄에 하나씩 적거나 쉼표로 구분해 붙여 넣으세요. 캐릭터는 자동으로 배정합니다.
         </p>

@@ -25,7 +25,7 @@ src/
     props/         여러 장면이 같이 쓰는 소품(땅 · 길 · 표지판)
     state/         매 프레임 쓰는 위치 · 장애물, 장면 바꾸기
     debug/         fps 측정 · 개발용 주소 옵션
-  teacher/       선생님 화면 (teacher.html)
+  teacher/       선생님 화면 (teacher.html) — 학급 만들기 · 반별 학생 · 기록
 scripts/         그림 · 3D 모델 · 소리 만드는 도구 (npm run art / model / audio)
   lib/             단계별 도구 (3D 변환, 모양 다듬기, 색 보정, 그림자 사본, 자동 뼈대, Codex, 아이콘)
 dev/             개발 중 확인용 페이지 (그림 모아보기, 모델 미리보기)
@@ -108,7 +108,9 @@ art-src/         생성 원본 (git 에 안 들어감 — 아래 "백업" 참고
 
 | 하고 싶은 것 | 파일 |
 | --- | --- |
-| 이름 고르기 → 구구단 고르기 → 게임 | `src/App.tsx`, `src/ui/screens/` |
+| 반 고르기 → 이름 고르기 → 구구단 고르기 → 게임 (학급이 없으면 반 고르기를 건너뜀) | `src/App.tsx`, `src/ui/screens/` |
+| 학생이 이름 · 캐릭터 바꾸기 (구구단 고르기 화면) | `src/ui/screens/TableSelectScreen.tsx` |
+| 학급 만들기 · 이름 바꾸기 · 지우기, 학생 반 옮기기 (선생님 화면) | `src/teacher/ClassBar.tsx`, `src/teacher/StudentDetail.tsx` |
 | 위쪽 HUD (돈 · 레벨) | `src/ui/hud/GameHUD.tsx` |
 | 조이스틱 · 행동 버튼 | `src/ui/hud/TouchControls.tsx` |
 | 문제 팝업 | `src/ui/overlays/MathQuestionOverlay.tsx` |
@@ -126,7 +128,7 @@ art-src/         생성 원본 (git 에 안 들어감 — 아래 "백업" 참고
 - **새 나무 · 동물 · 가구**: `config/catalog.ts` 에 항목 → `config/models.ts` 에 모델 → `npm run model -- --only 키` → (가구면) `config/furniture3d.ts` 에 크기.
 - **새 장면**: `src/world/scenes/새장면/` 폴더를 만들고, 장면 이름을 `bridge/events.ts` 의 `SceneKey` · `world/state/sceneStore.ts` 에, 그리기를 `world/WorldRoot.tsx` 에 더한다.
 - **새 게임 상태**: 주제에 맞는 `state/game/*Slice.ts` 에 더한다. 저장해야 하면 `types/game.ts` 의 `GameSaveData`, `state/game/saveData.ts`, `sessionSlice.ts` 의 불러오기 · `toSaveData` 를 함께 고친다.
-- **서버 저장 (Firebase)**: 2D 판과 같은 프로젝트(googoodan-bada)를 쓴다. 컬렉션 이름은 `src/data/firebase/collections.ts`, 보안 규칙은 `firestore.rules` (2D 저장소에도 같은 파일 — 한쪽을 고치면 다른 쪽도). 설정 값은 `.env.local` 과 Netlify 환경변수의 `VITE_FIREBASE_*`. 다른 저장 방식으로 바꾸려면 `src/data/repositories.ts` 를 구현해 `src/data/index.ts` 에서 바꿔 끼운다.
+- **서버 저장 (Firebase)**: 2D 판과 같은 프로젝트(googoodan-bada)를 쓴다. 컬렉션 이름은 `src/data/firebase/collections.ts`, 보안 규칙은 `firestore.rules` (이 파일이 기준. 2D 저장소의 옛 사본에는 학급 `classes3d` 가 없어 그걸로 올리면 안 된다). 학급은 `classes3d`, 학생 문서의 `classId` 가 반을 가리킨다. 설정 값은 `.env.local` 과 Netlify 환경변수의 `VITE_FIREBASE_*`. 다른 저장 방식으로 바꾸려면 `src/data/repositories.ts` 를 구현해 `src/data/index.ts` 에서 바꿔 끼운다.
 
 ## 명령
 
