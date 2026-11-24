@@ -6,7 +6,7 @@
  */
 import { useCallback, useEffect, useState } from 'react';
 import { repositories, storageMode, type StorageMode } from '@/data';
-import type { AvatarId, ClassRoom, PlayerProfile } from '@/types/game';
+import { MAX_CLASSES, type AvatarId, type ClassRoom, type PlayerProfile } from '@/types/game';
 import { createEmptyLearningStats } from '@/types/learning';
 import { buildStudentRow, summarizeClass, type ClassSummary, type StudentRow } from './summary';
 
@@ -145,7 +145,10 @@ export function useClassData(enabled: boolean): UseClassData {
   const createClass = useCallback(
     async (name: string) => {
       const repos = repositories();
-      const first = (data?.classes.length ?? 0) === 0;
+      // 다른 선생님이 방금 만들었을 수도 있으니 서버 목록으로 다시 센다
+      const existing = await repos.classes.listClasses();
+      if (existing.length >= MAX_CLASSES) throw new Error(`학급은 ${MAX_CLASSES}개까지 만들 수 있어요`);
+      const first = existing.length === 0;
       const room = await repos.classes.createClass(name);
       if (first) {
         // 학급 기능 전에 만든 학생들은 첫 학급의 학생이다
@@ -157,7 +160,7 @@ export function useClassData(enabled: boolean): UseClassData {
       await refresh();
       return room;
     },
-    [data, refresh],
+    [refresh],
   );
 
   const renameClass = useCallback(

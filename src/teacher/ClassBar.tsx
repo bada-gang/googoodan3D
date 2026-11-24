@@ -2,10 +2,11 @@
  * 선생님 화면 맨 위의 학급 고르기 · 만들기 · 이름 바꾸기 · 지우기.
  *
  * 학급을 만들면 학생 게임 첫 화면이 '우리 반을 선택하세요' 로 시작한다 (학급이 없으면 그 화면을 건너뛴다).
+ * 학급은 MAX_CLASSES(10)개까지 만들 수 있다.
  * 처음 만드는 학급으로는 반이 없는 학생(학급 기능 전에 만든 학생)이 모두 옮겨진다.
  */
 import { useState } from 'react';
-import { MAX_CLASS_NAME_LENGTH, type ClassRoom } from '@/types/game';
+import { MAX_CLASSES, MAX_CLASS_NAME_LENGTH, type ClassRoom } from '@/types/game';
 import { Banner, Button, Card } from './ui';
 
 /** 'none' 은 '반 없음' 묶음 */
@@ -43,6 +44,7 @@ export function ClassBar({
   const [confirmDelete, setConfirmDelete] = useState(false);
 
   const current = classes.find((c) => c.id === selected) ?? null;
+  const full = classes.length >= MAX_CLASSES;
   const trimmed = name.trim();
   const taken = classes.some(
     (c) => c.name === trimmed && !(editing?.mode === 'rename' && editing.id === c.id),
@@ -75,6 +77,8 @@ export function ClassBar({
       right={
         <Button
           tone="primary"
+          disabled={full}
+          title={full ? `학급은 ${MAX_CLASSES}개까지 만들 수 있어요` : undefined}
           onClick={() => {
             setEditing({ mode: 'create' });
             setName('');
@@ -82,10 +86,15 @@ export function ClassBar({
             setConfirmDelete(false);
           }}
         >
-          학급 만들기
+          학급 만들기 ({classes.length}/{MAX_CLASSES})
         </Button>
       }
     >
+      {full && (
+        <p className="mb-3 text-[0.9rem] text-ink-soft">
+          학급은 {MAX_CLASSES}개까지 만들 수 있어요. 새로 만들려면 쓰지 않는 빈 학급을 먼저 지워 주세요.
+        </p>
+      )}
       {classError && (
         <div className="mb-3">
           <Banner tone="error">

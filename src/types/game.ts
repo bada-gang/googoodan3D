@@ -24,6 +24,9 @@ export interface ClassRoom {
   createdAt: string;
 }
 
+/** 만들 수 있는 학급 수 (선생님 화면에서 막는다) */
+export const MAX_CLASSES = 10;
+
 /** 학급 · 학생 이름 길이 한도 */
 export const MAX_CLASS_NAME_LENGTH = 12;
 export const MAX_PLAYER_NAME_LENGTH = 8;
