@@ -8,7 +8,7 @@
  *  - 놓침: 짧은 안내 뒤 저절로 닫힌다
  * 낚시 중에는 화면 전체를 덮어(투명) 다른 버튼 · 조이스틱을 막는다.
  */
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { BITE_MESSAGE, FISH, caughtMessage } from '@/config/fishing';
 import { CURRENCY } from '@/config/strings';
 import { useFishing } from '@/state/fishingStore';
@@ -132,14 +132,14 @@ function CaughtCard(): React.ReactElement | null {
   return (
     <div className="absolute inset-0 flex items-center justify-center p-6">
       <div className="absolute inset-0 bg-[rgba(48,38,30,0.45)]" />
-      <div className="panel-wood animate-pop-in relative flex w-[520px] flex-col items-center gap-3 px-10 py-8">
+      <div className="panel-wood animate-pop-in relative flex w-[580px] flex-col items-center gap-3 px-10 py-8">
         {firstTime && (
           <span className="font-game rounded-full border-4 border-[var(--color-ink)] bg-[var(--color-gold)] px-5 py-1 text-[1.25rem]">
             도감에 새로 올랐어요!
           </span>
         )}
         <Icon src={cropIcon(fish)} size={170} alt={def.name} />
-        <p className="font-game text-ink text-[2.1rem]">{caughtMessage(fish)}</p>
+        <OneLine text={caughtMessage(fish)} />
         <p className="font-game text-ink-soft text-[1.2rem]">
           가방에 넣었어요 · 팔면 {def.price}
           {CURRENCY}
@@ -149,6 +149,29 @@ function CaughtCard(): React.ReactElement | null {
         </GameButton>
       </div>
     </div>
+  );
+}
+
+/** 잡은 것 한 줄. "간이 필요한 용왕의 왕관을 건졌어요!" 처럼 길면 한 줄에 들어갈 만큼만 글씨를 줄인다 */
+const CAUGHT_FONT_REM = 2.1;
+/** 16글자가 넘는 긴 문구(용왕의 왕관 · 대왕 진주 조개)는 처음부터 조금 작게 */
+const CAUGHT_FONT_LONG_REM = 1.8;
+function OneLine({ text }: { text: string }): React.ReactElement {
+  const base = [...text].length > 16 ? CAUGHT_FONT_LONG_REM : CAUGHT_FONT_REM;
+  const ref = useRef<HTMLParagraphElement>(null);
+  const [size, setSize] = useState(base);
+  useLayoutEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    // 기기 글꼴이 달라 넘치면 넘친 만큼 더 줄인다
+    el.style.fontSize = `${base}rem`;
+    const ratio = el.clientWidth / el.scrollWidth;
+    setSize(ratio < 1 ? Math.floor(base * ratio * 100) / 100 : base);
+  }, [text, base]);
+  return (
+    <p ref={ref} className="font-game text-ink w-full whitespace-nowrap text-center" style={{ fontSize: `${size}rem` }}>
+      {text}
+    </p>
   );
 }
 
