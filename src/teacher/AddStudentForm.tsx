@@ -6,7 +6,7 @@
  */
 import { useMemo, useState } from 'react';
 import { avatarName } from '@/config/strings';
-import type { PlayerProfile } from '@/types/game';
+import { MAX_PLAYER_NAME_LENGTH, type PlayerProfile } from '@/types/game';
 import { planNewStudents } from './roster';
 import { Button } from './ui';
 
@@ -32,9 +32,11 @@ export function AddStudentForm({
   const planned = useMemo(() => planNewStudents(raw, existing), [raw, existing]);
   const duplicates = planned.filter((p) => p.sharesName);
   const tooMany = planned.length > remaining;
+  const tooLong = planned.filter((p) => [...p.displayName].length > MAX_PLAYER_NAME_LENGTH);
+  const blocked = planned.length === 0 || tooMany || tooLong.length > 0;
 
   const submit = async () => {
-    if (planned.length === 0 || tooMany || busy) return;
+    if (blocked || busy) return;
     setBusy(true);
     setFailed(null);
     try {
@@ -56,7 +58,8 @@ export function AddStudentForm({
       >
         <h2 className="font-game text-[1.5rem] text-ink">{className ? `${className}에 학생 추가` : '학생 추가'}</h2>
         <p className="mt-1 text-[0.9rem] text-ink-soft">
-          이름을 한 줄에 하나씩 적거나 쉼표로 구분해 붙여 넣으세요. 캐릭터는 자동으로 배정합니다.
+          이름을 한 줄에 하나씩 적거나 쉼표로 구분해 붙여 넣으세요 ({MAX_PLAYER_NAME_LENGTH}글자까지). 캐릭터는
+          자동으로 배정합니다.
         </p>
 
         <textarea
@@ -101,13 +104,20 @@ export function AddStudentForm({
           </p>
         )}
 
-        {failed && <p className="mt-3 text-[0.9rem] text-berry">만들지 못했어요 ({failed}).</p>}
+        {tooLong.length > 0 && (
+          <p className="mt-3 text-[0.9rem] text-berry">
+            이름은 {MAX_PLAYER_NAME_LENGTH}글자까지 쓸 수 있어요. 줄여 주세요:{' '}
+            {tooLong.map((p) => p.displayName).join(', ')}
+          </p>
+        )}
+
+        {failed &&<p className="mt-3 text-[0.9rem] text-berry">만들지 못했어요 ({failed}).</p>}
 
         <div className="mt-5 flex justify-end gap-2">
           <Button onClick={onClose} disabled={busy}>
             취소
           </Button>
-          <Button tone="primary" onClick={() => void submit()} disabled={planned.length === 0 || tooMany || busy}>
+          <Button tone="primary" onClick={() => void submit()} disabled={blocked || busy}>
             {busy ? '만드는 중…' : `${planned.length || ''}명 만들기`}
           </Button>
         </div>

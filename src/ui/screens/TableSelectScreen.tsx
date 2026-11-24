@@ -20,6 +20,9 @@ import { GameButton, Icon } from '../common/ui';
 import { ScreenShell } from './ProfileSelectScreen';
 import { audio } from '@/audio/sfx';
 
+/** 보통 게임 버튼(높이 56 · 글자 1.35rem)의 90% */
+const SMALL_BUTTON = '!min-h-[50px] !rounded-[18px] !px-[1.25rem] !py-[0.5rem] !text-[1.2rem]';
+
 export function TableSelectScreen({
   profile,
   onStart,
@@ -190,20 +193,22 @@ export function TableSelectScreen({
   return (
     <ScreenShell
       title={
-        // 이름이 길면(8글자) 쉼표 뒤에서 두 줄로 나뉜다
+        // 화면이 좁아 한 줄에 안 들어가면 쉼표 뒤에서 두 줄로 나뉜다
         <span className="inline-flex flex-wrap items-center justify-center gap-x-3 gap-y-2 text-[2.3rem]">
           <span className="inline-flex items-center gap-2">
-            <Icon src={avatarIcon(profile.avatarId)} size={52} alt="" />
+            <Icon src={avatarIcon(profile.avatarId)} size={44} alt="" />
             {profile.displayName}님,
           </span>
           <span>오늘은 무엇을 공부할까요?</span>
         </span>
       }
     >
-      <div className="flex flex-col items-center gap-4 pt-1">
-        <div className="flex items-center gap-3">
+      <div className="flex flex-col items-center gap-4">
+        {/* 제목에 붙은 작은 보조 버튼 (보통 버튼의 90%) */}
+        <div className="-mt-2 flex items-center gap-3">
           <GameButton
             tone="white"
+            className={SMALL_BUTTON}
             onClick={() => {
               audio.play('tap');
               setAvatar(profile.avatarId);
@@ -215,6 +220,7 @@ export function TableSelectScreen({
           </GameButton>
           <GameButton
             tone="white"
+            className={SMALL_BUTTON}
             onClick={() => {
               audio.play('tap');
               setNewName(profile.displayName);

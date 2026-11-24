@@ -177,7 +177,8 @@ export function ScreenShell({
       <div className="panel-wood relative z-10 flex max-h-[700px] w-[900px] flex-col items-center gap-3 px-8 py-7">
         <h1 className="font-game text-[2.6rem] leading-none text-ink stroke-ink">{title}</h1>
         {subtitle && <p className="font-game text-[1.3rem] text-ink-soft">{subtitle}</p>}
-        <div className="no-scrollbar w-full overflow-y-auto">{children}</div>
+        {/* 스크롤 상자가 버튼 그림자 · 빛나는 테두리를 자르지 않게, 패널 여백까지 넓혀 두고 안쪽을 그만큼 띄운다 */}
+        <div className="no-scrollbar -mx-7 -mt-3 -mb-7 self-stretch overflow-y-auto px-7 pt-3 pb-7">{children}</div>
       </div>
     </div>
   );

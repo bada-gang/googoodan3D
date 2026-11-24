@@ -44,7 +44,7 @@ export const MAX_STUDENTS_PER_CLASS = 20;
 
 /** 학급 · 학생 이름 길이 한도 */
 export const MAX_CLASS_NAME_LENGTH = 12;
-export const MAX_PLAYER_NAME_LENGTH = 8;
+export const MAX_PLAYER_NAME_LENGTH = 6;
 
 /** 학급 목록 순서: "2학년 2반" 이 "2학년 10반" 보다 앞에 오게 숫자를 숫자로 비교한다 */
 export function sortClasses(list: ClassRoom[]): ClassRoom[] {
