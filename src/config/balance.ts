@@ -159,7 +159,7 @@ export const MINIGAME = {
 /** 70% 일반 균형 출제 / 30% 취약 문제 우선 (명세 17) */
 export const WEAK_PROBLEM_RATIO = 0.3;
 /** 나머지가 있는 나눗셈에서 몫이 한 자리 수(45 ÷ 6 = 7 … 3)인 문제를 낼 확률. 나머지는 몫이 10 이상 */
-export const REMAINDER_ONE_DIGIT_RATIO = 0.7;
+export const REMAINDER_ONE_DIGIT_RATIO = 0.75;
 /** 오답 문제를 다시 만나기까지의 최소/최대 간격 (명세 18) */
 export const WRONG_REVIEW_MIN_GAP = 2;
 export const WRONG_REVIEW_MAX_GAP = 10;
