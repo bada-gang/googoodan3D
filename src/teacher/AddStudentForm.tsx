@@ -12,11 +12,14 @@ import { Button } from './ui';
 
 export function AddStudentForm({
   existing,
+  remaining,
   className,
   onAdd,
   onClose,
 }: {
   existing: PlayerProfile[];
+  /** 이 반에 더 넣을 수 있는 학생 수 */
+  remaining: number;
   /** 학생을 넣을 반 이름 (학급이 없으면 없음) */
   className?: string;
   onAdd: (entries: { displayName: string; avatarId: PlayerProfile['avatarId'] }[]) => Promise<void>;
@@ -28,9 +31,10 @@ export function AddStudentForm({
 
   const planned = useMemo(() => planNewStudents(raw, existing), [raw, existing]);
   const duplicates = planned.filter((p) => p.sharesName);
+  const tooMany = planned.length > remaining;
 
   const submit = async () => {
-    if (planned.length === 0 || busy) return;
+    if (planned.length === 0 || tooMany || busy) return;
     setBusy(true);
     setFailed(null);
     try {
@@ -91,13 +95,19 @@ export function AddStudentForm({
           </div>
         )}
 
+        {tooMany && (
+          <p className="mt-3 text-[0.9rem] text-berry">
+            이 반에는 {remaining}명만 더 넣을 수 있어요 (한 학급 최대 20명). {planned.length - remaining}명을 빼 주세요.
+          </p>
+        )}
+
         {failed && <p className="mt-3 text-[0.9rem] text-berry">만들지 못했어요 ({failed}).</p>}
 
         <div className="mt-5 flex justify-end gap-2">
           <Button onClick={onClose} disabled={busy}>
             취소
           </Button>
-          <Button tone="primary" onClick={() => void submit()} disabled={planned.length === 0 || busy}>
+          <Button tone="primary" onClick={() => void submit()} disabled={planned.length === 0 || tooMany || busy}>
             {busy ? '만드는 중…' : `${planned.length || ''}명 만들기`}
           </Button>
         </div>

@@ -6,6 +6,7 @@
  */
 import { useEffect, useMemo, useState } from 'react';
 import { GAME_TITLE } from '@/config/strings';
+import { MAX_STUDENTS_PER_CLASS } from '@/types/game';
 import { AddStudentForm } from './AddStudentForm';
 import { ClassBar, type ClassPick } from './ClassBar';
 import { PasscodeGate, useUnlocked } from './PasscodeGate';
@@ -62,6 +63,7 @@ export function TeacherApp(): React.ReactElement {
         : allRows.filter((r) => (activePick === 'none' ? !r.profile.classId : r.profile.classId === activePick)),
     [allRows, activePick],
   );
+  const classFull = rows.length >= MAX_STUDENTS_PER_CLASS;
   const summary = useMemo(() => (state.data ? summarizeClass(rows) : undefined), [state.data, rows]);
 
   if (!unlocked) return <PasscodeGate onUnlock={unlock} />;
@@ -75,14 +77,6 @@ export function TeacherApp(): React.ReactElement {
           <p className="text-[0.9rem] text-ink-soft">
             학생들의 곱셈구구 기록을 봅니다. 이 화면은 학생 게임과 분리돼 있어요.
           </p>
-        </div>
-        <div className="flex gap-2">
-          <Button onClick={() => void state.refresh()} disabled={state.loading}>
-            {state.loading ? '읽는 중…' : '새로고침'}
-          </Button>
-          <Button tone="primary" onClick={() => setAdding(true)}>
-            학생 추가
-          </Button>
         </div>
       </header>
 
@@ -114,6 +108,40 @@ export function TeacherApp(): React.ReactElement {
           onDelete={state.deleteClass}
         />
       )}
+
+      <Card
+        title={activeClass ? `${activeClass.name} 학생` : '학생'}
+        right={
+          <div className="flex items-center gap-3">
+            <span className="text-[0.9rem] text-ink-soft tabular-nums">
+              {rows.length}/{MAX_STUDENTS_PER_CLASS}명
+            </span>
+            <Button
+              tone="primary"
+              disabled={state.data === null || classFull}
+              title={classFull ? `한 학급에 ${MAX_STUDENTS_PER_CLASS}명까지 넣을 수 있어요` : undefined}
+              onClick={() => setAdding(true)}
+            >
+              학생 추가
+            </Button>
+          </div>
+        }
+      >
+        {classFull && (
+          <p className="mb-3 text-[0.9rem] text-ink-soft">
+            한 학급에는 학생을 {MAX_STUDENTS_PER_CLASS}명까지 넣을 수 있어요.
+          </p>
+        )}
+        {state.data === null && state.loading ? (
+          <EmptyNote>불러오는 중이에요…</EmptyNote>
+        ) : (
+          <StudentTable rows={rows} onSelect={(row) => setSelectedId(row.profile.id)} />
+        )}
+      </Card>
+
+      <p className="pb-4 text-center text-[0.8rem] text-ink-soft">
+        학생 이름을 클릭하면 그 학생의 단별 정답률과 자주 틀리는 문제를 볼 수 있어요.
+      </p>
 
       {summary && (
         <Card title={activePick === 'none' ? '반 없는 학생 전체' : activeClass ? `${activeClass.name} 전체` : '반 전체'}>
@@ -164,18 +192,6 @@ export function TeacherApp(): React.ReactElement {
         </Card>
       )}
 
-      <Card title={activeClass ? `${activeClass.name} 학생` : '학생'}>
-        {state.data === null && state.loading ? (
-          <EmptyNote>불러오는 중이에요…</EmptyNote>
-        ) : (
-          <StudentTable rows={rows} onSelect={(row) => setSelectedId(row.profile.id)} />
-        )}
-      </Card>
-
-      <p className="pb-4 text-center text-[0.8rem] text-ink-soft">
-        학생 이름을 클릭하면 그 학생의 단별 정답률과 자주 틀리는 문제를 볼 수 있어요.
-      </p>
-
       {selected && (
         <StudentDetail
           row={selected}
@@ -184,6 +200,7 @@ export function TeacherApp(): React.ReactElement {
           onRemove={state.removeStudent}
           onSetMoney={state.setMoney}
           classes={classes}
+          counts={counts}
           onMove={state.moveStudent}
         />
       )}
@@ -191,6 +208,7 @@ export function TeacherApp(): React.ReactElement {
       {adding && (
         <AddStudentForm
           existing={rows.map((row) => row.profile)}
+          remaining={Math.max(0, MAX_STUDENTS_PER_CLASS - rows.length)}
           className={activeClass?.name}
           onAdd={(entries) => state.addStudents(entries, activeClass?.id ?? null)}
           onClose={() => setAdding(false)}

@@ -6,7 +6,7 @@
  */
 import { useCallback, useEffect, useState } from 'react';
 import { repositories, storageMode, type StorageMode } from '@/data';
-import { MAX_CLASSES, type AvatarId, type ClassRoom, type PlayerProfile } from '@/types/game';
+import { MAX_CLASSES, MAX_STUDENTS_PER_CLASS, type AvatarId, type ClassRoom, type PlayerProfile } from '@/types/game';
 import { createEmptyLearningStats } from '@/types/learning';
 import { buildStudentRow, summarizeClass, type ClassSummary, type StudentRow } from './summary';
 
@@ -109,6 +109,10 @@ export function useClassData(enabled: boolean): UseClassData {
   const addStudents = useCallback(
     async (entries: { displayName: string; avatarId: AvatarId }[], classId: string | null) => {
       const repos = repositories();
+      // 다른 화면에서 방금 넣었을 수도 있으니 서버 목록으로 다시 센다
+      const now = (await repos.player.listProfiles()).filter((p) => (p.classId ?? null) === classId).length;
+      if (now + entries.length > MAX_STUDENTS_PER_CLASS)
+        throw new Error(`한 학급에 ${MAX_STUDENTS_PER_CLASS}명까지예요 (지금 ${now}명)`);
       // 순서대로 만든다. 한꺼번에 던지면 실패한 이름이 어느 것인지 알기 어렵다.
       for (const entry of entries) {
         await repos.player.createProfile(entry.displayName, entry.avatarId, undefined, classId);
@@ -193,6 +197,9 @@ export function useClassData(enabled: boolean): UseClassData {
 
   const moveStudent = useCallback(
     async (playerId: string, classId: string | null) => {
+      const profiles = await repositories().player.listProfiles();
+      if (classId && profiles.filter((p) => p.classId === classId).length >= MAX_STUDENTS_PER_CLASS)
+        throw new Error(`그 반은 이미 ${MAX_STUDENTS_PER_CLASS}명이에요`);
       await repositories().player.setClass(playerId, classId);
       await refresh();
     },

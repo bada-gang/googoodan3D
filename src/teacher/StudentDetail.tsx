@@ -7,7 +7,7 @@
  */
 import { useEffect, useState } from 'react';
 import { CURRENCY, avatarName, formatMoney } from '@/config/strings';
-import type { ClassRoom } from '@/types/game';
+import { MAX_STUDENTS_PER_CLASS, type ClassRoom } from '@/types/game';
 import { formatAccuracy, formatLastPlayed, type StudentRow } from './summary';
 import { AccuracyBar, Button, EmptyNote } from './ui';
 
@@ -20,11 +20,14 @@ export function StudentDetail({
   onRemove,
   onSetMoney,
   classes,
+  counts,
   onMove,
 }: {
   row: StudentRow;
   /** 옮길 수 있는 반들. 비어 있으면 반 옮기기를 보여 주지 않는다 */
   classes: ClassRoom[];
+  /** 반마다 학생 수 (꽉 찬 반으로는 옮기지 못한다) */
+  counts: Record<string, number>;
   onMove: (playerId: string, classId: string | null) => Promise<void>;
   onClose: () => void;
   onReset: (playerId: string) => Promise<void>;
@@ -166,8 +169,12 @@ export function StudentDetail({
                   >
                     {!row.profile.classId && <option value="">반 없음</option>}
                     {classes.map((room) => (
-                      <option key={room.id} value={room.id}>
-                        {room.name}
+                      <option
+                        key={room.id}
+                        value={room.id}
+                        disabled={room.id !== row.profile.classId && (counts[room.id] ?? 0) >= MAX_STUDENTS_PER_CLASS}
+                      >
+                        {room.name} ({counts[room.id] ?? 0}/{MAX_STUDENTS_PER_CLASS}명)
                       </option>
                     ))}
                   </select>
