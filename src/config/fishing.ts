@@ -47,13 +47,13 @@ export const FISH: Record<FishId, FishDef> = {
   minnow: fish({ id: 'minnow', name: '송사리', price: 3, weight: 13, size: 'small', speed: 1, zone: 0.28, color: '#b9c9d6' }),
   loach: fish({ id: 'loach', name: '미꾸라지', price: 4, weight: 12.5, size: 'small', speed: 1, zone: 0.27, color: '#a08a5c' }),
   crucian: fish({ id: 'crucian', name: '붕어', price: 7, weight: 11, size: 'medium', speed: 1.1, zone: 0.26, color: '#b8a36a' }),
-  // 고등어 · 오징어 · 장어 · 문어는 바다 낚시에서도 잡힌다 (나중에 바다 낚시터를 만들면 같이 쓴다)
+  // 고등어 · 오징어 · 뱀장어 · 문어는 바다 낚시에서도 잡힌다 (나중에 바다 낚시터를 만들면 같이 쓴다)
   mackerel: fish({ id: 'mackerel', name: '고등어', price: 9, weight: 10, size: 'medium', speed: 1.1, zone: 0.25, color: '#5f8fae' }),
   squid: fish({ id: 'squid', name: '오징어', price: 11, weight: 7.5, size: 'medium', speed: 1.2, zone: 0.24, color: '#f0c9b8' }),
   catfish: fish({ id: 'catfish', name: '메기', price: 13, weight: 6.5, size: 'medium', speed: 1.2, zone: 0.23, color: '#6f6a5e' }),
   trout: fish({ id: 'trout', name: '무지개송어', price: 16, weight: 6, size: 'big', speed: 1.3, zone: 0.22, color: '#e59a9a' }),
-  carp: fish({ id: 'carp', name: '잉어', price: 18, weight: 5.5, size: 'big', speed: 1.3, zone: 0.21, color: '#d9a14a' }),
-  eel: fish({ id: 'eel', name: '장어', price: 22, weight: 5, size: 'big', speed: 1.4, zone: 0.2, color: '#5f6b4e' }),
+  carp: fish({ id: 'carp', name: '비단잉어', price: 18, weight: 5.5, size: 'big', speed: 1.3, zone: 0.21, color: '#e8743b' }),
+  eel: fish({ id: 'eel', name: '뱀장어', price: 22, weight: 5, size: 'big', speed: 1.4, zone: 0.2, color: '#3f6f8a' }),
   octopus: fish({ id: 'octopus', name: '문어', price: 26, weight: 4.5, size: 'big', speed: 1.4, zone: 0.19, color: '#d9775f' }),
   goldfish: fish({ id: 'goldfish', name: '금붕어', price: 35, weight: 3.5, size: 'small', speed: 1.5, zone: 0.18, color: '#f08a3c' }),
   salmon: fish({ id: 'salmon', name: '전설의 연어', price: 120, weight: 2.5, size: 'legend', speed: 1.5, zone: 0.17, color: '#f2785a' }),
