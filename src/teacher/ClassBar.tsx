@@ -166,7 +166,7 @@ export function ClassBar({
           <p className="text-[0.95rem] text-ink">
             <strong>{current.name}</strong> 비밀번호{' '}
             {current.password ? (
-              <strong className="font-game tracking-[0.2em] text-[1.15rem]">{current.password}</strong>
+              <strong className="tabular-nums">{current.password}</strong>
             ) : (
               <span className="text-berry">없음 — 아무나 이 반에 들어갈 수 있어요</span>
             )}
