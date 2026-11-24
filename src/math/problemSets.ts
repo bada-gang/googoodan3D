@@ -3,9 +3,10 @@
  *
  *  - div1  한 자리 ÷ 한 자리, 나누어떨어지는 것 (÷1 과 같은 수 나누기 포함, 23문제)
  *  - div2  두 자리 ÷ 한 자리, 나누어떨어지는 것 (나누는 수 2~9, 몫이 10을 넘기도 한다)
- *  - div2r 두 자리 ÷ 한 자리, 나머지가 있는 것 (답은 "몫 … 나머지")
+ *  - div2r 두 자리 ÷ 한 자리, 나머지가 있는 것 (답은 "몫 … 나머지", 몫이 한 자리 수인 문제를 70%)
  *  - sub   받아내림이 있는 두 자리 − 한 자리 (일의 자리끼리 뺄 수 없는 것만)
  */
+import { REMAINDER_ONE_DIGIT_RATIO } from '@/config/balance';
 import type { ProblemSet } from '@/config/curriculum';
 import type { MathOp, MathQuestion } from '@/types/learning';
 import { buildChoices } from './distractors';
@@ -51,7 +52,27 @@ export function setPool(set: ProblemSet): SetCandidate[] {
   return list;
 }
 
-const remainderText = (q: number, r: number) => `${q} … ${r}`;
+const subPools = new Map<ProblemSet, SetCandidate[][]>();
+
+/**
+ * 이번 문제를 고를 범위. 보통은 묶음 전체.
+ * 나머지가 있는 나눗셈은 몫이 한 자리 수인 문제를 70%, 두 자리 수인 문제를 30% 낸다.
+ */
+export function drawPool(set: ProblemSet): SetCandidate[] {
+  if (set !== 'div2r') return setPool(set);
+  let split = subPools.get(set);
+  if (!split) {
+    const all = setPool(set);
+    split = [
+      all.filter((c) => Math.floor(c.left / c.right) < 10),
+      all.filter((c) => Math.floor(c.left / c.right) >= 10),
+    ];
+    subPools.set(set, split);
+  }
+  return Math.random() < REMAINDER_ONE_DIGIT_RATIO ? split[0] : split[1];
+}
+
+const remainderText =(q: number, r: number) => `${q} … ${r}`;
 
 /** 오답 후보: 정답에 가까운 것 · 실제로 자주 하는 실수부터 */
 function numberPool(answer: number, candidates: number[]): string[] {

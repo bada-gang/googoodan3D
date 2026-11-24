@@ -22,7 +22,7 @@ import {
   productDistractorPool,
   shuffle,
 } from './distractors';
-import { buildSetQuestion, iga, setHint, setPool } from './problemSets';
+import { buildSetQuestion, drawPool, iga, setHint } from './problemSets';
 
 export const RIGHT_FACTORS = [1, 2, 3, 4, 5, 6, 7, 8, 9];
 
@@ -109,7 +109,7 @@ export function generateQuestion({
   if (groups.length === 0) groups.push('mul');
   const group = groups[Math.floor(Math.random() * groups.length)];
   if (group !== 'mul') {
-    const picked = pickFrom(setPool(group), stats, recent);
+    const picked = pickFrom(drawPool(group), stats, recent);
     return buildSetQuestion(group, picked.left, picked.right);
   }
 

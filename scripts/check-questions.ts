@@ -54,6 +54,19 @@ for (const sc of scenarios) {
   for (const [kind, n] of [...count].sort()) console.log(`  ${kind}: ${((n / N) * 100).toFixed(1)}%`);
 }
 
+{
+  let oneDigit = 0;
+  for (let i = 0; i < N; i += 1) {
+    const q = generateQuestion({ tables: [], sets: ['div2r'], stats, recent: [] });
+    if (Math.floor(q.left / q.right) < 10) oneDigit += 1;
+  }
+  const all = setPool('div2r');
+  const inPool = all.filter((c) => Math.floor(c.left / c.right) < 10).length;
+  console.log(
+    `\n나머지 나눗셈에서 몫이 한 자리 수: ${((oneDigit / N) * 100).toFixed(1)}% (문제 ${inPool}/${all.length}개)`,
+  );
+}
+
 console.log('\n보기 예시');
 for (const set of PROBLEM_SETS) {
   const q = generateQuestion({ tables: [], sets: [set], stats, recent: [] });
