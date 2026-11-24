@@ -9,10 +9,12 @@
 import { useEffect, useMemo, useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
 import {
+  BoxGeometry,
   BufferGeometry,
   CircleGeometry,
   Color,
   ConeGeometry,
+  CylinderGeometry,
   DoubleSide,
   Float32BufferAttribute,
   type Group,
@@ -26,6 +28,7 @@ import {
   Euler,
   Shape,
   ShapeGeometry,
+  TorusGeometry,
   Vector3,
 } from 'three';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
@@ -39,7 +42,6 @@ import { StaticShadow } from '../../rendering/bakedShadows';
 import { ArtTexture } from '../../rendering/assets';
 import { useInteractable } from '../../systems/interaction';
 import { groundHeight, obstacles, player, playEmote, raisedAreas } from '../../state/runtime';
-import { mergedBoxGeometry, type BoxSpec } from '../../props/mergedBoxes';
 import { SignBoard } from '../../props/SignBoard';
 import { askMath, awardExperience } from '../../gameplay/gameplay';
 import { burstStars } from '../../effects/effects';
@@ -66,8 +68,6 @@ const COLORS = {
   water: '#7fcfdc',
   /** 깊은 가운데에 곱하는 색 (물 무늬가 짙은 청록이 된다) */
   deepTint: '#7fb4cc',
-  plank: '#c99a64',
-  frame: '#9a6d45',
   stones: ['#b9b3a6', '#a7a196', '#c8c1b1', '#9d978b'],
   reed: ['#6fae57', '#5f9e4c', '#7dbb62'],
   cattail: '#8a5a36',
@@ -507,62 +507,142 @@ function LilyPads(): React.ReactElement {
 
 /* --------------------------------- 데크 --------------------------------- */
 
-/** 나무 데크: 가로 널빤지, 아래 받침, 양옆 낮은 난간 (앞쪽은 낚시하게 터 둔다) */
+/** 데크 널빤지 수 · 널빤지 사이 틈 (m) */
+const DECK_BOARDS = 8;
+const BOARD_GAP = 0.022;
+/** 나뭇결 그림(실내 바닥 그림을 같이 쓴다) 한 장이 결 방향으로 덮는 길이 (m) */
+const GRAIN_TILE = 1.6;
+/** 나뭇결 그림이 어둡게 만드는 만큼 되밝히는 배율 (그림 평균 밝기 ≈ 0.8, 선형) */
+const DECK_TEXTURE_LIFT = new Color(1.22, 1.22, 1.22);
+
+type Axis = 'x' | 'y' | 'z';
+
+/**
+ * 나무 조각 하나를 마무리한다: 꼭짓점 색(윗면은 밝게, 옆면 · 아랫면은 어둡게 — 두께가 보이게)과
+ * 나뭇결 좌표(결이 grain 축을 따라 흐르고, 널빤지 한 장 = 그림의 널빤지 한 줄).
+ * wetBelow 보다 낮은 곳은 물에 젖은 것처럼 어둡게 칠한다.
+ */
+function woodPart(geometry: BufferGeometry, hex: string, grain: Axis, wetBelow?: number): BufferGeometry {
+  const g = geometry.index ? geometry.toNonIndexed() : geometry;
+  if (g !== geometry) geometry.dispose();
+  const pos = g.getAttribute('position');
+  const nor = g.getAttribute('normal');
+  const base = new Color(hex);
+  const colors = new Float32Array(pos.count * 3);
+  const uvs = new Float32Array(pos.count * 2);
+  const rowHeight = (DECK.maxZ - DECK.minZ) / DECK_BOARDS;
+  for (let i = 0; i < pos.count; i += 1) {
+    const c = { x: pos.getX(i), y: pos.getY(i), z: pos.getZ(i) };
+    const n = { x: Math.abs(nor.getX(i)), y: Math.abs(nor.getY(i)), z: Math.abs(nor.getZ(i)) };
+    const normalAxis: Axis = n.y >= n.x && n.y >= n.z ? 'y' : n.x >= n.z ? 'x' : 'z';
+    let shade = normalAxis === 'y' ? (nor.getY(i) > 0 ? 1 : 0.55) : 0.78;
+    if (wetBelow !== undefined && c.y < wetBelow) shade *= 0.6;
+    colors[i * 3] = base.r * shade;
+    colors[i * 3 + 1] = base.g * shade;
+    colors[i * 3 + 2] = base.b * shade;
+    const face = (['x', 'y', 'z'] as Axis[]).filter((a) => a !== normalAxis);
+    const u = face.includes(grain) ? grain : face[0];
+    const v = face.find((a) => a !== u) as Axis;
+    uvs[i * 2] = c[u] / GRAIN_TILE;
+    // 그림의 널빤지 한 줄(그림 높이의 1/8)이 데크 널빤지 한 장에 맞게
+    uvs[i * 2 + 1] = (c[v] - (v === 'z' ? DECK.minZ : 0)) / (rowHeight * 8);
+  }
+  g.setAttribute('color', new Float32BufferAttribute(colors, 3));
+  g.setAttribute('uv', new Float32BufferAttribute(uvs, 2));
+  return g;
+}
+
+function box(x: number, y: number, z: number, w: number, h: number, d: number): BufferGeometry {
+  return new BoxGeometry(w, h, d).translate(x, y, z);
+}
+
+/**
+ * 나무 데크: 색이 조금씩 다른 가로 널빤지(틈 · 못 자국), 앞쪽 테두리 판, 물에 박힌 둥근 기둥(밧줄 감김),
+ * 양옆 난간(기둥 머리 덮개), 테를 두른 양동이. 모두 한 덩어리로 합쳐 그리기 호출은 1번이다.
+ */
 function Deck(): React.ReactElement {
-  const { planks, frame } = useMemo(() => {
+  const geometry = useMemo(() => {
     const top = POND.deckHeight;
     const width = DECK.maxX - DECK.minX;
     const cx = (DECK.minX + DECK.maxX) / 2;
-    const plankBoxes: BoxSpec[] = [];
-    const boards = 6;
-    const pitch = (DECK.maxZ - DECK.minZ) / boards;
-    for (let i = 0; i < boards; i += 1) {
-      // 널빤지마다 길이를 조금씩 달리해 손으로 만든 느낌
-      const jag = i % 2 === 0 ? 0 : 0.06;
-      plankBoxes.push({ x: cx + (i % 3 === 1 ? 0.03 : -0.02), y: top - 0.035, z: DECK.minZ + pitch * (i + 0.5), w: width - jag, h: 0.07, d: pitch - 0.035 });
+    const pitch = (DECK.maxZ - DECK.minZ) / DECK_BOARDS;
+    const rand = seeded(91);
+    const parts: BufferGeometry[] = [];
+
+    // 널빤지: 색 · 길이 · 높이를 조금씩 달리해 손으로 만든 느낌
+    const plankColors = ['#e6b67c', '#dca96f', '#edc28b', '#d6a26a', '#e2b176'];
+    for (let i = 0; i < DECK_BOARDS; i += 1) {
+      const z = DECK.minZ + pitch * (i + 0.5);
+      const jag = rand() * 0.08;
+      const shift = (rand() - 0.5) * 0.06;
+      const lift = (rand() - 0.5) * 0.008;
+      parts.push(woodPart(box(cx + shift, top - 0.035 + lift, z, width - jag, 0.07, pitch - BOARD_GAP), plankColors[i % plankColors.length], 'x'));
+      // 못 자국: 받침이 지나가는 양끝에 둘씩
+      for (const x of [DECK.minX + 0.12, DECK.maxX - 0.12]) {
+        for (const dz of [-pitch * 0.22, pitch * 0.22]) {
+          parts.push(woodPart(box(x, top + 0.001 + lift, z + dz, 0.03, 0.01, 0.03), '#5b4331', 'x'));
+        }
+      }
     }
-    const frameBoxes: BoxSpec[] = [];
-    // 널빤지 아래 받침 (양옆)
+
+    const frame = '#a0714a';
+    // 널빤지 아래 받침 (양옆) · 앞쪽 테두리 판
     for (const x of [DECK.minX + 0.12, DECK.maxX - 0.12]) {
-      frameBoxes.push({ x, y: (top - 0.07) / 2, z: (DECK.minZ + DECK.maxZ) / 2, w: 0.14, h: top - 0.07, d: DECK.maxZ - DECK.minZ });
+      parts.push(woodPart(box(x, (top - 0.07) / 2, (DECK.minZ + DECK.maxZ) / 2, 0.14, top - 0.07, DECK.maxZ - DECK.minZ), frame, 'z'));
     }
-    // 물속 기둥 (앞쪽 모서리 · 가운데)
-    for (const x of [DECK.minX + 0.1, cx, DECK.maxX - 0.1]) {
-      frameBoxes.push({ x, y: top / 2, z: DECK.maxZ - 0.08, w: 0.16, h: top + 0.04, d: 0.16 });
+    parts.push(woodPart(box(cx, top - 0.06, DECK.maxZ + 0.005, width + 0.04, 0.11, 0.05), '#b9865a', 'x'));
+
+    // 물에 박힌 둥근 기둥: 앞 두 모서리는 데크 위로 조금 솟고 밧줄을 감는다, 가운데는 데크 밑까지
+    const wet = WATER_Y + 0.05;
+    for (const [x, tall] of [
+      [DECK.minX + 0.08, true],
+      [cx, false],
+      [DECK.maxX - 0.08, true],
+    ] as const) {
+      const h = tall ? top + 0.2 : top;
+      parts.push(woodPart(new CylinderGeometry(0.075, 0.085, h + 0.12, 10).translate(x, (h - 0.12) / 2, DECK.maxZ + 0.02), '#916443', 'y', wet));
+      if (tall) {
+        parts.push(woodPart(new TorusGeometry(0.085, 0.018, 5, 12).rotateX(Math.PI / 2).translate(x, top + 0.09, DECK.maxZ + 0.02), '#e2cb94', 'x'));
+        parts.push(woodPart(new TorusGeometry(0.085, 0.018, 5, 12).rotateX(Math.PI / 2).translate(x, top + 0.13, DECK.maxZ + 0.02), '#d8bf86', 'x'));
+      }
     }
-    // 양옆 난간: 기둥 셋 + 가로대 둘
+
+    // 양옆 난간: 기둥 셋(머리 덮개) + 가로대 둘. 앞쪽은 낚시하게 터 둔다
     const railFrom = DECK.minZ + 0.5;
-    const railTo = DECK.maxZ - 0.12;
+    const railTo = DECK.maxZ - 0.2;
     for (const x of [DECK.minX + 0.08, DECK.maxX - 0.08]) {
       for (const z of [railFrom, (railFrom + railTo) / 2, railTo]) {
-        frameBoxes.push({ x, y: top + 0.32, z, w: 0.1, h: 0.64, d: 0.1 });
+        parts.push(woodPart(box(x, top + 0.32, z, 0.1, 0.64, 0.1), frame, 'y'));
+        parts.push(woodPart(box(x, top + 0.655, z, 0.13, 0.03, 0.13), '#b9865a', 'x'));
       }
-      frameBoxes.push({ x, y: top + 0.6, z: (railFrom + railTo) / 2, w: 0.08, h: 0.07, d: railTo - railFrom + 0.1 });
-      frameBoxes.push({ x, y: top + 0.32, z: (railFrom + railTo) / 2, w: 0.06, h: 0.05, d: railTo - railFrom });
+      parts.push(woodPart(box(x, top + 0.6, (railFrom + railTo) / 2, 0.08, 0.07, railTo - railFrom + 0.1), '#b9865a', 'z'));
+      parts.push(woodPart(box(x, top + 0.32, (railFrom + railTo) / 2, 0.06, 0.05, railTo - railFrom), frame, 'z'));
     }
-    return { planks: mergedBoxGeometry(plankBoxes), frame: mergedBoxGeometry(frameBoxes) };
+
+    // 물고기 담는 나무 양동이 (데크 뒤쪽 구석): 몸통 + 쇠테 둘 + 손잡이
+    const bx = DECK.minX + 0.38;
+    const bz = DECK.minZ + 0.55;
+    parts.push(woodPart(new CylinderGeometry(0.16, 0.13, 0.28, 14).translate(bx, top + 0.14, bz), '#a8764a', 'y'));
+    for (const [y, r] of [
+      [top + 0.06, 0.142],
+      [top + 0.22, 0.158],
+    ] as const) {
+      parts.push(woodPart(new CylinderGeometry(r + 0.008, r + 0.008, 0.03, 14).translate(bx, y, bz), '#6c6a66', 'x'));
+    }
+    parts.push(woodPart(new TorusGeometry(0.15, 0.01, 4, 12, Math.PI).translate(bx, top + 0.28, bz), '#6c6a66', 'x'));
+
+    const merged = mergeGeometries(parts, false);
+    for (const part of parts) part.dispose();
+    return merged;
   }, []);
-  useEffect(
-    () => () => {
-      planks.dispose();
-      frame.dispose();
-    },
-    [planks, frame],
-  );
+  useEffect(() => () => geometry.dispose(), [geometry]);
   return (
-    <group>
-      <mesh geometry={planks} castShadow receiveShadow>
-        <meshStandardMaterial color={COLORS.plank} roughness={0.85} />
-      </mesh>
-      <mesh geometry={frame} castShadow receiveShadow>
-        <meshStandardMaterial color={COLORS.frame} roughness={0.9} />
-      </mesh>
-      {/* 물고기 담는 나무 양동이 (데크 뒤쪽 구석) */}
-      <mesh position={[DECK.minX + 0.38, POND.deckHeight + 0.14, DECK.minZ + 0.55]} castShadow receiveShadow>
-        <cylinderGeometry args={[0.16, 0.13, 0.28, 12]} />
-        <meshStandardMaterial color={COLORS.frame} roughness={0.85} />
-      </mesh>
-    </group>
+    <mesh geometry={geometry} castShadow receiveShadow>
+      <ArtTexture assetKey={ASSETS.textures.floor} repeat={[1, 1]}>
+        {/* 바닥 그림은 살짝 회색이라 곱하면 어두워진다 — 그만큼 밝혀 원래 나무색을 지킨다 */}
+        {(map) => <meshStandardMaterial map={map} color={map ? DECK_TEXTURE_LIFT : '#ffffff'} vertexColors roughness={0.85} />}
+      </ArtTexture>
+    </mesh>
   );
 }
 
