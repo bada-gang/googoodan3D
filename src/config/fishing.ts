@@ -40,19 +40,19 @@ const treasure = (def: Omit<FishDef, 'kind'>): FishDef => ({ ...def, kind: 'trea
  * 걸리는 정도(weight)는 합이 100 이라 그대로 % 다. 크기 · 드묾에 따라 값과 막대 난이도를 올린다.
  *  - 흔한 작은 물고기는 사과(6원)보다 싸고, 아주 큰 물고기는 체리 · 달걀(15~26원) 쯤
  *  - 드문 것(금붕어)은 염소젖 값, 보물 지도 · 대왕 진주 조개 · 전설(연어 · 왕관)은 큰 대박
- *  - 한 번 던질 때 평균 약 24.3원 (막대를 놓치는 것까지 치면 그보다 적다). 하루 20번뿐이라 밭일보다 적게 번다
+ *  - 한 번 던질 때 평균 약 24.5원 (막대를 놓치는 것까지 치면 그보다 적다). 하루 20번뿐이라 밭일보다 적게 번다
  * 금붕어는 작지만 드물다 (입질 때 '작은 물고기'로 보여 깜짝 놀라게)
  */
 export const FISH: Record<FishId, FishDef> = {
-  minnow: fish({ id: 'minnow', name: '송사리', price: 3, weight: 14, size: 'small', speed: 1, zone: 0.28, color: '#b9c9d6' }),
-  loach: fish({ id: 'loach', name: '미꾸라지', price: 4, weight: 13, size: 'small', speed: 1, zone: 0.27, color: '#a08a5c' }),
+  minnow: fish({ id: 'minnow', name: '송사리', price: 3, weight: 13, size: 'small', speed: 1, zone: 0.28, color: '#b9c9d6' }),
+  loach: fish({ id: 'loach', name: '미꾸라지', price: 4, weight: 12.5, size: 'small', speed: 1, zone: 0.27, color: '#a08a5c' }),
   crucian: fish({ id: 'crucian', name: '붕어', price: 7, weight: 11, size: 'medium', speed: 1.1, zone: 0.26, color: '#b8a36a' }),
   // 고등어 · 오징어 · 장어 · 문어는 바다 낚시에서도 잡힌다 (나중에 바다 낚시터를 만들면 같이 쓴다)
   mackerel: fish({ id: 'mackerel', name: '고등어', price: 9, weight: 10, size: 'medium', speed: 1.1, zone: 0.25, color: '#5f8fae' }),
   squid: fish({ id: 'squid', name: '오징어', price: 11, weight: 7.5, size: 'medium', speed: 1.2, zone: 0.24, color: '#f0c9b8' }),
   catfish: fish({ id: 'catfish', name: '메기', price: 13, weight: 6.5, size: 'medium', speed: 1.2, zone: 0.23, color: '#6f6a5e' }),
-  trout: fish({ id: 'trout', name: '무지개송어', price: 16, weight: 5.5, size: 'big', speed: 1.3, zone: 0.22, color: '#e59a9a' }),
-  carp: fish({ id: 'carp', name: '잉어', price: 18, weight: 4.5, size: 'big', speed: 1.3, zone: 0.21, color: '#d9a14a' }),
+  trout: fish({ id: 'trout', name: '무지개송어', price: 16, weight: 6, size: 'big', speed: 1.3, zone: 0.22, color: '#e59a9a' }),
+  carp: fish({ id: 'carp', name: '잉어', price: 18, weight: 5.5, size: 'big', speed: 1.3, zone: 0.21, color: '#d9a14a' }),
   eel: fish({ id: 'eel', name: '장어', price: 22, weight: 5, size: 'big', speed: 1.4, zone: 0.2, color: '#5f6b4e' }),
   octopus: fish({ id: 'octopus', name: '문어', price: 26, weight: 4.5, size: 'big', speed: 1.4, zone: 0.19, color: '#d9775f' }),
   goldfish: fish({ id: 'goldfish', name: '금붕어', price: 35, weight: 3.5, size: 'small', speed: 1.5, zone: 0.18, color: '#f08a3c' }),
