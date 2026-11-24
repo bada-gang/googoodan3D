@@ -216,60 +216,67 @@ export function TableSelectScreen({
           </GameButton>
         </div>
 
-        {/* 곱셈구구: 단 여덟 개 한 줄 + 퀵버튼. 2학년이 여덟 개를 보고 약한 단을 스스로 고르기는 어렵다. */}
-        <div className="flex w-full flex-col items-center gap-2">
-          <div className="flex items-center gap-3">
-            <span className="font-game text-[1.35rem] text-ink">곱셈구구</span>
-            <GameButton tone="sky" onClick={selectAll}>
-              구구단 전체
-            </GameButton>
-            <GameButton tone="berry" onClick={selectPractice}>
-              연습 필요
-            </GameButton>
+        {/* 왼쪽 곱셈구구 · 오른쪽 나눗셈 · 뺄셈. 둘을 섞어 여러 개 고를 수 있다. */}
+        <div className="flex items-stretch gap-6">
+          {/* 곱셈구구: 단 여덟 개(4 × 2) + 퀵버튼. 2학년이 여덟 개를 보고 약한 단을 스스로 고르기는 어렵다. */}
+          <div className="flex flex-col items-center gap-3">
+            <div className="flex min-h-[56px] items-center gap-3">
+              <span className="font-game text-[1.35rem] text-ink">곱셈구구</span>
+              <GameButton tone="sky" onClick={selectAll}>
+                구구단 전체
+              </GameButton>
+              <GameButton tone="berry" onClick={selectPractice}>
+                연습 필요
+              </GameButton>
+            </div>
+            <div className="grid grid-cols-4 gap-2.5">
+              {TABLES.map((table) => {
+                const on = selected.includes(table);
+                return (
+                  <button
+                    key={table}
+                    type="button"
+                    onClick={() => toggle(table)}
+                    aria-pressed={on}
+                    className={[
+                      'btn-game h-[84px] w-[88px] whitespace-nowrap !px-0 text-[1.8rem]',
+                      on ? 'btn-gold ring-4 ring-white/70' : '',
+                    ].join(' ')}
+                  >
+                    {table}단
+                  </button>
+                );
+              })}
+            </div>
           </div>
-          <div className="flex gap-2.5">
-            {TABLES.map((table) => {
-              const on = selected.includes(table);
-              return (
-                <button
-                  key={table}
-                  type="button"
-                  onClick={() => toggle(table)}
-                  aria-pressed={on}
-                  className={[
-                    'btn-game h-[76px] w-[92px] whitespace-nowrap !px-0 text-[1.8rem]',
-                    on ? 'btn-gold ring-4 ring-white/70' : '',
-                  ].join(' ')}
-                >
-                  {table}단
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* 다른 문제 묶음: 곱셈구구와 함께 여러 개 고를 수 있다 */}
-        <div className="flex w-full flex-col items-center gap-2">
-          <span className="font-game text-[1.35rem] text-ink">나눗셈 · 뺄셈</span>
-          <div className="flex gap-2.5">
-            {PROBLEM_SETS.map((set) => {
-              const on = sets.includes(set);
-              return (
-                <button
-                  key={set}
-                  type="button"
-                  onClick={() => toggleSet(set)}
-                  aria-pressed={on}
-                  className={[
-                    'btn-game flex h-[84px] w-[196px] flex-col items-center justify-center !gap-0 !px-2 leading-tight',
-                    on ? 'btn-gold ring-4 ring-white/70' : '',
-                  ].join(' ')}
-                >
-                  <span className="text-[1.2rem]">{PROBLEM_SET_LABEL[set]}</span>
-                  <span className="text-[0.95rem] opacity-75">{PROBLEM_SET_EXAMPLE[set]}</span>
-                </button>
-              );
-            })}
+  
+          <div className="w-[3px] self-stretch rounded-full bg-ink/15" aria-hidden />
+  
+          {/* 다른 문제 묶음 (2 × 2) */}
+          <div className="flex flex-col items-center gap-3">
+            <div className="flex min-h-[56px] items-center">
+              <span className="font-game text-[1.35rem] text-ink">나눗셈 · 뺄셈</span>
+            </div>
+            <div className="grid grid-cols-2 gap-2.5">
+              {PROBLEM_SETS.map((set) => {
+                const on = sets.includes(set);
+                return (
+                  <button
+                    key={set}
+                    type="button"
+                    onClick={() => toggleSet(set)}
+                    aria-pressed={on}
+                    className={[
+                      'btn-game flex h-[84px] w-[190px] flex-col items-center justify-center !gap-0 !px-2 leading-tight',
+                      on ? 'btn-gold ring-4 ring-white/70' : '',
+                    ].join(' ')}
+                  >
+                    <span className="text-[1.2rem]">{PROBLEM_SET_LABEL[set]}</span>
+                    <span className="text-[0.95rem] opacity-75">{PROBLEM_SET_EXAMPLE[set]}</span>
+                  </button>
+                );
+              })}
+            </div>
           </div>
         </div>
 
