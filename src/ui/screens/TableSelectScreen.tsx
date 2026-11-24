@@ -286,28 +286,30 @@ export function TableSelectScreen({
               '연습할 것을 하나 이상 골라 주세요'
             ) : (
               <>
-                <span className="text-ink">{describeChoice(selected, sets)}</span>을 연습해요
+                <span className="text-ink">{describeChoice(selected, sets)}</span>
+                {objectParticle(describeChoice(selected, sets))} 연습해요
                 {pickNote && <span className="text-ink"> — {pickNote}</span>}
               </>
             )}
           </p>
-          {!(selected.length === 0 && sets.length === 0) && (
-            <GameButton
-              onClick={() => {
-                audio.play('tap');
-                setSelected([]);
-                setSets([]);
-                setPickNote('');
-              }}
-            >
-              지우기
-            </GameButton>
-          )}
         </div>
 
         <div className="flex gap-4">
           <GameButton tone="white" onClick={onBack}>
             이름 다시 고르기
+          </GameButton>
+          {/* 늘 같은 자리에 둔다. 고른 게 없으면 흐리게만 */}
+          <GameButton
+            tone="white"
+            disabled={selected.length === 0 && sets.length === 0}
+            onClick={() => {
+              audio.play('tap');
+              setSelected([]);
+              setSets([]);
+              setPickNote('');
+            }}
+          >
+            선택 취소
           </GameButton>
           <GameButton
             tone="leaf"
@@ -322,6 +324,13 @@ export function TableSelectScreen({
       </div>
     </ScreenShell>
   );
+}
+
+/** 마지막 글자에 받침이 있으면 '을', 없으면 '를' ("구구단 전체를", "뺄셈을") */
+function objectParticle(text: string): string {
+  const code = text.charCodeAt(text.length - 1) - 0xac00;
+  if (code < 0 || code > 11171) return '을';
+  return code % 28 === 0 ? '를' : '을';
 }
 
 /** "2단, 3단 · 받아내림 뺄셈" 처럼 고른 것을 한 줄로 */
