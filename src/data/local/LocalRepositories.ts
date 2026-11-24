@@ -131,19 +131,27 @@ export class LocalClassRepository implements ClassRepository {
     return sortClasses(readJson<ClassRoom[]>(KEYS.classes, []));
   }
 
-  async createClass(name: string): Promise<ClassRoom> {
+  async createClass(name: string, password: string | null): Promise<ClassRoom> {
     const list = readJson<ClassRoom[]>(KEYS.classes, []);
-    const room: ClassRoom = { id: newId('class'), name: name.trim(), createdAt: new Date().toISOString() };
+    const room: ClassRoom = { id: newId('class'), name: name.trim(), createdAt: new Date().toISOString(), password };
     list.push(room);
     writeJson(KEYS.classes, list);
     return room;
   }
 
   async renameClass(classId: string, name: string): Promise<void> {
+    this.patch(classId, { name: name.trim() });
+  }
+
+  async setClassPassword(classId: string, password: string | null): Promise<void> {
+    this.patch(classId, { password });
+  }
+
+  private patch(classId: string, patch: Partial<ClassRoom>): void {
     const list = readJson<ClassRoom[]>(KEYS.classes, []);
     const target = list.find((c) => c.id === classId);
     if (!target) return;
-    target.name = name.trim();
+    Object.assign(target, patch);
     writeJson(KEYS.classes, list);
   }
 

@@ -142,11 +142,12 @@ export class FirebaseClassRepository implements ClassRepository {
     return sortClasses(snapshot.docs.map((d) => ({ id: d.id, ...d.data() }) as ClassRoom));
   }
 
-  async createClass(name: string): Promise<ClassRoom> {
+  async createClass(name: string, password: string | null): Promise<ClassRoom> {
     const room: ClassRoom = {
       id: `class_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 6)}`,
       name: name.trim(),
       createdAt: new Date().toISOString(),
+      password,
     };
     const { id, ...body } = room;
     await setDoc(doc(firestore(), CLASSES, id), body);
@@ -155,6 +156,10 @@ export class FirebaseClassRepository implements ClassRepository {
 
   async renameClass(classId: string, name: string): Promise<void> {
     await updateDoc(doc(firestore(), CLASSES, classId), { name: name.trim() });
+  }
+
+  async setClassPassword(classId: string, password: string | null): Promise<void> {
+    await updateDoc(doc(firestore(), CLASSES, classId), { password });
   }
 
   async deleteClass(classId: string): Promise<void> {

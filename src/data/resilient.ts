@@ -77,7 +77,8 @@ export function createResilientBundle(
 
   const classes: ClassRepository = {
     listClasses: () => direct((b) => b.classes.listClasses()),
-    createClass: (name) => direct((b) => b.classes.createClass(name)),
+    createClass: (name, password) => direct((b) => b.classes.createClass(name, password)),
+    setClassPassword: (id, password) => direct((b) => b.classes.setClassPassword(id, password)),
     renameClass: (id, name) => direct((b) => b.classes.renameClass(id, name)),
     deleteClass: (id) => direct((b) => b.classes.deleteClass(id)),
   };

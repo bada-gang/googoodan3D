@@ -105,11 +105,12 @@ export function TeacherApp(): React.ReactElement {
           unassigned={unassigned}
           classError={state.data.classError}
           onSelect={setPick}
-          onCreate={async (name) => {
-            const room = await state.createClass(name);
+          onCreate={async (name, password) => {
+            const room = await state.createClass(name, password);
             setPick(room.id);
           }}
           onRename={state.renameClass}
+          onSetPassword={state.setClassPassword}
           onDelete={state.deleteClass}
         />
       )}

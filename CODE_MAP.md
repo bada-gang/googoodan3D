@@ -108,9 +108,9 @@ art-src/         생성 원본 (git 에 안 들어감 — 아래 "백업" 참고
 
 | 하고 싶은 것 | 파일 |
 | --- | --- |
-| 반 고르기 → 이름 고르기 → 구구단 고르기 → 게임 (학급이 없으면 반 고르기를 건너뜀) | `src/App.tsx`, `src/ui/screens/` |
+| 반 고르기 → 반 비밀번호(숫자 4자리, 있으면) → 이름 고르기 → 구구단 고르기 → 게임 (학급이 없으면 반 고르기를 건너뜀) | `src/App.tsx`, `src/ui/screens/` |
 | 학생이 이름 · 캐릭터 바꾸기 (구구단 고르기 화면) | `src/ui/screens/TableSelectScreen.tsx` |
-| 학급 만들기 · 이름 바꾸기 · 지우기, 학생 반 옮기기 (선생님 화면) | `src/teacher/ClassBar.tsx`, `src/teacher/StudentDetail.tsx` |
+| 학급 만들기 · 이름 · 비밀번호 바꾸기 · 지우기, 학생 반 옮기기 (선생님 화면) | `src/teacher/ClassBar.tsx`, `src/teacher/StudentDetail.tsx` |
 | 위쪽 HUD (돈 · 레벨) | `src/ui/hud/GameHUD.tsx` |
 | 조이스틱 · 행동 버튼 | `src/ui/hud/TouchControls.tsx` |
 | 문제 팝업 | `src/ui/overlays/MathQuestionOverlay.tsx` |

@@ -34,8 +34,10 @@ export interface PlayerRepository {
 /** 학급 목록. 선생님 화면에서 만들고 고치며, 게임 첫 화면은 읽기만 한다. */
 export interface ClassRepository {
   listClasses(): Promise<ClassRoom[]>;
-  createClass(name: string): Promise<ClassRoom>;
+  createClass(name: string, password: string | null): Promise<ClassRoom>;
   renameClass(classId: string, name: string): Promise<void>;
+  /** 반 비밀번호를 바꾼다. null 이면 비밀번호 없이 들어간다 */
+  setClassPassword(classId: string, password: string | null): Promise<void>;
   /** 학급만 지운다. 학생이 남아 있는 반은 화면에서 지우지 못하게 막는다. */
   deleteClass(classId: string): Promise<void>;
 }

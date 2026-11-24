@@ -36,8 +36,9 @@ export interface UseClassData {
    * 학급을 만든다. 처음 만드는 학급이면 반이 없는 학생(학급 기능 전에 만든 학생)을 모두 그 반으로 옮긴다.
    * 만든 학급을 돌려준다.
    */
-  createClass: (name: string) => Promise<ClassRoom>;
+  createClass: (name: string, password: string | null) => Promise<ClassRoom>;
   renameClass: (classId: string, name: string) => Promise<void>;
+  setClassPassword: (classId: string, password: string | null) => Promise<void>;
   deleteClass: (classId: string) => Promise<void>;
   /** 학생을 다른 반으로 옮긴다 */
   moveStudent: (playerId: string, classId: string | null) => Promise<void>;
@@ -143,13 +144,13 @@ export function useClassData(enabled: boolean): UseClassData {
   );
 
   const createClass = useCallback(
-    async (name: string) => {
+    async (name: string, password: string | null) => {
       const repos = repositories();
       // 다른 선생님이 방금 만들었을 수도 있으니 서버 목록으로 다시 센다
       const existing = await repos.classes.listClasses();
       if (existing.length >= MAX_CLASSES) throw new Error(`학급은 ${MAX_CLASSES}개까지 만들 수 있어요`);
       const first = existing.length === 0;
-      const room = await repos.classes.createClass(name);
+      const room = await repos.classes.createClass(name, password);
       if (first) {
         // 학급 기능 전에 만든 학생들은 첫 학급의 학생이다
         const profiles = await repos.player.listProfiles();
@@ -166,6 +167,14 @@ export function useClassData(enabled: boolean): UseClassData {
   const renameClass = useCallback(
     async (classId: string, name: string) => {
       await repositories().classes.renameClass(classId, name);
+      await refresh();
+    },
+    [refresh],
+  );
+
+  const setClassPassword = useCallback(
+    async (classId: string, password: string | null) => {
+      await repositories().classes.setClassPassword(classId, password);
       await refresh();
     },
     [refresh],
@@ -207,6 +216,7 @@ export function useClassData(enabled: boolean): UseClassData {
     addStudents,
     createClass,
     renameClass,
+    setClassPassword,
     deleteClass,
     moveStudent,
     resetStudent,

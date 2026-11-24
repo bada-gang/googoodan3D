@@ -22,6 +22,18 @@ export interface ClassRoom {
   /** "2학년 3반" 처럼 화면에 보이는 이름 */
   name: string;
   createdAt: string;
+  /**
+   * 반에 들어갈 때 누르는 숫자 비밀번호 (CLASS_PASSWORD_LENGTH 자리). 없으면 묻지 않는다.
+   * ⚠ 잠금장치가 아니라 다른 반 학생이 들어오지 않게 하는 정도다 — 선생님 화면에서 보이도록 그대로 저장한다.
+   */
+  password?: string | null;
+}
+
+/** 학급 비밀번호 자리 수 (숫자만) */
+export const CLASS_PASSWORD_LENGTH = 4;
+
+export function isValidClassPassword(value: string): boolean {
+  return new RegExp(`^\\d{${CLASS_PASSWORD_LENGTH}}$`).test(value);
 }
 
 /** 만들 수 있는 학급 수 (선생님 화면에서 막는다) */
