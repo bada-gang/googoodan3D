@@ -127,6 +127,9 @@ export function TeacherApp(): React.ReactElement {
           </div>
         }
       >
+        <p className="-mt-1 mb-3 text-[0.9rem] text-ink-soft">
+          학생 이름을 클릭하면 그 학생의 단별 정답률과 자주 틀리는 문제를 볼 수 있어요.
+        </p>
         {classFull && (
           <p className="mb-3 text-[0.9rem] text-ink-soft">
             한 학급에는 학생을 {MAX_STUDENTS_PER_CLASS}명까지 넣을 수 있어요.
@@ -138,10 +141,6 @@ export function TeacherApp(): React.ReactElement {
           <StudentTable rows={rows} onSelect={(row) => setSelectedId(row.profile.id)} />
         )}
       </Card>
-
-      <p className="pb-4 text-center text-[0.8rem] text-ink-soft">
-        학생 이름을 클릭하면 그 학생의 단별 정답률과 자주 틀리는 문제를 볼 수 있어요.
-      </p>
 
       {summary && (
         <Card title={activePick === 'none' ? '반 없는 학생 전체' : activeClass ? `${activeClass.name} 전체` : '반 전체'}>
