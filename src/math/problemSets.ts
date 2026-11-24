@@ -3,7 +3,7 @@
  *
  *  - div1  한 자리 ÷ 한 자리, 나누어떨어지는 것 (÷1 과 같은 수 나누기 포함, 23문제)
  *  - div2  두 자리 ÷ 한 자리, 나누어떨어지는 것 (나누는 수 2~9, 몫이 10을 넘기도 한다)
- *  - div2r 두 자리 ÷ 한 자리, 나머지가 있는 것 (답은 "몫 … 나머지", 몫이 한 자리 수인 문제를 75%)
+ *  - div2r 두 자리 ÷ 한 자리, 나머지가 있는 것 (답은 "몫 … 나머지", 몫이 한 자리 수인 문제를 85%)
  *  - sub   받아내림이 있는 두 자리 − 한 자리 (일의 자리끼리 뺄 수 없는 것만)
  */
 import { REMAINDER_ONE_DIGIT_RATIO } from '@/config/balance';
@@ -56,7 +56,7 @@ const subPools = new Map<ProblemSet, SetCandidate[][]>();
 
 /**
  * 이번 문제를 고를 범위. 보통은 묶음 전체.
- * 나머지가 있는 나눗셈은 몫이 한 자리 수인 문제를 75%, 두 자리 수인 문제를 25% 낸다.
+ * 나머지가 있는 나눗셈은 몫이 한 자리 수인 문제를 85%, 두 자리 수인 문제를 15% 낸다.
  */
 export function drawPool(set: ProblemSet): SetCandidate[] {
   if (set !== 'div2r') return setPool(set);
