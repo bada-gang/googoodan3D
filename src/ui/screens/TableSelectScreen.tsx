@@ -306,7 +306,9 @@ export function TableSelectScreen({
         </div>
 
         <div className="flex gap-4">
-          <GameButton onClick={onBack}>이름 다시 고르기</GameButton>
+          <GameButton tone="white" onClick={onBack}>
+            이름 다시 고르기
+          </GameButton>
           <GameButton
             tone="leaf"
             big
