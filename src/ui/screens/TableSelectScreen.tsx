@@ -204,11 +204,11 @@ export function TableSelectScreen({
       }
     >
       <div className="flex flex-col items-center gap-4">
-        {/* 제목에 붙은 작은 보조 버튼 (보통 버튼의 90%) */}
-        <div className="-mt-2 flex items-center gap-3">
+        {/* 제목에 붙은 작은 보조 버튼 (보통 버튼의 90%). 두 버튼 사이 틈이 화면 가운데 */}
+        <div className="-mt-2 grid w-full grid-cols-2 items-center gap-3">
           <GameButton
             tone="white"
-            className={SMALL_BUTTON}
+            className={`${SMALL_BUTTON} justify-self-end`}
             onClick={() => {
               audio.play('tap');
               setAvatar(profile.avatarId);
@@ -220,7 +220,7 @@ export function TableSelectScreen({
           </GameButton>
           <GameButton
             tone="white"
-            className={SMALL_BUTTON}
+            className={`${SMALL_BUTTON} justify-self-start`}
             onClick={() => {
               audio.play('tap');
               setNewName(profile.displayName);
@@ -231,8 +231,8 @@ export function TableSelectScreen({
           </GameButton>
         </div>
 
-        {/* 왼쪽 곱셈구구 · 오른쪽 나눗셈 · 뺄셈. 둘을 섞어 여러 개 고를 수 있다. */}
-        <div className="flex items-stretch gap-6">
+        {/* 왼쪽 곱셈구구 · 오른쪽 나눗셈 · 뺄셈. 둘을 섞어 여러 개 고를 수 있다. 두 칸 너비를 같게 해 구분선이 화면 가운데 */}
+        <div className="grid w-full grid-cols-[1fr_auto_1fr] items-stretch gap-6">
           {/* 곱셈구구: 단 여덟 개(4 × 2) + 퀵버튼. 2학년이 여덟 개를 보고 약한 단을 스스로 고르기는 어렵다. */}
           <div className="flex flex-col items-center gap-3">
             <span className="font-game text-[1.35rem] text-ink">곱셈구구</span>
@@ -307,8 +307,9 @@ export function TableSelectScreen({
           </p>
         </div>
 
-        <div className="flex gap-4">
-          <GameButton tone="white" onClick={onBack}>
+        {/* [선택 취소]가 화면 가운데, 양옆 버튼은 그쪽으로 붙인다 */}
+        <div className="grid w-full grid-cols-[1fr_auto_1fr] items-center gap-4">
+          <GameButton tone="white" className="justify-self-end" onClick={onBack}>
             이름 다시 고르기
           </GameButton>
           {/* 늘 같은 자리에 둔다. 고른 게 없으면 흐리게만 */}
@@ -327,6 +328,7 @@ export function TableSelectScreen({
           <GameButton
             tone="leaf"
             big
+            className="justify-self-start"
             glow={!(selected.length === 0 && sets.length === 0)}
             disabled={selected.length === 0 && sets.length === 0}
             onClick={() => onStart([...selected].sort((a, b) => a - b), PROBLEM_SETS.filter((set) => sets.includes(set)))}
