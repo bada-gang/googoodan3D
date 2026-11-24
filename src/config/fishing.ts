@@ -40,7 +40,7 @@ const treasure = (def: Omit<FishDef, 'kind'>): FishDef => ({ ...def, kind: 'trea
  * 걸리는 정도(weight)는 합이 100 이라 그대로 % 다. 크기 · 드묾에 따라 값과 막대 난이도를 올린다.
  *  - 흔한 작은 물고기는 사과(6원)보다 싸고, 아주 큰 물고기는 체리 · 달걀(15~26원) 쯤
  *  - 드문 것(금붕어)은 염소젖 값, 보물 지도 · 대왕 진주 조개 · 전설(연어 · 왕관)은 큰 대박
- *  - 한 번 던질 때 평균 약 23.8원 (막대를 놓치는 것까지 치면 그보다 적다). 하루 20번뿐이라 밭일보다 적게 번다
+ *  - 한 번 던질 때 평균 약 24.3원 (막대를 놓치는 것까지 치면 그보다 적다). 하루 20번뿐이라 밭일보다 적게 번다
  * 금붕어는 작지만 드물다 (입질 때 '작은 물고기'로 보여 깜짝 놀라게)
  */
 export const FISH: Record<FishId, FishDef> = {
@@ -60,7 +60,7 @@ export const FISH: Record<FishId, FishDef> = {
   bottle: treasure({ id: 'bottle', name: '유리병 편지', price: 15, weight: 5.5, size: 'thing', speed: 1.3, zone: 0.23, color: '#9fd3c7' }),
   treasureMap: treasure({ id: 'treasureMap', name: '보물 지도', price: 77, weight: 3, size: 'thing', speed: 1.4, zone: 0.21, color: '#d9b77a' }),
   pearl: treasure({ id: 'pearl', name: '대왕 진주 조개', price: 140, weight: 2.5, size: 'thing', speed: 1.5, zone: 0.19, color: '#f3d9e2' }),
-  crown: treasure({ id: 'crown', name: '간이 필요한 용왕의 왕관', price: 300, weight: 1.5, size: 'legend', speed: 1.5, zone: 0.19, color: '#f6c453' }),
+  crown: treasure({ id: 'crown', name: '간이 필요한 용왕의 왕관', price: 333, weight: 1.5, size: 'legend', speed: 1.5, zone: 0.19, color: '#f6c453' }),
 };
 
 /** 도감 · 가게에 보이는 순서: 물고기(흔하고 싼 것부터) → 보물 */
