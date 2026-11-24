@@ -54,6 +54,10 @@ const CLIPS: Clip[] = [
   // 발소리: 몇 개를 번갈아 써야 기계 소리처럼 안 들린다
   ...[0, 1, 2].map((i) => ({ out: `step_grass_${i}`, from: `${IMPACT}/footstep_grass_00${i}.ogg` })),
   ...[0, 1, 2].map((i) => ({ out: `step_wood_${i}`, from: `${IMPACT}/footstep_wood_00${i}.ogg` })),
+  // 낚시 대어 팡파레. 사용자가 OpenGameArt 후보 26개 중 고름 (둘 다 CC0). 끝의 조용한 부분은 자른다
+  // 전설의 연어: listener "Win sound effect" / 용왕의 왕관: congusbongus "New thing get!"
+  { out: 'fanfare_salmon', from: 'fanfare/win_sound.wav', end: 2.3 },
+  { out: 'fanfare_crown', from: 'fanfare/newthingget.ogg', end: 5.05 },
   // 동물 울음 (위키미디어 공용)
   { out: 'animal_chicken', from: 'chicken_hen_egg.ogg', start: 3.5, end: 5.5 },
   { out: 'animal_sheep', from: 'sheep_bleating.ogg', start: 0.35, end: 1.75 },

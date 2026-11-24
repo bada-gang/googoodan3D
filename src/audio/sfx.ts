@@ -20,6 +20,7 @@ export type SfxName =
   | 'door'
   | 'animal'
   | 'levelUp'
+  | 'fanfare'
   | 'tap';
 
 /**
@@ -41,6 +42,9 @@ const SFX_FILES: Record<string, string[]> = {
   'animal:goat': ['animal_goat'],
   'animal:sheep': ['animal_sheep'],
   'animal:cow': ['animal_cow'],
+  // 낚시 대어 팡파레 (variant 는 잡은 것)
+  'fanfare:salmon': ['fanfare_salmon'],
+  'fanfare:crown': ['fanfare_crown'],
 };
 
 /** 파일마다 크기 (음원은 모두 같은 크기로 맞춰 두었다. 발소리 · 울음은 작게) */
@@ -176,7 +180,7 @@ class AudioEngine {
   }
 
   /**
-   * 효과음. variant 는 발소리 바닥(grass · wood)이나 동물 종류(chicken · goat · sheep · cow).
+   * 효과음. variant 는 발소리 바닥(grass · wood), 동물 종류(chicken · goat · sheep · cow), 팡파레(salmon · crown).
    */
   play(name: SfxName, variant?: string): void {
     if (!this.sfxEnabled) return;
@@ -216,6 +220,7 @@ class AudioEngine {
         this.tone({ freq: midiToFreq(71), start: now, duration: 0.16, gain: 0.4, type: 'sawtooth', glideTo: midiToFreq(76) });
         break;
       case 'levelUp':
+      case 'fanfare':
         [67, 72, 76, 79, 84].forEach((note, i) =>
           this.tone({ freq: midiToFreq(note), start: now + i * 0.085, duration: 0.3, gain: 0.6 }),
         );

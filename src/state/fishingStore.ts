@@ -89,7 +89,9 @@ export const useFishing = create<FishingState>()((set, get) => {
       later(FISHING.reelSeconds, () => {
         const firstTime = useGameStore.getState().catchFish(fish);
         go('caught', { firstTime });
-        audio.play('harvest');
+        // 가장 드문 둘(전설의 연어 · 용왕의 왕관)은 팡파레, 나머지는 수확 소리
+        if (fish === 'salmon' || fish === 'crown') audio.play('fanfare', fish);
+        else audio.play('harvest');
       });
     },
 

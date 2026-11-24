@@ -5,6 +5,7 @@
  *  - 효과음: Kenney (kenney.nl, CC0), 수확 소리는 wobbleboxx (OpenGameArt, CC0)
  *  - 배경음악 "Apple Cider": Zane Little Music (OpenGameArt, CC0)
  *  - 닭 · 양 · 염소 울음: 위키미디어 공용 (퍼블릭 도메인)
+ *  - 낚시 팡파레: listener "Win sound effect" · congusbongus "New thing get!" (OpenGameArt, CC0)
  */
 export const CREDITS: string[] = [
   // CC BY-SA 3.0: 만든 사람과 라이선스를 적어야 한다. 잘라 쓴 소리도 같은 라이선스를 따른다
