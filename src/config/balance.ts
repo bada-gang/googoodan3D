@@ -159,7 +159,7 @@ export const MINIGAME = {
 /** 70% 일반 균형 출제 / 30% 취약 문제 우선 (명세 17) */
 export const WEAK_PROBLEM_RATIO = 0.3;
 /** 나머지가 있는 나눗셈에서 몫이 한 자리 수(45 ÷ 6 = 7 … 3)인 문제를 낼 확률. 나머지는 몫이 10 이상 */
-export const REMAINDER_ONE_DIGIT_RATIO = 0.85;
+export const REMAINDER_ONE_DIGIT_RATIO = 0.9;
 /** 오답 문제를 다시 만나기까지의 최소/최대 간격 (명세 18) */
 export const WRONG_REVIEW_MIN_GAP = 2;
 export const WRONG_REVIEW_MAX_GAP = 10;
@@ -180,6 +180,12 @@ export const RECENT_MEMORY = 4;
  * 1 로 낮추면 한 번만 틀려도 끝난다. 2학년에게는 너무 빡빡하다고 보고 2 로 둔다.
  */
 export const WRONG_LIMIT_PER_QUESTION = 2;
+
+/**
+ * 틀리면 이만큼(초) 보기를 못 누른다. 두 번 틀려 정답을 보여 줄 때도 [새 문제 풀기]를 이만큼 잠근다.
+ * 마구 찍으면 오히려 느려지게 해서, 힌트를 읽고 생각하게 한다. (수업에서 찍고 넘어가는 학생이 있었다)
+ */
+export const WRONG_COOLDOWN_SECONDS = 2;
 
 /* -------------------------------- 문제 유형 비율 ------------------------------ */
 

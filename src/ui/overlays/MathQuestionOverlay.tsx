@@ -4,8 +4,10 @@
  * - 시험지가 아니라 게임 세계의 종이 카드처럼 보이게 한다.
  * - 문제는 아주 크게, 선택지는 2×2 큰 버튼.
  * - 오답이어도 잃는 것은 없다. 다만 두 번 틀리면 정답을 알려주고 새 문제로 넘어간다. (요청 2)
+ * - 틀리면 2초 동안 보기를 못 누른다 (마구 찍기 막기, config/balance WRONG_COOLDOWN_SECONDS).
  */
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { WRONG_COOLDOWN_SECONDS } from '@/config/balance';
 import { particle } from '@/config/josa';
 import { hintFor } from '@/math/questionGenerator';
 import { useUiStore } from '@/state/uiStore';
@@ -21,6 +23,9 @@ export function MathQuestionOverlay(): React.ReactElement | null {
   const [wrongChoices, setWrongChoices] = useState<string[]>([]);
   const [shaking, setShaking] = useState<string | null>(null);
   const [chosen, setChosen] = useState<string | null>(null);
+  /** 틀린 뒤 잠깐 못 누르는 중 (마구 찍기 막기). 숫자가 바뀌면 진행 막대를 처음부터 다시 그린다 */
+  const [cooling, setCooling] = useState(0);
+  const coolTimer = useRef<number | undefined>(undefined);
 
   const questionId = request?.question.id;
 
@@ -29,7 +34,18 @@ export function MathQuestionOverlay(): React.ReactElement | null {
     setWrongChoices([]);
     setShaking(null);
     setChosen(null);
+    window.clearTimeout(coolTimer.current);
+    setCooling(0);
   }, [questionId]);
+
+  useEffect(() => () => window.clearTimeout(coolTimer.current), []);
+
+  const startCooldown = () => {
+    window.clearTimeout(coolTimer.current);
+    setCooling((n) => n + 1);
+    coolTimer.current = window.setTimeout(() => setCooling(0), WRONG_COOLDOWN_SECONDS * 1000);
+  };
+  const locked = cooling > 0;
 
   const hint = useMemo(() => (request ? hintFor(request.question) : ''), [request]);
 
@@ -37,7 +53,7 @@ export function MathQuestionOverlay(): React.ReactElement | null {
   const { question, title } = request;
 
   const pick = (value: string) => {
-    if (phase !== 'asking' || wrongChoices.includes(value)) return;
+    if (phase !== 'asking' || locked || wrongChoices.includes(value)) return;
     const result = submitAnswer(value);
     if (result === 'correct') {
       setChosen(value);
@@ -49,6 +65,8 @@ export function MathQuestionOverlay(): React.ReactElement | null {
     setWrongChoices((prev) => [...prev, value]);
     setShaking(value);
     window.setTimeout(() => setShaking(null), 430);
+    // 틀리면 잠깐 아무것도 못 누른다: 힌트(또는 정답)를 읽는 시간. 찍으면 오히려 느려진다
+    startCooldown();
     // 두 번 틀렸다. 답을 알려주고, 학생이 누를 때 새 문제를 받는다.
     // 자동으로 넘기지 않는다 — 정답을 읽을 시간이 필요하다.
     if (result === 'failed') setPhase('failed');
@@ -97,11 +115,12 @@ export function MathQuestionOverlay(): React.ReactElement | null {
                 <button
                   key={choice}
                   type="button"
-                  disabled={isWrong}
+                  disabled={isWrong || locked}
                   onClick={() => pick(choice)}
                   className={[
                     'btn-game min-h-[104px] text-[2.8rem]',
                     isWrong ? 'opacity-45' : 'btn-sky',
+                    // 잠긴 동안은 흐리게만 (disabled 기본 흐림을 그대로 쓴다)
                     shaking === choice ? 'animate-shake-soft' : '',
                   ].join(' ')}
                 >
@@ -115,12 +134,15 @@ export function MathQuestionOverlay(): React.ReactElement | null {
         {/* 오답 안내: 붉은 번쩍임 없이 부드럽게 (명세 57) */}
         {phase === 'asking' && wrongChoices.length > 0 && (
           <p className="font-game animate-pop-in text-center text-[1.35rem] text-ink-soft">
-            한 번 더 생각해 볼까요? {hint}
+            {locked ? '천천히 생각해 봐요.' : '한 번 더 생각해 볼까요?'} {hint}
           </p>
         )}
 
+        {/* 잠긴 동안 줄어드는 막대: 언제 다시 누를 수 있는지 보여 준다 */}
+        {locked && <CooldownBar key={cooling} />}
+
         {phase === 'failed' && (
-          <GameButton tone="gold" big onClick={retryWithNewQuestion}>
+          <GameButton tone="gold" big disabled={locked} onClick={retryWithNewQuestion}>
             새 문제 풀기
           </GameButton>
         )}
@@ -137,6 +159,18 @@ export function MathQuestionOverlay(): React.ReactElement | null {
       </div>
 
       {phase === 'correct' && chosen !== null && <span className="sr-only">{solved}</span>}
+    </div>
+  );
+}
+
+/** 틀린 뒤 기다리는 시간: 가득 찬 막대가 WRONG_COOLDOWN_SECONDS 동안 줄어든다 */
+function CooldownBar(): React.ReactElement {
+  return (
+    <div aria-hidden className="h-3 w-[60%] overflow-hidden rounded-full border-2 border-[var(--color-ink)] bg-white/70">
+      <div
+        className="h-full origin-left bg-[var(--color-gold)]"
+        style={{ animation: `cooldown-shrink ${WRONG_COOLDOWN_SECONDS}s linear forwards` }}
+      />
     </div>
   );
 }
