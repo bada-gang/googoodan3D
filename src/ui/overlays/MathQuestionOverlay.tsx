@@ -4,7 +4,7 @@
  * - 시험지가 아니라 게임 세계의 종이 카드처럼 보이게 한다.
  * - 문제는 아주 크게, 선택지는 2×2 큰 버튼.
  * - 오답이어도 잃는 것은 없다. 다만 두 번 틀리면 정답을 알려주고 새 문제로 넘어간다. (요청 2)
- * - 틀리면 2초 동안 보기를 못 누른다 (마구 찍기 막기, config/balance WRONG_COOLDOWN_SECONDS).
+ * - 틀리면 2.5초 동안 보기를 못 누른다 (마구 찍기 막기, config/balance WRONG_COOLDOWN_SECONDS).
  */
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { WRONG_COOLDOWN_SECONDS } from '@/config/balance';
@@ -134,7 +134,7 @@ export function MathQuestionOverlay(): React.ReactElement | null {
         {/* 오답 안내: 붉은 번쩍임 없이 부드럽게 (명세 57) */}
         {phase === 'asking' && wrongChoices.length > 0 && (
           <p className="font-game animate-pop-in text-center text-[1.35rem] text-ink-soft">
-            {locked ? '천천히 생각해 봐요.' : '한 번 더 생각해 볼까요?'} {hint}
+            한 번 더 생각해 볼까요? {hint}
           </p>
         )}
 

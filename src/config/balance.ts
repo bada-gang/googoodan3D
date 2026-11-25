@@ -185,7 +185,7 @@ export const WRONG_LIMIT_PER_QUESTION = 2;
  * 틀리면 이만큼(초) 보기를 못 누른다. 두 번 틀려 정답을 보여 줄 때도 [새 문제 풀기]를 이만큼 잠근다.
  * 마구 찍으면 오히려 느려지게 해서, 힌트를 읽고 생각하게 한다. (수업에서 찍고 넘어가는 학생이 있었다)
  */
-export const WRONG_COOLDOWN_SECONDS = 2;
+export const WRONG_COOLDOWN_SECONDS = 2.5;
 
 /* -------------------------------- 문제 유형 비율 ------------------------------ */
 
