@@ -72,6 +72,7 @@ art-src/         생성 원본 (git 에 안 들어감 — 아래 "백업" 참고
 | 나눗셈 · 뺄셈 묶음 (문제 범위 · 헷갈리는 오답 · 힌트) | `src/math/problemSets.ts` |
 | 묶음 이름 · 예시 (선택 화면 · 교사 화면) | `src/config/curriculum.ts` |
 | 출제기 점검 (정답 · 선택지 확인, 유형별 비율): `npx tsx --tsconfig tsconfig.scripts.json scripts/check-questions.ts` | `scripts/check-questions.ts` |
+| 조사 (닭이 · 염소가, 레벨 2가): 이름 뒤에 조사를 직접 쓰지 말고 `josa(이름, '이/가')`. 점검: `npx tsx --tsconfig tsconfig.scripts.json scripts/check-josa.ts` | `src/config/josa.ts`, `scripts/check-josa.ts` |
 | 오답 선택지 | `src/math/distractors.ts` |
 | 정답/오답 처리 흐름 | `src/ui/mathFlow.ts` |
 | 학습 기록 (정답률 · 오답 복습) | `src/state/game/learningSlice.ts` |

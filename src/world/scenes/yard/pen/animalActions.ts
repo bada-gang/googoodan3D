@@ -2,6 +2,7 @@
  * 동물 돌보기 규칙과 동물 위치 공유.
  * 먹이 주기 · 생산물 받기마다 문제를 하나 푼다 — 2D 판 YardScene 과 같다. (명세 78)
  */
+import { josa } from '@/config/josa';
 import { PALETTE } from '@/config/artTokens';
 import { ANIMAL_SPECIES } from '@/config/catalog';
 import type { InteractionPrompt } from '@/bridge/events';
@@ -131,7 +132,7 @@ export function handleAnimalAction(animalId: string, actionId: string): void {
       burstStars(above(animalId, body.marker * 0.5), 6);
       floatText(above(animalId, body.marker), '냠냠', PALETTE.accentPink);
       if (animalById(animalId)?.produceReady) {
-        toast(`${def.produceName}이(가) 준비됐어요!`, 'reward');
+        toast(`${josa(def.produceName, '이/가')} 준비됐어요!`, 'reward');
         burstStars(above(animalId, body.marker * 0.7), 9);
       }
       awardExperience('ANIMAL', math);
@@ -140,7 +141,7 @@ export function handleAnimalAction(animalId: string, actionId: string): void {
   }
 
   if (actionId === 'collect') {
-    askMath('ANIMAL', `${def.produceName}을(를) 받아 볼까요?`, (math) => {
+    askMath('ANIMAL', `${josa(def.produceName, '을/를')} 받아 볼까요?`, (math) => {
       const result = useGameStore.getState().collectProduce(animalId, math.wrongAttempts);
       if (!result) return;
       // 다 틀려도 최소 1개는 받는다 (PRODUCE_BY_ATTEMPTS)

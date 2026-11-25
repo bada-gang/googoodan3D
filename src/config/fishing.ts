@@ -5,6 +5,7 @@
  * 알맞은 칸에서 멈춘다 → 칸 안이면 잡는다. 하루에 던질 수 있는 횟수는 정해져 있다.
  * 잡은 것은 가방에 들어가고(팔 수 있다) 도감에 자동으로 오른다.
  */
+import { josa } from '@/config/josa';
 import type { FishId } from '@/types/game';
 
 /** 물고기냐, 물속에 가라앉은 물건(보물)이냐 */
@@ -104,9 +105,7 @@ export const BITE_MESSAGE: Record<FishSize, string> = {
 /** "송사리를 잡았어요!" / "용왕의 왕관을 건졌어요!" — 받침에 따라 을/를, 물고기는 잡고 보물은 건진다 */
 export function caughtMessage(id: FishId): string {
   const { name, kind } = FISH[id];
-  const last = name.charCodeAt(name.length - 1);
-  const hasFinal = last >= 0xac00 && last <= 0xd7a3 && (last - 0xac00) % 28 !== 0;
-  return `${name}${hasFinal ? '을' : '를'} ${kind === 'fish' ? '잡았어요' : '건졌어요'}!`;
+  return `${josa(name, '을/를')} ${kind === 'fish' ? '잡았어요' : '건졌어요'}!`;
 }
 
 export const FISHING = {

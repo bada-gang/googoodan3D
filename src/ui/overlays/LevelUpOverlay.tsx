@@ -1,6 +1,7 @@
 /**
  * 레벨업 안내. 새로 열린 콘텐츠를 알려 준다. (명세 33)
  */
+import { josa } from '@/config/josa';
 import { unlocksAtLevel } from '@/config/balance';
 import { useUiStore } from '@/state/uiStore';
 import { starIcon } from '../common/icons';
@@ -23,7 +24,7 @@ export function LevelUpOverlay(): React.ReactElement | null {
           <Icon src={starIcon()} size={48} alt="" />
         </div>
         <p className="font-game text-[2.6rem] leading-none text-ink stroke-ink">
-          레벨 {level}이 되었어요!
+          레벨 {josa(String(level), '이/가')} 되었어요!
         </p>
         {unlock && (
           <p className="font-game text-center text-[1.4rem] text-ink-soft">

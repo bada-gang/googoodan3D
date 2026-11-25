@@ -6,7 +6,7 @@
  * - 오답이어도 잃는 것은 없다. 다만 두 번 틀리면 정답을 알려주고 새 문제로 넘어간다. (요청 2)
  */
 import { useEffect, useMemo, useState } from 'react';
-import { hasFinal } from '@/math/problemSets';
+import { particle } from '@/config/josa';
 import { hintFor } from '@/math/questionGenerator';
 import { useUiStore } from '@/state/uiStore';
 import { cancelMath, completeMath, retryWithNewQuestion, submitAnswer } from '../mathFlow';
@@ -166,6 +166,5 @@ function StarBurst(): React.ReactElement {
 
 /** "12예요" / "7 … 3이에요": 마지막 수의 받침에 맞춘 끝말 */
 function answerEnding(answer: string): string {
-  const last = Number(answer.split(' … ').pop());
-  return Number.isFinite(last) && !hasFinal(last) ? '예요' : '이에요';
+  return particle(answer, '이에요/예요');
 }

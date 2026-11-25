@@ -6,6 +6,7 @@
  * 학급은 MAX_CLASSES(10)개까지 만들 수 있다.
  * 처음 만드는 학급으로는 반이 없는 학생(학급 기능 전에 만든 학생)이 모두 옮겨진다.
  */
+import { josa } from '@/config/josa';
 import { useState } from 'react';
 import {
   CLASS_PASSWORD_LENGTH,
@@ -187,7 +188,7 @@ export function ClassBar({
               </span>
             ) : confirmDelete ? (
               <>
-                <span className="text-[0.95rem] text-ink">{current.name}을(를) 지울까요?</span>
+                <span className="text-[0.95rem] text-ink">{josa(current.name, '을/를')} 지울까요?</span>
                 <Button tone="danger" disabled={busy} onClick={() => void run(() => onDelete(current.id))}>
                   {busy ? '지우는 중…' : '네, 지울게요'}
                 </Button>

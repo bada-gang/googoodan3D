@@ -8,6 +8,7 @@
  */
 import { useEffect, useState } from 'react';
 import { PROBLEM_SETS, PROBLEM_SET_EXAMPLE, PROBLEM_SET_LABEL, TABLES, type ProblemSet } from '@/config/curriculum';
+import { particle } from '@/config/josa';
 import { pickPracticeTables } from '@/math/practiceNeeds';
 import { repositories } from '@/data';
 import type { AvatarId, CharacterId, PlayerProfile } from '@/types/game';
@@ -300,7 +301,7 @@ export function TableSelectScreen({
             ) : (
               <>
                 <span className="text-ink">{describeChoice(selected, sets)}</span>
-                {objectParticle(describeChoice(selected, sets))} 연습해요
+                {particle(describeChoice(selected, sets), '을/를')} 연습해요
                 {pickNote && <span className="text-ink"> — {pickNote}</span>}
               </>
             )}
@@ -339,13 +340,6 @@ export function TableSelectScreen({
       </div>
     </ScreenShell>
   );
-}
-
-/** 마지막 글자에 받침이 있으면 '을', 없으면 '를' ("구구단 전체를", "뺄셈을") */
-function objectParticle(text: string): string {
-  const code = text.charCodeAt(text.length - 1) - 0xac00;
-  if (code < 0 || code > 11171) return '을';
-  return code % 28 === 0 ? '를' : '을';
 }
 
 /** "2단, 3단 · 받아내림 뺄셈" 처럼 고른 것을 한 줄로 */

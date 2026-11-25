@@ -2,6 +2,7 @@
  * 밭 행동 규칙: 씨앗 심기 → 물 주기(5단계 성장) → 수확. 행동마다 곱셈 문제를 하나 푼다. (명세 78)
  * 규칙은 2D 판 YardScene 과 같다. 무엇을 할 수 있는지(안내 버튼)와 했을 때 일어나는 일을 여기서 정한다.
  */
+import { josa } from '@/config/josa';
 import { PALETTE } from '@/config/artTokens';
 import { MAX_HARVESTS_PER_TREE, STAGE_LABEL } from '@/config/balance';
 import { TREE_SPECIES, seedIdOf } from '@/config/catalog';
@@ -83,7 +84,7 @@ export function plantWithMath(plotId: string, species: TreeSpeciesId): void {
   const plot = plotById(plotId);
   if (!plot || plot.species) return;
   const def = TREE_SPECIES[species];
-  askMath('PLANT', `${def.seedName}을 심어 볼까요?`, (math) => {
+  askMath('PLANT', `${josa(def.seedName, '을/를')} 심어 볼까요?`, (math) => {
     if (!useGameStore.getState().plantSeed(plotId, species)) return;
     burstStars(above(plot.index, 0.4), 6);
     audio.play('place');
@@ -112,7 +113,7 @@ export function handlePlotAction(plotId: string, actionId: string): void {
   const def = TREE_SPECIES[species];
 
   if (actionId === 'grow') {
-    askMath('GROW', `${def.name}를 키워 볼까요?`, (math) => {
+    askMath('GROW', `${josa(def.name, '을/를')} 키워 볼까요?`, (math) => {
       const before = plotById(plotId)?.stage;
       // 물이 없으면 아무 일도 일어나지 않는다.
       if (!useGameStore.getState().growPlot(plotId)) {
@@ -136,7 +137,7 @@ export function handlePlotAction(plotId: string, actionId: string): void {
   }
 
   if (actionId === 'harvest') {
-    askMath('HARVEST', `${def.fruitName}를 따 볼까요?`, (math) => {
+    askMath('HARVEST', `${josa(def.fruitName, '을/를')} 따 볼까요?`, (math) => {
       const result = useGameStore.getState().harvestPlot(plotId, math.wrongAttempts);
       if (!result) return;
       // 다 틀려도 최소 1개는 딴다 (HARVEST_BY_ATTEMPTS) — 빈손으로 끝나는 경우는 없다.
@@ -145,7 +146,7 @@ export function handlePlotAction(plotId: string, actionId: string): void {
       floatText(above(plot.index, 3), `${def.fruitName} +${result.count}`, PALETTE.goldShade);
       if (result.finished) {
         // 다 딴 나무는 밭에서 사라진다. (요청 3)
-        toast(`${def.name}가 열매를 다 맺었어요. 밭이 비었으니 새로 심어 보세요`, 'info');
+        toast(`${josa(def.name, '이/가')} 열매를 다 맺었어요. 밭이 비었으니 새로 심어 보세요`, 'info');
       } else {
         toast(`${def.fruitName} ${result.count}개를 얻었어요`, 'reward');
       }

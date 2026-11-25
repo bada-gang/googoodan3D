@@ -2,6 +2,7 @@
  * 가구 가게. 테마 컬렉션으로 묶어서 보여준다. (명세 52)
  * 구입할 때만 문제를 풀고, 배치는 자유롭게 한다. (명세 29)
  */
+import { josa } from '@/config/josa';
 import { useState } from 'react';
 import {
   FLOORS,
@@ -41,12 +42,12 @@ export function FurnitureShopOverlay(): React.ReactElement {
       pushToast({ text: '돈이 모자라요', tone: 'warn' });
       return;
     }
-    const math = await askMath('SHOP', `${name}을(를) 사 볼까요?`);
+    const math = await askMath('SHOP', `${josa(name, '을/를')} 사 볼까요?`);
     if (!math.correct) return;
     if (!useGameStore.getState().buyFurniture(itemId)) return;
     audio.play('coin');
     awardCorrect('SHOP', math);
-    pushToast({ text: `${name}을(를) 샀어요. 꾸미기에서 놓아 보세요`, tone: 'reward' });
+    pushToast({ text: `${josa(name, '을/를')} 샀어요. 꾸미기에서 놓아 보세요`, tone: 'reward' });
   };
 
   const buySurface = async (surfaceId: string, name: string, price: number) => {
@@ -55,13 +56,13 @@ export function FurnitureShopOverlay(): React.ReactElement {
       return;
     }
     if (price > 0) {
-      const math = await askMath('SHOP', `${name}을(를) 사 볼까요?`);
+      const math = await askMath('SHOP', `${josa(name, '을/를')} 사 볼까요?`);
       if (!math.correct) return;
       awardCorrect('SHOP', math);
     }
     if (!useGameStore.getState().buySurface(surfaceId)) return;
     audio.play('coin');
-    pushToast({ text: `${name}을(를) 얻었어요. 꾸미기에서 바꿀 수 있어요`, tone: 'reward' });
+    pushToast({ text: `${josa(name, '을/를')} 얻었어요. 꾸미기에서 바꿀 수 있어요`, tone: 'reward' });
   };
 
   const items = FURNITURE.filter((item) => item.area === (tab === 'yard' ? 'yard' : 'home'));

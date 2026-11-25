@@ -6,6 +6,7 @@
  *
  * 사고 파는 것은 "가치가 생기는 행동"이므로 문제를 푼다. (명세 78)
  */
+import { josa } from '@/config/josa';
 import { useState } from 'react';
 import {
   ANIMAL_LIST,
@@ -50,12 +51,12 @@ export function FarmShopOverlay(): React.ReactElement {
       pushToast({ text: '돈이 모자라요. 수확한 것을 팔아 볼까요?', tone: 'warn' });
       return;
     }
-    const math = await askMath('SHOP', `${supply.packName}를 사 볼까요?`);
+    const math = await askMath('SHOP', `${josa(supply.packName, '을/를')} 사 볼까요?`);
     if (!math.correct) return;
     if (!useGameStore.getState().buySupply(supply.id)) return;
     audio.play('coin');
     awardCorrect('SHOP', math);
-    pushToast({ text: `${supply.packName}를 샀어요`, tone: 'reward' });
+    pushToast({ text: `${josa(supply.packName, '을/를')} 샀어요`, tone: 'reward' });
   };
 
   const buySeed = async (species: (typeof TREE_LIST)[number]) => {
@@ -63,29 +64,29 @@ export function FarmShopOverlay(): React.ReactElement {
       pushToast({ text: '돈이 모자라요. 수확한 것을 팔아 볼까요?', tone: 'warn' });
       return;
     }
-    const math = await askMath('SHOP', `${species.seedName}을 사 볼까요?`);
+    const math = await askMath('SHOP', `${josa(species.seedName, '을/를')} 사 볼까요?`);
     if (!math.correct) return;
     if (!useGameStore.getState().buySeed(species.id)) return;
     audio.play('coin');
     awardCorrect('SHOP', math);
-    pushToast({ text: `${species.seedName}을 샀어요`, tone: 'reward' });
+    pushToast({ text: `${josa(species.seedName, '을/를')} 샀어요`, tone: 'reward' });
   };
 
   const buyAnimal = async (animal: (typeof ANIMAL_LIST)[number]) => {
     if (ownedCount(animal.id) >= animal.maxCount) {
-      pushToast({ text: `${animal.name}은(는) ${animal.maxCount}마리까지 키울 수 있어요`, tone: 'warn' });
+      pushToast({ text: `${josa(animal.name, '은/는')} ${animal.maxCount}마리까지 키울 수 있어요`, tone: 'warn' });
       return;
     }
     if (money < animal.price) {
       pushToast({ text: '돈이 모자라요. 조금만 더 모아 볼까요?', tone: 'warn' });
       return;
     }
-    const math = await askMath('SHOP', `${animal.name}을(를) 데려와 볼까요?`);
+    const math = await askMath('SHOP', `${josa(animal.name, '을/를')} 데려와 볼까요?`);
     if (!math.correct) return;
     if (!useGameStore.getState().buyAnimal(animal.id)) return;
     audio.play('coin');
     awardCorrect('SHOP', math);
-    pushToast({ text: `${animal.name}이(가) 우리에 왔어요!`, tone: 'reward' });
+    pushToast({ text: `${josa(animal.name, '이/가')} 우리에 왔어요!`, tone: 'reward' });
   };
 
   /* -------------------------------- 판매 -------------------------------- */

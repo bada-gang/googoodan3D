@@ -7,6 +7,7 @@
  *  - sub   받아내림이 있는 두 자리 − 한 자리 (일의 자리끼리 뺄 수 없는 것만)
  */
 import { REMAINDER_ONE_DIGIT_RATIO } from '@/config/balance';
+import { josa } from '@/config/josa';
 import type { ProblemSet } from '@/config/curriculum';
 import type { MathOp, MathQuestion } from '@/types/learning';
 import { buildChoices } from './distractors';
@@ -148,14 +149,9 @@ export function buildSetQuestion(set: ProblemSet, left: number, right: number): 
   };
 }
 
-/** 받침이 있는 수 읽기인지 (일 · 삼 · 육 · 칠 · 팔 · 십 …) — 조사 을/를, 이/가 고르기 */
-export function hasFinal(n: number): boolean {
-  const last = n % 10;
-  if (last === 0) return n !== 0; // 십 · 이십 · 백 …
-  return [1, 3, 6, 7, 8].includes(last);
-}
-const eul = (n: number) => `${n}${hasFinal(n) ? '을' : '를'}`;
-export const iga = (n: number) => `${n}${hasFinal(n) ? '이' : '가'}`;
+/** 수 + 조사 (읽는 소리의 받침에 맞춘다: 일 · 삼 · 육 · 칠 · 팔 · 십 …) */
+const eul = (n: number) => josa(String(n), '을/를');
+export const iga = (n: number) => josa(String(n), '이/가');
 
 /** 오답일 때 보여 줄 힌트 */
 export function setHint(question: MathQuestion): string {
