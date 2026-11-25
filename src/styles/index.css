@@ -223,16 +223,6 @@ button {
   }
 }
 
-/* 문제 팝업: 틀린 뒤 기다리는 막대가 줄어든다 (MathQuestionOverlay CooldownBar) */
-@keyframes cooldown-shrink {
-  from {
-    transform: scaleX(1);
-  }
-  to {
-    transform: scaleX(0);
-  }
-}
-
 @keyframes glow-pulse {
   0%,
   100% {
