@@ -31,7 +31,8 @@ function Prop({
 }): React.ReactElement {
   return (
     <group position={[x, y, z]} rotation-y={rot} scale={scale}>
-      <GltfModel modelKey={modelKey} fallback={fallback} />
+      {/* 마굿간 안 물건은 그림자를 드리우지 않는다 (그리기 호출을 줄이려고, 사용자 요청) */}
+      <GltfModel modelKey={modelKey} fallback={fallback} castShadow={false} />
     </group>
   );
 }
@@ -133,7 +134,7 @@ function LanternGlow(): React.ReactElement {
 
 function FallbackBox({ w, h, d, color }: { w: number; h: number; d: number; color: string }): React.ReactElement {
   return (
-    <mesh position-y={h / 2} castShadow>
+    <mesh position-y={h / 2}>
       <boxGeometry args={[w, h, d]} />
       <meshStandardMaterial color={color} roughness={0.9} />
     </mesh>
@@ -146,7 +147,7 @@ function FallbackBale(): React.ReactElement {
 
 function FallbackHayPile(): React.ReactElement {
   return (
-    <mesh position-y={0.3} scale={[1.2, 0.75, 1]} castShadow>
+    <mesh position-y={0.3} scale={[1.2, 0.75, 1]}>
       <sphereGeometry args={[0.6, 14, 10]} />
       <meshStandardMaterial color={COLORS.straw} roughness={1} />
     </mesh>
@@ -155,7 +156,7 @@ function FallbackHayPile(): React.ReactElement {
 
 function FallbackBucket(): React.ReactElement {
   return (
-    <mesh position-y={0.2} castShadow>
+    <mesh position-y={0.2}>
       <cylinderGeometry args={[0.22, 0.18, 0.4, 14]} />
       <meshStandardMaterial color={PALETTE.wood} roughness={0.9} />
     </mesh>
@@ -164,7 +165,7 @@ function FallbackBucket(): React.ReactElement {
 
 function FallbackCan(): React.ReactElement {
   return (
-    <mesh position-y={0.32} castShadow>
+    <mesh position-y={0.32}>
       <cylinderGeometry args={[0.2, 0.22, 0.65, 14]} />
       <meshStandardMaterial color="#c8ccd2" roughness={0.5} metalness={0.3} />
     </mesh>

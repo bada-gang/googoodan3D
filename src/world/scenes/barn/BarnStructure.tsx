@@ -2,7 +2,7 @@
  * 마굿간 건물: 흙바닥과 짚 · 입구 밖 풀밭, 판자 벽(위는 지붕 그늘), 기둥 · 들보 · 창틀, 다락 창,
  * 입구(문틀 · 열린 붉은 문짝), 칸막이, 다락 바닥판, 사다리. 모두 코드로 만든 모양이다 (새 그림 없음).
  *
- * 가볍게: 움직이지 않는 상자는 색(재질)마다 모양 하나로 합친다 (props/mergedBoxes).
+ * 그림자는 드리우지 않는다 (받기만: 캐릭터 그림자). 가볍게: 움직이지 않는 상자는 색(재질)마다 모양 하나로 합친다 (props/mergedBoxes).
  * 상자마다 그리면 그리기 호출이 상자 수만큼(그림자까지 두 배) 늘어 태블릿에서 무겁다.
  * 그래서 이 파일의 그리기는 바닥 · 짚 · 풀밭 · 벽 2 · 들보 · 나무 · 창 빛 · 문짝 · 문 무늬 · 사다리 = 11번이다.
  * 자리 · 색은 barnLayout.ts.
@@ -184,7 +184,7 @@ export function Frame(): React.ReactElement {
     return mergedBoxGeometry(boxes);
   }, []);
   return (
-    <mesh geometry={geometry} castShadow receiveShadow>
+    <mesh geometry={geometry} receiveShadow>
       <meshStandardMaterial color={COLORS.beam} roughness={0.9} />
     </mesh>
   );
@@ -214,7 +214,7 @@ export function Woodwork(): React.ReactElement {
     return mergedBoxGeometry(boxes);
   }, []);
   return (
-    <mesh geometry={geometry} castShadow receiveShadow>
+    <mesh geometry={geometry} receiveShadow>
       <meshStandardMaterial color={PALETTE.wood} roughness={0.9} />
     </mesh>
   );
@@ -267,7 +267,7 @@ export function Entrance(): React.ReactElement {
   }, []);
   return (
     <group>
-      <mesh geometry={leaves} castShadow>
+      <mesh geometry={leaves}>
         <meshStandardMaterial color={COLORS.barnRed} roughness={0.85} />
       </mesh>
       <mesh geometry={trim}>
@@ -291,7 +291,7 @@ export function Ladder(): React.ReactElement {
     return mergedBoxGeometry(boxes);
   }, []);
   return (
-    <mesh geometry={geometry} position={[PLACE.ladder.x, 0, PLACE.ladder.z]} rotation-x={-0.2} castShadow>
+    <mesh geometry={geometry} position={[PLACE.ladder.x, 0, PLACE.ladder.z]} rotation-x={-0.2}>
       <meshStandardMaterial color={PALETTE.woodLight} roughness={0.9} />
     </mesh>
   );

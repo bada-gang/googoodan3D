@@ -33,7 +33,7 @@ export const BARN_VIEW = { position: [0, 8.1, 8.9], target: [0, 0.1, -0.7] } as 
 export const ENTRANCE = { halfWidth: 1.3, height: 2.6 };
 /** 처음 서는 자리: 입구 안쪽, 안(위)을 본다 */
 export const SPAWN = { x: 0, z: FRONT_Z - 0.9, facing: Math.PI };
-/** 다락 창 (뒷벽 높이) — 여기서 햇빛 줄기가 내려온다 */
+/** 다락 창 (뒷벽 높이). 바깥 빛처럼 밝게 칠한다 */
 export const LOFT_WINDOW = { x: 0.3, y: 2.35, width: 1.3, height: 1.05 };
 /** 판자 틈 (뒷벽 왼쪽). 가는 빛 줄기 */
 export const SLITS = [-2.75, -2.45];
@@ -52,7 +52,7 @@ export const COLORS = {
   trim: '#f3ead9',
   straw: '#e3bf68',
   beam: PALETTE.woodDark,
-  /** 햇빛 줄기 · 바닥 빛 */
+  /** 바닥에 번지는 빛 */
   sunlight: '#ffdc9c',
   /** 창 · 판자 틈 (낮) */
   window: '#fff1cf',
@@ -83,25 +83,9 @@ export const LANTERNS = [
   { x: HALF_W - WALL_THICKNESS / 2 - 0.02, y: 1.55, z: 0.55, rot: -Math.PI / 2 },
 ];
 
-/** 햇빛 줄기: 창에서 바닥까지. 첫째가 큰 줄기(다락 창) */
-export const SHAFTS: { from: [number, number, number]; to: [number, number, number]; width: number; strength: number }[] = [
-  {
-    from: [LOFT_WINDOW.x, LOFT_WINDOW.y, BACK_Z + 0.15],
-    to: [LOFT_WINDOW.x - 0.9, 0, BACK_Z + 3.6],
-    width: LOFT_WINDOW.width,
-    strength: 0.42,
-  },
-  ...SLITS.map((x) => ({
-    from: [x, 1.95, BACK_Z + 0.15] as [number, number, number],
-    to: [x - 0.5, 0, BACK_Z + 2.4] as [number, number, number],
-    width: 0.16,
-    strength: 0.3,
-  })),
-];
-
-/** 바닥에 번지는 빛: 큰 햇빛 줄기가 닿는 곳, 입구로 스며드는 바깥 빛 */
+/** 바닥에 번지는 빛: 다락 창 빛이 닿는 곳, 입구로 스며드는 바깥 빛 (햇빛 줄기 · 먼지는 무거워서 뺐다) */
 export const FLOOR_GLOWS = [
-  { x: SHAFTS[0].to[0], z: SHAFTS[0].to[2] - 0.2, width: 2.2, depth: 1.6, strength: 0.42 },
+  { x: LOFT_WINDOW.x - 0.9, z: BACK_Z + 3.4, width: 2.2, depth: 1.6, strength: 0.42 },
   { x: 0, z: FRONT_Z - 0.6, width: 3.2, depth: 2.2, strength: 0.32 },
 ];
 
