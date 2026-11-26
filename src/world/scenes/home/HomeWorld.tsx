@@ -56,8 +56,9 @@ const PLACE_BOUNDS = { minX: -HALF_W + 0.25, maxX: HALF_W - 0.25, minZ: BACK_Z +
 const RULES: DecorateRules = {
   area: 'home',
   bounds: PLACE_BOUNDS,
-  // 액자 · 시계는 뒷벽에 건다. 창문 자리는 피한다
-  wall: { z: BACK_Z + WALL_THICKNESS / 2 + 0.05, y: 1.35, minX: -HALF_W + 0.3, maxX: HALF_W - 0.3 },
+  // 액자 · 시계는 뒷벽에 건다. 창문 자리는 피한다.
+  // 거는 높이 1.0m: 카메라를 낮춘 뒤 1.35m 는 화면 위쪽 레벨 막대에 윗부분이 가렸다 (이미 건 것도 같이 내려온다)
+  wall: { z: BACK_Z + WALL_THICKNESS / 2 + 0.05, y: 1.0, minX: -HALF_W + 0.3, maxX: HALF_W - 0.3 },
   blocked: (x, z, radius) => {
     // 나가는 문 앞은 비워 둔다 (갇히지 않게)
     return x - radius < -HALF_W + 1.6 && Math.abs(z - DOOR.z) < DOOR.width / 2 + radius;
@@ -95,6 +96,16 @@ export function HomeWorld(): React.ReactElement {
   };
   const onHover = (event: ThreeEvent<PointerEvent>) => decorateFloorHover(event.point.x, event.point.z);
 
+  // 뒷벽을 눌러도 된다: 시계 · 액자는 누른 가로 자리에 걸린다 (예전에는 바닥만 받아서 벽을 누르면 아무 일도 없었다).
+  // 바닥 물건을 들고 있으면 벽 바로 앞 바닥에, 꾸미기 중이 아니면 벽 앞까지 걸어간다
+  const wallFrontZ = BACK_Z + 0.6;
+  const onWallTap = (event: ThreeEvent<MouseEvent>) => {
+    if (event.delta > 10) return;
+    if (decorateFloorTap(event.point.x, wallFrontZ)) return;
+    input.tapTarget = { x: event.point.x, z: wallFrontZ };
+  };
+  const onWallHover = (event: ThreeEvent<PointerEvent>) => decorateFloorHover(event.point.x, wallFrontZ);
+
   return (
     <group>
       <DecorateSystem rules={RULES} />
@@ -110,7 +121,14 @@ export function HomeWorld(): React.ReactElement {
       </mesh>
 
       {/* 벽: 뒤 · 왼쪽 · 오른쪽 */}
-      <Wall position={[0, VISIBLE_WALL_HEIGHT / 2, BACK_Z]} length={ROOM.width + WALL_THICKNESS} color={wallpaper.color} textureKey={surfaceTextureKey(wallpaper, 'wall')} />
+      <Wall
+        position={[0, VISIBLE_WALL_HEIGHT / 2, BACK_Z]}
+        length={ROOM.width + WALL_THICKNESS}
+        color={wallpaper.color}
+        textureKey={surfaceTextureKey(wallpaper, 'wall')}
+        onClick={onWallTap}
+        onPointerMove={onWallHover}
+      />
       <Wall position={[-HALF_W, VISIBLE_WALL_HEIGHT / 2, FRONT_EXTENSION / 2]} length={ROOM.depth + FRONT_EXTENSION} rotation={Math.PI / 2} color={wallpaper.color} textureKey={surfaceTextureKey(wallpaper, 'wall')} />
       <Wall position={[HALF_W, VISIBLE_WALL_HEIGHT / 2, FRONT_EXTENSION / 2]} length={ROOM.depth + FRONT_EXTENSION} rotation={-Math.PI / 2} color={wallpaper.color} textureKey={surfaceTextureKey(wallpaper, 'wall')} />
       <Baseboards />
@@ -148,16 +166,20 @@ function Wall({
   rotation = 0,
   color,
   textureKey,
+  onClick,
+  onPointerMove,
 }: {
   position: [number, number, number];
   length: number;
   rotation?: number;
   color: string;
   textureKey: string;
+  onClick?: (event: ThreeEvent<MouseEvent>) => void;
+  onPointerMove?: (event: ThreeEvent<PointerEvent>) => void;
 }): React.ReactElement {
   return (
     // 벽은 그림자를 드리우지 않는다. 해가 왼쪽 위에 있어 왼쪽 벽 그림자가 바닥을 반이나 덮는다
-    <mesh position={position} rotation-y={rotation} receiveShadow>
+    <mesh position={position} rotation-y={rotation} receiveShadow onClick={onClick} onPointerMove={onPointerMove}>
       <boxGeometry args={[length, VISIBLE_WALL_HEIGHT, WALL_THICKNESS]} />
       <SurfaceMaterial textureKey={textureKey} color={color} repeat={[length / 2, VISIBLE_WALL_HEIGHT / 2]} />
     </mesh>
