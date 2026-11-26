@@ -18,6 +18,7 @@ import {
 } from '@/config/catalog';
 import { CURRENCY } from '@/config/strings';
 import { ASSETS } from '@/config/assets';
+import { isRare } from '@/config/fishing';
 import { useGameStore } from '@/state/gameStore';
 import { useUiStore } from '@/state/uiStore';
 import type { SellableId, SupplyId } from '@/types/game';
@@ -242,6 +243,7 @@ export function FarmShopOverlay(): React.ReactElement {
                 icon={cropIcon(id)}
                 name={SELLABLE_NAME[id]}
                 count={count}
+                rare={isRare(id)}
                 sub={`한 개 ${SELL_PRICE[id]}${CURRENCY}`}
                 price={SELL_PRICE[id] * count}
                 actionLabel="팔기"

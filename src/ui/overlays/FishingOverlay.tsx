@@ -9,11 +9,12 @@
  * 낚시 중에는 화면 전체를 덮어(투명) 다른 버튼 · 조이스틱을 막는다.
  */
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { BITE_MESSAGE, FISH, caughtMessage } from '@/config/fishing';
+import { BITE_MESSAGE, FISH, caughtMessage, isRare } from '@/config/fishing';
 import { CURRENCY } from '@/config/strings';
 import { useFishing } from '@/state/fishingStore';
 import { cropIcon } from '../common/icons';
 import { GameButton, Icon } from '../common/ui';
+import { RareBadge, RareIcon } from '../common/RareIcon';
 
 /** 멈춘 뒤 결과(맞음/빗나감)를 막대 위에 보여 주는 시간 (ms) */
 const STOP_SHOW_MS = 550;
@@ -129,16 +130,26 @@ function CaughtCard(): React.ReactElement | null {
   const finish = useFishing((s) => s.finish);
   if (!fish) return null;
   const def = FISH[fish];
+  const rare = isRare(fish);
   return (
     <div className="absolute inset-0 flex items-center justify-center p-6">
       <div className="absolute inset-0 bg-[rgba(48,38,30,0.45)]" />
       <div className="panel-wood animate-pop-in relative flex w-[580px] flex-col items-center gap-3 px-10 py-8">
-        {firstTime && (
-          <span className="font-game rounded-full border-4 border-[var(--color-ink)] bg-[var(--color-gold)] px-5 py-1 text-[1.25rem]">
-            도감에 새로 올랐어요!
-          </span>
+        {(firstTime || rare) && (
+          <div className="flex items-center gap-2">
+            {rare && <RareBadge className="!px-5 !py-1 !text-[1.25rem] border-4" />}
+            {firstTime && (
+              <span className="font-game rounded-full border-4 border-[var(--color-ink)] bg-[var(--color-gold)] px-5 py-1 text-[1.25rem]">
+                도감에 새로 올랐어요!
+              </span>
+            )}
+          </div>
         )}
-        <Icon src={cropIcon(fish)} size={170} alt={def.name} />
+        {rare ? (
+          <RareIcon src={cropIcon(fish)} size={170} alt={def.name} big />
+        ) : (
+          <Icon src={cropIcon(fish)} size={170} alt={def.name} />
+        )}
         <OneLine text={caughtMessage(fish)} />
         <p className="font-game text-ink-soft text-[1.2rem]">
           가방에 넣었어요 · 팔면 {def.price}

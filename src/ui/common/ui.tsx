@@ -4,6 +4,7 @@
  */
 import type { ReactNode } from 'react';
 import { coinIcon } from './icons';
+import { RareBadge, RareIcon } from './RareIcon';
 import { formatMoney } from '@/config/strings';
 import { audio } from '@/audio/sfx';
 
@@ -170,6 +171,7 @@ export function ItemCard({
   selected,
   onClick,
   actionLabel,
+  rare,
 }: {
   icon: string;
   name: string;
@@ -180,6 +182,8 @@ export function ItemCard({
   selected?: boolean;
   onClick?: () => void;
   actionLabel?: string;
+  /** 레어템이면 빛나는 효과 (config/fishing isRare) */
+  rare?: boolean;
 }): React.ReactElement {
   return (
     <button
@@ -194,9 +198,11 @@ export function ItemCard({
         'panel-paper relative flex min-h-[132px] w-full flex-col items-center justify-center gap-1 px-2 py-3 text-center transition',
         selected ? 'ring-4 ring-gold ring-offset-2' : '',
         disabled ? 'opacity-55 grayscale' : 'active:translate-y-[3px]',
+        rare ? 'rare-card' : '',
       ].join(' ')}
     >
-      <Icon src={icon} size={62} alt="" />
+      {rare && <RareBadge className="absolute -top-3 -left-2 z-10 !text-[0.85rem]" />}
+      {rare ? <RareIcon src={icon} size={62} /> : <Icon src={icon} size={62} alt="" />}
       <span className="text-game text-[1.15rem] leading-tight">{name}</span>
       {sub && <span className="text-[0.9rem] text-ink-soft">{sub}</span>}
       {price !== undefined && (

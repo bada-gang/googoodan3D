@@ -13,7 +13,7 @@ export type CatchKind = 'fish' | 'treasure';
 
 /**
  * 입질 때 보여 주는 크기. "작은 물고기가 물었어요" 처럼 (무엇인지는 잡아야 안다).
- * thing 은 물고기가 아닌 묵직한 물건, legend 는 가장 드문 것 (전설의 연어 · 용왕의 왕관)
+ * thing 은 물고기가 아닌 묵직한 물건, legend 는 가장 드문 레어템 (전설의 연어 · 고래수염 · 금화 주머니 · 마법 빗 · 용왕의 왕관). 화면에서 빛나는 효과를 준다
  */
 export type FishSize = 'small' | 'medium' | 'big' | 'thing' | 'legend';
 
@@ -70,9 +70,9 @@ export const FISH: Record<FishId, FishDef> = {
   bottle: treasure({ id: 'bottle', name: '유리병 편지', price: 7, weight: 2, size: 'thing', speed: 1.2, zone: 0.23, color: '#9fd3c7' }),
   treasureMap: treasure({ id: 'treasureMap', name: '보물 지도', price: 33, weight: 1, size: 'thing', speed: 1.3, zone: 0.21, color: '#d9b77a' }),
   pearl: treasure({ id: 'pearl', name: '대왕 진주 조개', price: 55, weight: 1, size: 'thing', speed: 1.3, zone: 0.19, color: '#f3d9e2' }),
-  baleen: treasure({ id: 'baleen', name: '흰수염고래의 수염 한 줌', price: 66, weight: 0.7, size: 'thing', speed: 1.3, zone: 0.19, color: '#bfe3f2' }),
-  coinPouch: treasure({ id: 'coinPouch', name: '해적왕의 금화 주머니', price: 77, weight: 0.7, size: 'thing', speed: 1.4, zone: 0.19, color: '#c98a4b' }),
-  mermaidComb: treasure({ id: 'mermaidComb', name: '인어공주의 마법 빗', price: 88, weight: 0.7, size: 'thing', speed: 1.4, zone: 0.19, color: '#f4b8d0' }),
+  baleen: treasure({ id: 'baleen', name: '흰수염고래의 수염 한 줌', price: 66, weight: 0.7, size: 'legend', speed: 1.3, zone: 0.19, color: '#bfe3f2' }),
+  coinPouch: treasure({ id: 'coinPouch', name: '해적왕의 금화 주머니', price: 77, weight: 0.7, size: 'legend', speed: 1.4, zone: 0.19, color: '#c98a4b' }),
+  mermaidComb: treasure({ id: 'mermaidComb', name: '인어공주의 마법 빗', price: 88, weight: 0.7, size: 'legend', speed: 1.4, zone: 0.19, color: '#f4b8d0' }),
   crown: treasure({ id: 'crown', name: '간이 필요한 용왕의 왕관', price: 99, weight: 0.6, size: 'legend', speed: 1.4, zone: 0.19, color: '#f6c453' }),
 };
 
@@ -172,4 +172,9 @@ export function rollFish(random: () => number = Math.random): FishId {
 
 export function isFishId(id: string): id is FishId {
   return id in FISH;
+}
+
+/** 레어템: 도감 · 가방 · 가게 · 잡은 카드에서 빛나는 효과를 준다 (ui/common/RareIcon) */
+export function isRare(id: string): boolean {
+  return isFishId(id) && FISH[id].size === 'legend';
 }

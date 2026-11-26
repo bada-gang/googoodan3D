@@ -4,13 +4,14 @@
  */
 import { useState } from 'react';
 import { SELLABLE_ORDER, SELL_PRICE } from '@/config/catalog';
-import { FISH, FISH_ORDER, FISH_SIZE_LABEL } from '@/config/fishing';
+import { FISH, FISH_ORDER, FISH_SIZE_LABEL, isRare } from '@/config/fishing';
 import { CURRENCY } from '@/config/strings';
 import { useGameStore } from '@/state/gameStore';
 import { useUiStore } from '@/state/uiStore';
 import type { FishId, SellableId } from '@/types/game';
 import { chestIcon, cropIcon, itemCategory, itemIcon, itemName } from '../common/icons';
 import { EmptyNote, GameButton, Icon, ItemCard, MoneyTag, OverlayShell } from '../common/ui';
+import { RareBadge, RareIcon } from '../common/RareIcon';
 
 type Tab = 'harvest' | 'seed' | 'supply' | 'furniture' | 'fish';
 
@@ -85,6 +86,7 @@ export function InventoryOverlay(): React.ReactElement {
               icon={itemIcon(itemId)}
               name={itemName(itemId)}
               count={count}
+              rare={isRare(itemId)}
               sub={
                 SELLABLE_ORDER.includes(itemId as SellableId)
                   ? `한 개 ${SELL_PRICE[itemId as SellableId]}${CURRENCY}`
@@ -126,23 +128,30 @@ function DexGrid({ ids }: { ids: FishId[] }): React.ReactElement {
         const entry = dex[id];
         const def = FISH[id];
         const have = inventory[id] ?? 0;
+        // 레어템은 잡은 뒤에만 빛난다 (못 잡은 것은 무엇인지 몰라야 한다)
+        const rare = isRare(id) && !!entry;
         return (
           <div
             key={id}
             className={[
-              'panel-paper flex flex-col items-center gap-1 px-2 py-3 text-center',
-              def.size === 'legend' && entry ? 'bg-[#fff1c4]' : '',
+              'panel-paper relative flex flex-col items-center gap-1 px-2 py-3 text-center',
+              rare ? 'rare-card' : '',
             ].join(' ')}
           >
-            <img
-              src={cropIcon(id)}
-              alt={entry ? def.name : ''}
-              width={84}
-              height={84}
-              draggable={false}
-              // 못 잡은 것은 까만 그림자로
-              style={entry ? undefined : { filter: 'brightness(0)', opacity: 0.22 }}
-            />
+            {rare && <RareBadge className="absolute -top-3 -left-2 z-10" />}
+            {rare ? (
+              <RareIcon src={cropIcon(id)} size={84} alt={def.name} />
+            ) : (
+              <img
+                src={cropIcon(id)}
+                alt={entry ? def.name : ''}
+                width={84}
+                height={84}
+                draggable={false}
+                // 못 잡은 것은 까만 그림자로
+                style={entry ? undefined : { filter: 'brightness(0)', opacity: 0.22 }}
+              />
+            )}
             <p className="font-game text-ink text-[1.15rem] leading-tight">{entry ? def.name : '???'}</p>
             <p className="font-game text-ink-soft text-[0.95rem] leading-tight">
               {entry ? `잡은 수 ${entry.caught} · 가진 수 ${have}` : FISH_SIZE_LABEL[def.size]}

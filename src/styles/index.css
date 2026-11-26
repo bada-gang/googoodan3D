@@ -290,3 +290,135 @@ button {
 .animate-bob {
   animation: bob 2400ms ease-in-out infinite;
 }
+
+/* ---- 레어템 (전설의 연어 · 큰 보물 4개). ui/common/RareIcon ---- */
+
+.rare-frame {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+/* 뒤에서 숨 쉬듯 빛나는 금빛 */
+.rare-halo {
+  position: absolute;
+  inset: -12%;
+  border-radius: 9999px;
+  background: radial-gradient(
+    circle,
+    rgba(255, 240, 180, 0.95) 0%,
+    rgba(255, 210, 90, 0.45) 42%,
+    rgba(255, 210, 90, 0) 70%
+  );
+  animation: rare-breathe 2600ms ease-in-out infinite;
+}
+
+/* 잡은 카드에서만: 천천히 도는 빛줄기 */
+.rare-rays {
+  position: absolute;
+  inset: -34%;
+  border-radius: 9999px;
+  background: repeating-conic-gradient(
+    from 0deg,
+    rgba(255, 205, 80, 0.55) 0deg 9deg,
+    rgba(255, 205, 80, 0) 9deg 30deg
+  );
+  mask-image: radial-gradient(circle, #000 22%, transparent 68%);
+  -webkit-mask-image: radial-gradient(circle, #000 22%, transparent 68%);
+  animation: rare-spin 16s linear infinite;
+}
+
+.rare-img {
+  position: relative;
+  filter: drop-shadow(0 0 6px rgba(255, 196, 70, 0.85));
+}
+
+/* 번갈아 반짝이는 네 갈래 별 */
+.rare-spark {
+  position: absolute;
+  background: #fffbe8;
+  clip-path: polygon(50% 0, 61% 39%, 100% 50%, 61% 61%, 50% 100%, 39% 61%, 0 50%, 39% 39%);
+  filter: drop-shadow(0 0 3px #ffc94a);
+  opacity: 0;
+  animation: rare-twinkle 2400ms ease-in-out infinite;
+}
+
+/* 레어 칸: 금빛 바탕에 빛이 한 번씩 훑고 지나간다 */
+.rare-card {
+  position: relative;
+  background: linear-gradient(160deg, #fff7da 0%, #ffe7a3 100%) !important;
+  border-color: #c58a1e !important;
+}
+
+.rare-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: linear-gradient(110deg, transparent 35%, rgba(255, 255, 255, 0.7) 50%, transparent 65%);
+  background-size: 260% 100%;
+  animation: rare-shine 3400ms ease-in-out infinite;
+}
+
+.rare-badge {
+  display: inline-block;
+  padding: 0.1rem 0.7rem;
+  border: 3px solid var(--color-ink);
+  border-radius: 9999px;
+  background: linear-gradient(90deg, #ffd65c, #ff9fb8, #9fd8ff);
+  color: var(--color-ink);
+  font-size: 1rem;
+  line-height: 1.3;
+}
+
+@keyframes rare-breathe {
+  0%,
+  100% {
+    opacity: 0.65;
+    transform: scale(0.92);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.06);
+  }
+}
+
+@keyframes rare-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes rare-twinkle {
+  0%,
+  100% {
+    opacity: 0;
+    transform: scale(0.3) rotate(0deg);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1) rotate(45deg);
+  }
+}
+
+@keyframes rare-shine {
+  0% {
+    background-position: 140% 0;
+  }
+  55%,
+  100% {
+    background-position: -40% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rare-halo,
+  .rare-rays,
+  .rare-spark,
+  .rare-card::after {
+    animation: none;
+  }
+}
