@@ -8,7 +8,7 @@
  *
  * 파일:
  *   barnLayout.ts      크기 · 카메라 · 물건 자리 · 부딪힘 · 색 (숫자는 여기서)
- *   BarnStructure.tsx  바닥 · 벽 · 기둥 · 입구 문짝 · 칸막이 · 다락 · 사다리
+ *   BarnStructure.tsx  바닥 · 벽 · 기둥 · 입구 문짝 · 칸막이 · 다락 · 사다리 (같은 색 상자는 한 모양으로 합친다)
  *   BarnProps.tsx      건초 · 도구 걸이 · 손수레 등 3D 모델 물건과 등불
  *   BarnLight.tsx      햇빛 줄기 · 바닥 빛 · 먼지
  */
@@ -20,9 +20,9 @@ import { input, obstacles, walkBounds } from '../../state/runtime';
 import { goToScene, useWorldScene } from '../../state/scenes';
 import { BARN } from '../yard/pen/penLayout';
 import { BARN_OBSTACLES, ENTRANCE, FRONT_Z, SPAWN, WALK_BOUNDS } from './barnLayout';
-import { Entrance, Floor, Frame, Ladder, Loft, Stalls, Walls } from './BarnStructure';
+import { Entrance, Floor, Frame, Ladder, Walls, Woodwork } from './BarnStructure';
 import { BarnProps, Lanterns } from './BarnProps';
-import { SunShafts } from './BarnLight';
+import { BarnLight } from './BarnLight';
 
 export { BARN_VIEW } from './barnLayout';
 
@@ -61,12 +61,11 @@ export function BarnWorld(): React.ReactElement {
       <Walls />
       <Frame />
       <Entrance />
-      <Stalls />
-      <Loft />
+      <Woodwork />
       <Ladder />
       <BarnProps />
       <Lanterns />
-      <SunShafts />
+      <BarnLight />
     </group>
   );
 }

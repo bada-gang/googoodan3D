@@ -1,17 +1,21 @@
 /**
- * 마굿간 건물: 흙바닥과 짚 · 입구 밖 풀밭, 판자 벽(위는 지붕 그늘), 기둥 · 들보, 다락 창,
+ * 마굿간 건물: 흙바닥과 짚 · 입구 밖 풀밭, 판자 벽(위는 지붕 그늘), 기둥 · 들보 · 창틀, 다락 창,
  * 입구(문틀 · 열린 붉은 문짝), 칸막이, 다락 바닥판, 사다리. 모두 코드로 만든 모양이다 (새 그림 없음).
+ *
+ * 가볍게: 움직이지 않는 상자는 색(재질)마다 모양 하나로 합친다 (props/mergedBoxes).
+ * 상자마다 그리면 그리기 호출이 상자 수만큼(그림자까지 두 배) 늘어 태블릿에서 무겁다.
+ * 그래서 이 파일의 그리기는 바닥 · 짚 · 풀밭 · 벽 2 · 들보 · 나무 · 창 빛 · 문짝 · 문 무늬 · 사다리 = 11번이다.
  * 자리 · 색은 barnLayout.ts.
  */
 import { useMemo, useRef } from 'react';
 import { useFrame, type ThreeEvent } from '@react-three/fiber';
-import { Color, type BufferGeometry, type MeshBasicMaterial } from 'three';
+import { Color, PlaneGeometry, type BufferGeometry, type MeshBasicMaterial } from 'three';
+import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { PALETTE } from '@/config/artTokens';
 import { ASSETS } from '@/config/assets';
 import { ArtTexture } from '../../rendering/assets';
 import { daylight } from '../../rendering/dayNight';
 import { mergedBoxGeometry, type BoxSpec } from '../../props/mergedBoxes';
-import { FloorGlow } from './BarnLight';
 import {
   BACK_Z,
   COLORS,
@@ -75,114 +79,87 @@ function strawGeometry(): BufferGeometry {
 
 /* --------------------------------- 벽 --------------------------------- */
 
-/** 판자 벽: 아래(지붕 밑까지)는 따뜻한 나무색, 그 위는 지붕 그늘처럼 어둡게. 입구 양옆은 낮게 잘라 낸 앞벽 */
-export function Walls(): React.ReactElement {
-  const upper = VISIBLE_WALL_HEIGHT - ROOM.wallHeight;
-  const sides: { y: number; height: number; color: string }[] = [
-    { y: ROOM.wallHeight / 2, height: ROOM.wallHeight, color: COLORS.wall },
-    { y: ROOM.wallHeight + upper / 2, height: upper, color: COLORS.wallShade },
+/** 판자 한 장 (가로 length · 세로 height), 판자 질감이 같은 크기로 깔리게 uv 를 늘린다 */
+function plank(x: number, y: number, z: number, length: number, height: number, rotationY = 0): BoxSpec {
+  return { x, y, z, w: length, h: height, d: WALL_THICKNESS, rotationY, uvRepeat: [length / 2, height / 1.2] };
+}
+
+/** 벽 판자들: 아래(지붕 밑까지, 입구 양옆 낮은 앞벽 포함) · 위(지붕 그늘) */
+function wallGeometries(): { lower: BufferGeometry; upper: BufferGeometry } {
+  const upperHeight = VISIBLE_WALL_HEIGHT - ROOM.wallHeight;
+  const ring = (y: number, height: number) => [
+    plank(0, y, BACK_Z, ROOM.width + WALL_THICKNESS, height),
+    plank(-HALF_W, y, 0, ROOM.depth, height, Math.PI / 2),
+    plank(HALF_W, y, 0, ROOM.depth, height, -Math.PI / 2),
   ];
   const frontLength = HALF_W - ENTRANCE.halfWidth;
+  const front = [-1, 1].map((side) => plank(side * (ENTRANCE.halfWidth + frontLength / 2), 0.35, FRONT_Z, frontLength, 0.7));
+  return {
+    lower: mergedBoxGeometry([...ring(ROOM.wallHeight / 2, ROOM.wallHeight), ...front]),
+    upper: mergedBoxGeometry(ring(ROOM.wallHeight + upperHeight / 2, upperHeight)),
+  };
+}
+
+/** 판자 벽 (그림자는 드리우지 않는다: 집 안과 같이 왼쪽 벽 그림자가 바닥을 덮는다) + 다락 창 빛 */
+export function Walls(): React.ReactElement {
+  const { lower, upper } = useMemo(wallGeometries, []);
   return (
     <group>
-      {sides.map(({ y, height, color }) => (
-        <group key={color}>
-          <PlankWall position={[0, y, BACK_Z]} length={ROOM.width + WALL_THICKNESS} height={height} color={color} />
-          <PlankWall position={[-HALF_W, y, 0]} length={ROOM.depth} height={height} rotation={Math.PI / 2} color={color} />
-          <PlankWall position={[HALF_W, y, 0]} length={ROOM.depth} height={height} rotation={-Math.PI / 2} color={color} />
-        </group>
+      {[
+        { geometry: lower, color: COLORS.wall },
+        { geometry: upper, color: COLORS.wallShade },
+      ].map(({ geometry, color }) => (
+        <mesh key={color} geometry={geometry} receiveShadow>
+          {/* 집 안 바닥 판자 질감(흰 바탕)에 색을 곱한다. 반복은 uv 에 넣었다 */}
+          <ArtTexture assetKey={ASSETS.textures.floor} repeat={[1, 1]}>
+            {(map) => <meshStandardMaterial map={map} color={color} roughness={0.95} />}
+          </ArtTexture>
+        </mesh>
       ))}
-      {[-1, 1].map((side) => (
-        <PlankWall
-          key={side}
-          position={[side * (ENTRANCE.halfWidth + frontLength / 2), 0.35, FRONT_Z]}
-          length={frontLength}
-          height={0.7}
-          color={COLORS.wall}
-        />
-      ))}
-      <LoftWindow />
+      <WindowLight />
     </group>
   );
 }
 
-function PlankWall({
-  position,
-  length,
-  height,
-  rotation = 0,
-  color,
-}: {
-  position: [number, number, number];
-  length: number;
-  height: number;
-  rotation?: number;
-  color: string;
-}): React.ReactElement {
+/** 다락 창과 판자 틈의 빛 (한 모양). 낮에는 밝은 크림색, 밤에는 바깥 하늘색 */
+const WINDOW_DAY = new Color(COLORS.window);
+function WindowLight(): React.ReactElement {
+  const geometry = useMemo(() => {
+    const z = BACK_Z + WALL_THICKNESS / 2 + 0.02;
+    const panes = [
+      new PlaneGeometry(LOFT_WINDOW.width, LOFT_WINDOW.height).translate(LOFT_WINDOW.x, LOFT_WINDOW.y, z),
+      ...SLITS.map((x) => new PlaneGeometry(0.05, 1.5).translate(x, 1.95, z)),
+    ];
+    const merged = mergeGeometries(panes, false);
+    for (const pane of panes) pane.dispose();
+    return merged;
+  }, []);
+  const material = useRef<MeshBasicMaterial>(null);
+  useFrame(() => {
+    material.current?.color.copy(WINDOW_DAY).lerp(daylight.sky, Math.min(1, daylight.darkness * 1.2));
+  });
   return (
-    // 벽은 그림자를 드리우지 않는다 (집 안과 같다: 왼쪽 벽 그림자가 바닥을 덮는다)
-    <mesh position={position} rotation-y={rotation} receiveShadow>
-      <boxGeometry args={[length, height, WALL_THICKNESS]} />
-      {/* 집 안 바닥 판자 질감(흰 바탕)에 색을 곱한다 */}
-      <ArtTexture assetKey={ASSETS.textures.floor} repeat={[length / 2, height / 1.2]}>
-        {(map) => <meshStandardMaterial map={map} color={color} roughness={0.95} />}
-      </ArtTexture>
+    <mesh geometry={geometry}>
+      <meshBasicMaterial ref={material} color={WINDOW_DAY} toneMapped={false} />
     </mesh>
   );
 }
 
-/** 뒷벽 다락 창: 바깥 빛이 들어오는 밝은 네모 + 나무 틀, 왼쪽에 판자 틈. 밤에는 바깥 하늘색 */
-const WINDOW_DAY = new Color(COLORS.window);
-function LoftWindow(): React.ReactElement {
-  const z = BACK_Z + WALL_THICKNESS / 2 + 0.01;
-  const materials = useRef<(MeshBasicMaterial | null)[]>([]);
-  useFrame(() => {
-    const k = Math.min(1, daylight.darkness * 1.2);
-    for (const material of materials.current) material?.color.copy(WINDOW_DAY).lerp(daylight.sky, k);
-  });
-  const glass = (index: number) => (material: MeshBasicMaterial | null) => {
-    materials.current[index] = material;
-  };
-  const { x, y, width, height } = LOFT_WINDOW;
-  return (
-    <group>
-      <mesh position={[x, y, z + 0.01]}>
-        <planeGeometry args={[width, height]} />
-        <meshBasicMaterial ref={glass(0)} color={WINDOW_DAY} toneMapped={false} />
-      </mesh>
-      {[
-        [x, y + height / 2, width + 0.2, 0.14],
-        [x, y - height / 2, width + 0.2, 0.14],
-        [x - width / 2, y, 0.14, height],
-        [x + width / 2, y, 0.14, height],
-        [x, y, 0.09, height],
-      ].map(([bx, by, w, h], i) => (
-        <mesh key={i} position={[bx, by, z + 0.05]}>
-          <boxGeometry args={[w, h, 0.08]} />
-          <meshStandardMaterial color={COLORS.beam} roughness={0.9} />
-        </mesh>
-      ))}
-      {SLITS.map((sx, i) => (
-        <mesh key={sx} position={[sx, 1.95, z + 0.01]}>
-          <planeGeometry args={[0.05, 1.5]} />
-          <meshBasicMaterial ref={glass(i + 1)} color={WINDOW_DAY} toneMapped={false} />
-        </mesh>
-      ))}
-    </group>
-  );
-}
+/* ------------------------- 기둥 · 들보 · 틀 (짙은 나무) ------------------------- */
 
-/* ------------------------------- 기둥 · 들보 ------------------------------- */
-
-/** 벽 모서리와 칸막이 자리에 기둥, 벽 위에 가로 들보. 한 모양으로 합쳐 그리기 1번 */
+/** 짙은 나무색 상자 전부: 벽 기둥 · 들보, 창틀, 입구 기둥, 다락 앞 들보 · 받침 기둥 */
 export function Frame(): React.ReactElement {
   const geometry = useMemo(() => {
     const t = 0.22;
     const h = ROOM.wallHeight + 0.15;
     const inX = HALF_W - WALL_THICKNESS / 2 - t / 2;
     const inZ = BACK_Z + WALL_THICKNESS / 2 + t / 2;
+    const glassZ = BACK_Z + WALL_THICKNESS / 2 + 0.06;
+    const { x, y, width, height } = LOFT_WINDOW;
+    const loftCx = (LOFT.minX + LOFT.maxX) / 2;
     const boxes: BoxSpec[] = [
-      ...[-inX, -2.0, 2.0, inX].map((x) => ({ x, y: h / 2, z: inZ, w: t, h, d: t })),
+      // 벽 기둥 · 들보
+      ...[-inX, -2.0, 2.0, inX].map((px) => ({ x: px, y: h / 2, z: inZ, w: t, h, d: t })),
       ...[...STALL_WALLS_Z, FRONT_Z - t / 2].flatMap((z) => [
         { x: -inX, y: h / 2, z, w: t, h, d: t },
         { x: inX, y: h / 2, z, w: t, h, d: t },
@@ -192,6 +169,17 @@ export function Frame(): React.ReactElement {
       { x: inX, y: ROOM.wallHeight, z: 0, w: t, h: t, d: ROOM.depth },
       // 뒷벽 가운데 가로대 (판자를 받치는 띠)
       { x: 0, y: 1.2, z: inZ + 0.02, w: ROOM.width - 0.4, h: 0.12, d: 0.08 },
+      // 다락 창틀
+      { x, y: y + height / 2, z: glassZ, w: width + 0.2, h: 0.14, d: 0.08 },
+      { x, y: y - height / 2, z: glassZ, w: width + 0.2, h: 0.14, d: 0.08 },
+      { x: x - width / 2, y, z: glassZ, w: 0.14, h: height, d: 0.08 },
+      { x: x + width / 2, y, z: glassZ, w: 0.14, h: height, d: 0.08 },
+      { x, y, z: glassZ, w: 0.09, h: height, d: 0.08 },
+      // 입구 기둥 (위 가로대는 두지 않는다: 카메라가 가까워 화면 아래를 가로질러 캐릭터를 가린다)
+      ...[-1, 1].map((side) => ({ x: side * ENTRANCE.halfWidth, y: ENTRANCE.height / 2, z: FRONT_Z, w: 0.2, h: ENTRANCE.height, d: 0.24 })),
+      // 다락 앞 들보 · 받침 기둥
+      { x: loftCx, y: LOFT.y - 0.12, z: LOFT.maxZ, w: LOFT.maxX - LOFT.minX, h: 0.22, d: 0.2 },
+      { x: LOFT.minX, y: LOFT.y / 2, z: LOFT.maxZ, w: 0.2, h: LOFT.y, d: 0.2 },
     ];
     return mergedBoxGeometry(boxes);
   }, []);
@@ -202,77 +190,27 @@ export function Frame(): React.ReactElement {
   );
 }
 
-/* ---------------------------------- 입구 ---------------------------------- */
+/* ------------------------------ 칸막이 · 다락 바닥 ------------------------------ */
 
-/** 입구: 문틀 기둥 두 개, 바깥쪽으로 활짝 열린 붉은 문짝 두 개 (바깥 헛간 문과 같은 흰 테두리 · X) */
-export function Entrance(): React.ReactElement {
-  const leafWidth = 1.15;
-  const leafHeight = 2.3;
-  return (
-    <group>
-      {[-1, 1].map((side) => (
-        <group key={side}>
-          <mesh position={[side * ENTRANCE.halfWidth, ENTRANCE.height / 2, FRONT_Z]} castShadow>
-            <boxGeometry args={[0.2, ENTRANCE.height, 0.24]} />
-            <meshStandardMaterial color={COLORS.beam} roughness={0.9} />
-          </mesh>
-          {/* 문짝: 기둥에 달려 바깥(카메라 쪽)으로 열려 있다. 통로 쪽 면에 무늬 */}
-          <group position={[side * (ENTRANCE.halfWidth + 0.05), leafHeight / 2 + 0.02, FRONT_Z + 0.1]} rotation-y={side * 0.35}>
-            <group position-z={leafWidth / 2}>
-              <mesh castShadow>
-                <boxGeometry args={[0.08, leafHeight, leafWidth]} />
-                <meshStandardMaterial color={COLORS.barnRed} roughness={0.85} />
-              </mesh>
-              <DoorTrim side={-side} width={leafWidth} height={leafHeight} />
-            </group>
-          </group>
-        </group>
-      ))}
-      {/* 문틀 위 가로대는 두지 않는다: 카메라가 가까워서 화면 아래를 가로질러 캐릭터를 가린다 */}
-      {/* 입구로 스며드는 바깥 빛 */}
-      <FloorGlow x={0} z={FRONT_Z - 0.6} width={3.2} depth={2.2} strength={0.32} />
-    </group>
-  );
-}
-
-/** 문짝 한 면의 흰 테두리와 X (side: 어느 면에 붙일지 ±x) */
-function DoorTrim({ side, width, height }: { side: number; width: number; height: number }): React.ReactElement {
-  const { frame, diagonal, angle } = useMemo(() => {
-    const t = 0.1;
-    const parts: BoxSpec[] = [
-      { x: 0, y: height / 2 - t / 2, z: 0, w: 0.03, h: t, d: width },
-      { x: 0, y: -height / 2 + t / 2, z: 0, w: 0.03, h: t, d: width },
-      { x: 0, y: 0, z: width / 2 - t / 2, w: 0.03, h: height, d: t },
-      { x: 0, y: 0, z: -width / 2 + t / 2, w: 0.03, h: height, d: t },
-    ];
-    return { frame: mergedBoxGeometry(parts), diagonal: Math.hypot(width, height) - 0.2, angle: Math.atan2(height, width) };
-  }, [width, height]);
-  return (
-    <group position-x={side * 0.055}>
-      <mesh geometry={frame}>
-        <meshStandardMaterial color={COLORS.trim} roughness={0.85} />
-      </mesh>
-      {[1, -1].map((sign) => (
-        <mesh key={sign} rotation-x={sign * (Math.PI / 2 - angle)}>
-          <boxGeometry args={[0.03, 0.09, diagonal]} />
-          <meshStandardMaterial color={COLORS.trim} roughness={0.85} />
-        </mesh>
-      ))}
-    </group>
-  );
-}
-
-/* --------------------------------- 칸막이 --------------------------------- */
-
-/** 왼쪽 벽의 칸막이 두 칸: 가로 판자 세 줄 + 통로 쪽 끝 기둥 */
-export function Stalls(): React.ReactElement {
+/** 보통 나무색 상자 전부: 왼쪽 칸막이 두 칸(가로 판자 세 줄 + 끝 기둥), 다락 바닥판 */
+export function Woodwork(): React.ReactElement {
   const geometry = useMemo(() => {
     const length = STALL_FRONT_X + HALF_W;
     const cx = -HALF_W + length / 2;
-    const boxes: BoxSpec[] = STALL_WALLS_Z.flatMap((z) => [
-      ...[0.3, 0.65, 1.0].map((y) => ({ x: cx, y, z, w: length, h: 0.24, d: 0.08 })),
-      { x: STALL_FRONT_X, y: 0.65, z, w: 0.18, h: 1.3, d: 0.18 },
-    ]);
+    const boxes: BoxSpec[] = [
+      ...STALL_WALLS_Z.flatMap((z) => [
+        ...[0.3, 0.65, 1.0].map((y) => ({ x: cx, y, z, w: length, h: 0.24, d: 0.08 })),
+        { x: STALL_FRONT_X, y: 0.65, z, w: 0.18, h: 1.3, d: 0.18 },
+      ]),
+      {
+        x: (LOFT.minX + LOFT.maxX) / 2,
+        y: LOFT.y,
+        z: (LOFT.minZ + LOFT.maxZ) / 2,
+        w: LOFT.maxX - LOFT.minX,
+        h: 0.14,
+        d: LOFT.maxZ - LOFT.minZ,
+      },
+    ];
     return mergedBoxGeometry(boxes);
   }, []);
   return (
@@ -282,30 +220,64 @@ export function Stalls(): React.ReactElement {
   );
 }
 
-/* ------------------------------- 다락 · 사다리 ------------------------------- */
+/* --------------------------------- 입구 문짝 --------------------------------- */
 
-/** 오른쪽 안쪽 위 다락: 바닥판 + 앞 들보 + 받침 기둥 (위의 건초는 BarnProps) */
-export function Loft(): React.ReactElement {
-  const width = LOFT.maxX - LOFT.minX;
-  const depth = LOFT.maxZ - LOFT.minZ;
-  const cx = (LOFT.minX + LOFT.maxX) / 2;
+const LEAF = { width: 1.15, height: 2.3, thickness: 0.08, open: 0.35 };
+
+/** 문짝 안의 한 점(lx, ly, lz)을 바닥 좌표로. 문짝은 기둥에 달려 바깥(카메라 쪽)으로 open 만큼 열려 있다 */
+function leafPoint(side: number, lx: number, ly: number, lz: number): { x: number; y: number; z: number; rot: number } {
+  const rot = side * LEAF.open;
+  const hingeX = side * (ENTRANCE.halfWidth + 0.05);
+  const hingeZ = FRONT_Z + 0.1;
+  const z = lz + LEAF.width / 2;
+  return {
+    x: hingeX + lx * Math.cos(rot) + z * Math.sin(rot),
+    y: LEAF.height / 2 + 0.02 + ly,
+    z: hingeZ - lx * Math.sin(rot) + z * Math.cos(rot),
+    rot,
+  };
+}
+
+/** 활짝 열린 붉은 문짝 두 개 (한 모양) + 통로 쪽 면의 흰 테두리 · X 무늬 (한 모양). 바깥 헛간 문과 같은 무늬 */
+export function Entrance(): React.ReactElement {
+  const { leaves, trim } = useMemo(() => {
+    const leafBoxes: BoxSpec[] = [];
+    const trimBoxes: BoxSpec[] = [];
+    const t = 0.1;
+    const { width: w, height: h } = LEAF;
+    const diagonal = Math.hypot(w, h) - 0.2;
+    const angle = Math.PI / 2 - Math.atan2(h, w);
+    for (const side of [-1, 1]) {
+      const center = leafPoint(side, 0, 0, 0);
+      leafBoxes.push({ x: center.x, y: center.y, z: center.z, w: LEAF.thickness, h, d: w, rotationY: center.rot });
+      // 무늬는 통로 쪽(-side) 면에
+      const fx = -side * 0.055;
+      const part = (ly: number, lz: number, ph: number, pd: number, rotationX = 0) => {
+        const p = leafPoint(side, fx, ly, lz);
+        trimBoxes.push({ x: p.x, y: p.y, z: p.z, w: 0.03, h: ph, d: pd, rotationY: p.rot, rotationX });
+      };
+      part(h / 2 - t / 2, 0, t, w);
+      part(-h / 2 + t / 2, 0, t, w);
+      part(0, w / 2 - t / 2, h, t);
+      part(0, -w / 2 + t / 2, h, t);
+      part(0, 0, 0.09, diagonal, angle);
+      part(0, 0, 0.09, diagonal, -angle);
+    }
+    return { leaves: mergedBoxGeometry(leafBoxes), trim: mergedBoxGeometry(trimBoxes) };
+  }, []);
   return (
     <group>
-      <mesh position={[cx, LOFT.y, (LOFT.minZ + LOFT.maxZ) / 2]} castShadow receiveShadow>
-        <boxGeometry args={[width, 0.14, depth]} />
-        <meshStandardMaterial color={PALETTE.wood} roughness={0.9} />
+      <mesh geometry={leaves} castShadow>
+        <meshStandardMaterial color={COLORS.barnRed} roughness={0.85} />
       </mesh>
-      <mesh position={[cx, LOFT.y - 0.12, LOFT.maxZ]} castShadow>
-        <boxGeometry args={[width, 0.22, 0.2]} />
-        <meshStandardMaterial color={COLORS.beam} roughness={0.9} />
-      </mesh>
-      <mesh position={[LOFT.minX, LOFT.y / 2, LOFT.maxZ]} castShadow>
-        <boxGeometry args={[0.2, LOFT.y, 0.2]} />
-        <meshStandardMaterial color={COLORS.beam} roughness={0.9} />
+      <mesh geometry={trim}>
+        <meshStandardMaterial color={COLORS.trim} roughness={0.85} />
       </mesh>
     </group>
   );
 }
+
+/* --------------------------------- 사다리 --------------------------------- */
 
 /** 다락으로 기대 놓은 사다리 (아래는 통로 쪽, 위는 다락 앞 들보) */
 export function Ladder(): React.ReactElement {

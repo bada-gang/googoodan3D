@@ -99,6 +99,12 @@ export const SHAFTS: { from: [number, number, number]; to: [number, number, numb
   })),
 ];
 
+/** 바닥에 번지는 빛: 큰 햇빛 줄기가 닿는 곳, 입구로 스며드는 바깥 빛 */
+export const FLOOR_GLOWS = [
+  { x: SHAFTS[0].to[0], z: SHAFTS[0].to[2] - 0.2, width: 2.2, depth: 1.6, strength: 0.42 },
+  { x: 0, z: FRONT_Z - 0.6, width: 3.2, depth: 2.2, strength: 0.32 },
+];
+
 /* -------------------------------- 부딪힘 -------------------------------- */
 
 const box = (minX: number, maxX: number, minZ: number, maxZ: number): Obstacle => ({ kind: 'box', minX, maxX, minZ, maxZ });
