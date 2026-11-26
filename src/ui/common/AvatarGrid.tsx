@@ -28,12 +28,12 @@ export function AvatarGrid({
           aria-label={item.name}
           aria-pressed={selected === item.id}
           className={[
-            'panel-paper flex h-[118px] w-[118px] flex-col items-center justify-center gap-0.5 transition',
+            'panel-paper flex h-[118px] w-[118px] items-center justify-center transition',
             selected === item.id ? 'ring-4 ring-gold ring-offset-2' : 'opacity-80',
           ].join(' ')}
         >
-          <Icon src={avatarIcon(item.id)} size={70} alt="" />
-          <span className="font-game text-[1rem]">{item.name}</span>
+          {/* 동물 이름은 띄우지 않는다 (그림만). 화면 읽기용 이름은 aria-label 에 */}
+          <Icon src={avatarIcon(item.id)} size={86} alt="" />
         </button>
       ))}
     </div>
