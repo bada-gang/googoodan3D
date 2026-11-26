@@ -50,7 +50,8 @@ const CLIPS: Clip[] = [
   // 수확 · 열매 맺힘 · 생산물 받기. 사용자가 후보 87개 중 고름 (wobbleboxx "Level up, power up, Coin get", OpenGameArt CC0)
   { out: 'harvest', from: 'candidates/level-up-power-up-coin-get-13-sounds__SoundPack01/Rise03.aif', tempo: 1.1 },
   { out: 'place', from: `${IMPACT}/impactWood_light_002.ogg` },
-  { out: 'door', from: `${RPG}/doorOpen_1.ogg` },
+  // 문 소리: 끝의 두 번째 "탁"(0.73초~)은 겹쳐 들려서 잘라 낸다 (사용자가 비교해 듣고 고름)
+  { out: 'door', from: `${RPG}/doorOpen_1.ogg`, end: 0.69 },
   // 발소리: 몇 개를 번갈아 써야 기계 소리처럼 안 들린다
   ...[0, 1, 2].map((i) => ({ out: `step_grass_${i}`, from: `${IMPACT}/footstep_grass_00${i}.ogg` })),
   ...[0, 1, 2].map((i) => ({ out: `step_wood_${i}`, from: `${IMPACT}/footstep_wood_00${i}.ogg` })),

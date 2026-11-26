@@ -75,6 +75,8 @@ export function HomeWorld(): React.ReactElement {
 
   useInteractable({
     id: 'home_exit',
+    // 문 소리만 (버튼 딸깍과 겹치지 않게)
+    silentTap: true,
     position: () => ({ x: -HALF_W + 0.5, z: DOOR.z }),
     range: 1.5,
     prompts: () => [{ id: 'exit_home', label: '밖으로 나가기', enabled: true }],

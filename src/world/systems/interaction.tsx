@@ -26,6 +26,8 @@ export interface Interactable {
   area?: Rect;
   prompts: () => InteractionPrompt[];
   onAction: (actionId: string) => void;
+  /** 버튼 "딸깍" 소리를 내지 않는다. 장면 이동처럼 행동이 자기 소리(문 소리)를 내면 겹치지 않게 */
+  silentTap?: boolean;
 }
 
 export const DEFAULT_RANGE = 1.8;
@@ -113,7 +115,7 @@ export function InteractionSystem(): null {
       if (!item) return;
       const prompt = item.prompts().find((p) => p.id === actionId);
       if (!prompt || !prompt.enabled) return;
-      audio.play('tap');
+      if (!item.silentTap) audio.play('tap');
       // 행동하러 왔으니 걸어가던 것은 멈춘다
       input.tapTarget = null;
       item.onAction(actionId);

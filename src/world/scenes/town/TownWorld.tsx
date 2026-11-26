@@ -170,6 +170,8 @@ function Gate(): React.ReactElement {
 
   useInteractable({
     id: 'town_gate_home',
+    // 문 소리만 (버튼 딸깍과 겹치지 않게)
+    silentTap: true,
     position: () => gate,
     // 표지판 둘레가 아니라 큰길 끝에 닿으면
     area: TOWN_HOME_PORTAL,

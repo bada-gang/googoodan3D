@@ -156,6 +156,8 @@ function House(): React.ReactElement {
 
   useInteractable({
     id: 'house_door',
+    // 문 소리만 (버튼 딸깍과 겹치지 않게)
+    silentTap: true,
     position: () => door,
     range: 1.7,
     prompts: () => [{ id: 'enter_home', label: '집에 들어가기', enabled: true }],
@@ -205,6 +207,8 @@ function TownGate(): React.ReactElement {
 
   useInteractable({
     id: 'town_gate',
+    // 문 소리만 (버튼 딸깍과 겹치지 않게)
+    silentTap: true,
     position: () => gate,
     // 표지판 둘레가 아니라 큰길 끝에 닿으면
     area: YARD_TOWN_PORTAL,
