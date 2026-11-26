@@ -14,7 +14,7 @@ import { CURRENCY } from '@/config/strings';
 import { useFishing } from '@/state/fishingStore';
 import { cropIcon } from '../common/icons';
 import { GameButton, Icon } from '../common/ui';
-import { RareBadge, RareIcon } from '../common/RareIcon';
+import { RareIcon } from '../common/RareIcon';
 
 /** 멈춘 뒤 결과(맞음/빗나감)를 막대 위에 보여 주는 시간 (ms) */
 const STOP_SHOW_MS = 550;
@@ -135,15 +135,10 @@ function CaughtCard(): React.ReactElement | null {
     <div className="absolute inset-0 flex items-center justify-center p-6">
       <div className="absolute inset-0 bg-[rgba(48,38,30,0.45)]" />
       <div className="panel-wood animate-pop-in relative flex w-[580px] flex-col items-center gap-3 px-10 py-8">
-        {(firstTime || rare) && (
-          <div className="flex items-center gap-2">
-            {rare && <RareBadge className="!px-5 !py-1 !text-[1.25rem] border-4" />}
-            {firstTime && (
-              <span className="font-game rounded-full border-4 border-[var(--color-ink)] bg-[var(--color-gold)] px-5 py-1 text-[1.25rem]">
-                도감에 새로 올랐어요!
-              </span>
-            )}
-          </div>
+        {firstTime && (
+          <span className="font-game rounded-full border-4 border-[var(--color-ink)] bg-[var(--color-gold)] px-5 py-1 text-[1.25rem]">
+            도감에 새로 올랐어요!
+          </span>
         )}
         {rare ? (
           <RareIcon src={cropIcon(fish)} size={170} alt={def.name} big />

@@ -54,8 +54,3 @@ export function RareIcon({
     </span>
   );
 }
-
-/** 레어템 표시 딱지 */
-export function RareBadge({ className = '' }: { className?: string }): React.ReactElement {
-  return <span className={`rare-badge font-game ${className}`}>레어</span>;
-}

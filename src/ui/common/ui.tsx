@@ -4,7 +4,7 @@
  */
 import type { ReactNode } from 'react';
 import { coinIcon } from './icons';
-import { RareBadge, RareIcon } from './RareIcon';
+import { RareIcon } from './RareIcon';
 import { formatMoney } from '@/config/strings';
 import { audio } from '@/audio/sfx';
 
@@ -201,7 +201,6 @@ export function ItemCard({
         rare ? 'rare-card' : '',
       ].join(' ')}
     >
-      {rare && <RareBadge className="absolute -top-3 -left-2 z-10 !text-[0.85rem]" />}
       {rare ? <RareIcon src={icon} size={62} /> : <Icon src={icon} size={62} alt="" />}
       <span className="text-game text-[1.15rem] leading-tight">{name}</span>
       {sub && <span className="text-[0.9rem] text-ink-soft">{sub}</span>}

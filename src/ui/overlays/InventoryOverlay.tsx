@@ -11,7 +11,7 @@ import { useUiStore } from '@/state/uiStore';
 import type { FishId, SellableId } from '@/types/game';
 import { chestIcon, cropIcon, itemCategory, itemIcon, itemName } from '../common/icons';
 import { EmptyNote, GameButton, Icon, ItemCard, MoneyTag, OverlayShell } from '../common/ui';
-import { RareBadge, RareIcon } from '../common/RareIcon';
+import { RareIcon } from '../common/RareIcon';
 
 type Tab = 'harvest' | 'seed' | 'supply' | 'furniture' | 'fish';
 
@@ -138,7 +138,6 @@ function DexGrid({ ids }: { ids: FishId[] }): React.ReactElement {
               rare ? 'rare-card' : '',
             ].join(' ')}
           >
-            {rare && <RareBadge className="absolute -top-3 -left-2 z-10" />}
             {rare ? (
               <RareIcon src={cropIcon(id)} size={84} alt={def.name} />
             ) : (
