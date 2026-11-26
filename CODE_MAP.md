@@ -110,6 +110,7 @@ art-src/         생성 원본 (git 에 안 들어감 — 아래 "백업" 참고
 | 그림자용 저해상도 사본 | `src/world/rendering/shadowProxies.ts` (만드는 쪽: `scripts/lib/shadowProxy.ts`) |
 | 밤낮 색 · 별 · 밤 불빛 | `src/world/rendering/dayNight.tsx` |
 | 모델 · 질감 불러오기 | `src/world/rendering/assets.tsx` |
+| 같은 모델 여러 개를 한 번에 그리기 (인스턴싱, 움직이지 않는 장식) | `src/world/rendering/InstancedModel.tsx` |
 | 캔버스 설정 (화질 · 그림자 방식) | `src/world/WorldRoot.tsx`, `src/world/GameCanvas.tsx` |
 | 장면 바꾸기 (마당 ↔ 집 · 마굿간 · 시장) | `src/world/state/scenes.ts` (지붕 아래 장면 목록: `sceneStore.ts` 의 `isIndoorScene`) |
 
