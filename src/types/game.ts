@@ -129,23 +129,35 @@ export interface AnimalInstance {
 export type SeedId = `seed_${TreeSpeciesId}`;
 export type FruitId = TreeSpeciesId;
 export type ProduceId = 'egg' | 'wool' | 'milk' | 'goatMilk';
-/** 시장 연못에서 낚는 것: 물고기 12종 + 물속 보물 4종 (config/fishing) */
+/** 시장 연못에서 낚는 것: 물고기 20종 + 물속 보물 8종 (config/fishing) */
 export type FishId =
   | 'minnow'
+  | 'paleChub'
   | 'loach'
-  | 'mackerel'
-  | 'squid'
+  | 'crab'
   | 'crucian'
+  | 'mackerel'
+  | 'hairtail'
+  | 'squid'
+  | 'flounder'
   | 'catfish'
+  | 'pufferfish'
   | 'trout'
   | 'carp'
   | 'eel'
+  | 'stingray'
   | 'octopus'
+  | 'tuna'
   | 'goldfish'
+  | 'sturgeon'
   | 'salmon'
-  | 'treasureMap'
+  | 'rubberDuck'
   | 'bottle'
+  | 'treasureMap'
   | 'pearl'
+  | 'baleen'
+  | 'coinPouch'
+  | 'mermaidComb'
   | 'crown';
 export type SellableId = FruitId | ProduceId | FishId;
 

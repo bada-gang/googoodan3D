@@ -99,7 +99,7 @@ export function InventoryOverlay(): React.ReactElement {
 }
 
 /**
- * 물고기 도감: 물고기 12 + 물속 보물 4 를 나누지 않고 한 판(4 × 4)에 FISH_ORDER 순서로.
+ * 물고기 도감: 물고기 20 + 물속 보물 8 을 나누지 않고 한 판(4 칸씩 7 줄)에 FISH_ORDER 순서로.
  * 잡아 본 것은 그림 · 이름 · 잡은 수 · 가진 수 · 값, 아직 못 잡은 것은 까만 그림자와 크기만 보여 준다.
  */
 function FishDex(): React.ReactElement {
