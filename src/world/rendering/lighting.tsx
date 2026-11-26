@@ -9,6 +9,7 @@ import { PALETTE } from '@/config/artTokens';
 import { TEST_FLAGS } from '../debug/testFlags';
 import { player } from '../state/runtime';
 import { useWorldScene } from '../state/scenes';
+import { isIndoorScene } from '../state/sceneStore';
 import { daylight } from './dayNight';
 import { setShadowProxiesVisible, useShadowProxyGate } from './shadowProxies';
 
@@ -28,6 +29,12 @@ const SKY_INTENSITY = 0.55;
 const ENV_INTENSITY = 0.3;
 const indoorColor = new Color();
 
+/** 장면마다 빛 배율 (1 = 그대로). 마굿간은 약간 어둡게 */
+const NO_DIM = { sun: 1, sky: 1, env: 1 };
+const BARN_LIGHT = { sun: 0.5, sky: 0.45, env: 0.5 };
+/** 마굿간 햇빛 색: 짚빛이 도는 따뜻한 색 */
+const BARN_SUN_COLOR = '#ffd9a6';
+
 /** 그림자를 계산하는 범위 (그림자 상자 가운데에서 ±m). 넓을수록 그릴 물체가 많아진다 */
 const SHADOW_RANGE = 7;
 /** 그림자 상자를 캐릭터보다 화면 위쪽으로 당기는 거리 (m) */
@@ -38,7 +45,8 @@ export function Sun(): React.ReactElement {
   const sky = useRef<HemisphereLight>(null);
   const target = useRef<Object3D>(null);
   const scene = useThree((s) => s.scene);
-  const indoor = useWorldScene((s) => s.scene === 'HomeScene');
+  const indoor = useWorldScene((s) => isIndoorScene(s.scene));
+  const barn = useWorldScene((s) => s.scene === 'BarnScene');
 
   useEffect(() => {
     if (light.current && target.current) light.current.target = target.current;
@@ -63,19 +71,22 @@ export function Sun(): React.ReactElement {
 
     // 밤낮 (rendering/dayNight). 밤에도 나무 · 동물이 구별되게 너무 어둡게 하지 않는다. 집 안은 조금만
     const d = daylight.darkness * (indoor ? 0.35 : 1);
+    // 마굿간은 약간 어둡고 따뜻하게 (햇빛은 창 · 판자 틈으로만 들어오는 느낌, scenes/barn)
+    const dim = barn ? BARN_LIGHT : NO_DIM;
     if (light.current) {
-      light.current.intensity = SUN_INTENSITY * (1 - 0.65 * d);
-      light.current.color.copy(indoor ? indoorColor.set('#ffffff').lerp(daylight.sunColor, 0.35) : daylight.sunColor);
+      light.current.intensity = SUN_INTENSITY * (1 - 0.65 * d) * dim.sun;
+      if (barn) light.current.color.copy(indoorColor.set(BARN_SUN_COLOR).lerp(daylight.sunColor, 0.35));
+      else light.current.color.copy(indoor ? indoorColor.set('#ffffff').lerp(daylight.sunColor, 0.35) : daylight.sunColor);
     }
     if (sky.current) {
-      sky.current.intensity = SKY_INTENSITY * (1 - 0.25 * d);
+      sky.current.intensity = SKY_INTENSITY * (1 - 0.25 * d) * dim.sky;
       if (!indoor) {
         sky.current.color.copy(daylight.skyLight);
         sky.current.groundColor.copy(daylight.groundLight);
       }
     }
     // 주변광(흰 방 반사)은 밤에 많이 줄인다. 남아 있으면 달빛 파랑이 회색으로 바랜다
-    scene.environmentIntensity = ENV_INTENSITY * (1 - 0.8 * d);
+    scene.environmentIntensity = ENV_INTENSITY * (1 - 0.8 * d) * dim.env;
   });
 
   return (

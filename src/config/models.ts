@@ -48,6 +48,17 @@ export const MODELS = {
   },
   /** 씨앗을 심은 뒤 첫 싹 (모든 나무 공통) */
   sprout: 'model_plant_sprout',
+  /** 마굿간 안 장식 (world/scenes/barn). 놓기만 하고 상호작용은 없다 */
+  barnProps: {
+    hayBale: 'model_barn_hay_bale',
+    hayPile: 'model_barn_hay_pile',
+    toolRack: 'model_barn_tool_rack',
+    bucket: 'model_barn_bucket',
+    appleCrate: 'model_barn_apple_crate',
+    wheelbarrow: 'model_barn_wheelbarrow',
+    lantern: 'model_barn_lantern',
+    milkCan: 'model_barn_milk_can',
+  },
   /** 동물 우리의 동물. 뼈대 없이 통째로 움직인다(통통 걷기·고개 숙여 먹기) */
   animals: {
     chicken: 'model_animal_chicken',
@@ -168,6 +179,16 @@ export const MODEL_MANIFEST: ModelSpec[] = [
   model(MODELS.scenery.tree, 'models/scenery/tree.glb', 'small', 4.2),
   model(MODELS.scenery.pine, 'models/scenery/pine.glb', 'small', 5),
   model(MODELS.scenery.bush, 'models/scenery/bush.glb', 'small', 1.1),
+
+  // 마굿간 안 장식 (키 m). 한 장면에 열 개 남짓이라 small
+  model(MODELS.barnProps.hayBale, 'models/barn/hay_bale.glb', 'small', 0.72),
+  model(MODELS.barnProps.hayPile, 'models/barn/hay_pile.glb', 'small', 1.25),
+  model(MODELS.barnProps.toolRack, 'models/barn/tool_rack.glb', 'small', 2.0),
+  model(MODELS.barnProps.bucket, 'models/barn/bucket.glb', 'small', 0.55),
+  model(MODELS.barnProps.appleCrate, 'models/barn/apple_crate.glb', 'small', 0.65),
+  model(MODELS.barnProps.wheelbarrow, 'models/barn/wheelbarrow.glb', 'small', 0.95),
+  { ...model(MODELS.barnProps.lantern, 'models/barn/lantern.glb', 'small', 0.65), depth: 0.4 },
+  model(MODELS.barnProps.milkCan, 'models/barn/milk_can.glb', 'small', 0.8),
 
   ...(Object.entries(ANIMAL_HEIGHT) as [AnimalSpeciesId, number][]).map(([id, height]) => ({
     ...model(MODELS.animals[id], `models/animals/${id}.glb`, 'medium', height),

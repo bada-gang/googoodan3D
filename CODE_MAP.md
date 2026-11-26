@@ -85,10 +85,15 @@ art-src/         생성 원본 (git 에 안 들어감 — 아래 "백업" 참고
 | 밭 흙 · 테두리 모양 | `src/world/scenes/yard/farm/PlotBeds.tsx` |
 | 나무 모양 · 흔들림 · 단계별 크기 | `src/world/scenes/yard/farm/Tree.tsx` |
 | 열매 위치 · 색 · 수확할 때 날아가기 | `src/world/scenes/yard/farm/Fruits.tsx` |
-| 울타리 · 헛간 · 여물통 | `src/world/scenes/yard/pen/AnimalPen.tsx` |
+| 울타리 · 헛간 · 여물통 · '마굿간 들어가기' 버튼 거리 | `src/world/scenes/yard/pen/AnimalPen.tsx` |
 | 우리 크기 · 문 · 동물 크기와 걷는 빠르기 | `src/world/scenes/yard/pen/penLayout.ts` |
 | 동물 움직임 (걷기 · 먹기 · 기뻐하기) | `src/world/scenes/yard/pen/Animal.tsx` |
 | 집 안 (방 크기 · 벽 · 문) | `src/world/scenes/home/HomeWorld.tsx` |
+| 마굿간 안: 크기 · 카메라 · 물건 자리 · 부딪힘 · 색 (숫자는 여기만) | `src/world/scenes/barn/barnLayout.ts` |
+| 마굿간 안: 들어오기 · 나가기, 무엇을 그리는지 | `src/world/scenes/barn/BarnWorld.tsx` |
+| 마굿간 안: 바닥 · 벽 · 기둥 · 입구 문짝 · 칸막이 · 다락 · 사다리 | `src/world/scenes/barn/BarnStructure.tsx` |
+| 마굿간 안: 건초 · 도구 걸이 · 손수레 등 3D 물건 · 등불 | `src/world/scenes/barn/BarnProps.tsx` (모델: `config/models.ts` 의 `barnProps`) |
+| 마굿간 안: 햇빛 줄기 · 바닥 빛 · 먼지 | `src/world/scenes/barn/BarnLight.tsx` (어둡기: `rendering/lighting.tsx` 의 `BARN_LIGHT`) |
 | 시장 (가게 건물 · 가로등 · 장식) | `src/world/scenes/town/TownWorld.tsx` |
 | 시장 낚시터 (연못 · 데크 · 낚싯대 · 찌) | `src/world/scenes/town/FishingSpot.tsx` (자리: `config/layout.ts` 의 `TOWN.pond`) |
 | 땅 · 흙길 | `src/world/props/Ground.tsx` |
@@ -96,7 +101,7 @@ art-src/         생성 원본 (git 에 안 들어감 — 아래 "백업" 참고
 | 표지판 | `src/world/props/SignBoard.tsx` |
 | 내 캐릭터 (걷는 동작 · 밭 위 높이) | `src/world/player/Player.tsx` |
 | 걷는 빠르기 · 부딪힘 | `src/world/systems/movement.ts` |
-| 카메라 거리 · 각도 | `src/world/systems/CameraRig.tsx` (집 안 고정 카메라는 `HomeWorld.tsx` 의 `HOME_VIEW`) |
+| 카메라 거리 · 각도 | `src/world/systems/CameraRig.tsx` (고정 카메라: 집 안 `HomeWorld.tsx` 의 `HOME_VIEW`, 마굿간 `barnLayout.ts` 의 `BARN_VIEW`) |
 | 가까이 가면 뜨는 버튼의 거리 | `src/world/systems/interaction.tsx` |
 | 별 터지기 · 물방울 개수 | `src/world/effects/particles.tsx` |
 | 떠오르는 글자 · 느낌표 | `src/world/effects/effects.tsx` |
@@ -106,7 +111,7 @@ art-src/         생성 원본 (git 에 안 들어감 — 아래 "백업" 참고
 | 밤낮 색 · 별 · 밤 불빛 | `src/world/rendering/dayNight.tsx` |
 | 모델 · 질감 불러오기 | `src/world/rendering/assets.tsx` |
 | 캔버스 설정 (화질 · 그림자 방식) | `src/world/WorldRoot.tsx`, `src/world/GameCanvas.tsx` |
-| 장면 바꾸기 (마당 ↔ 집 ↔ 시장) | `src/world/state/scenes.ts` |
+| 장면 바꾸기 (마당 ↔ 집 · 마굿간 · 시장) | `src/world/state/scenes.ts` (지붕 아래 장면 목록: `sceneStore.ts` 의 `isIndoorScene`) |
 
 ### React 화면
 

@@ -164,7 +164,7 @@ export function NightStars(): React.ReactElement {
 let glowTextureCache: CanvasTexture | null = null;
 
 /** 가운데가 밝고 가장자리로 갈수록 사라지는 따뜻한 빛 */
-function glowTexture(): CanvasTexture {
+export function glowTexture(): CanvasTexture {
   if (glowTextureCache) return glowTextureCache;
   const size = 128;
   const canvas = document.createElement('canvas');

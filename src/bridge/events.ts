@@ -6,7 +6,7 @@
 import type { MathContext } from '@/types/learning';
 import type { PlacementArea } from '@/types/game';
 
-export type SceneKey = 'YardScene' | 'HomeScene' | 'TownScene' | 'FruitCatchScene';
+export type SceneKey = 'YardScene' | 'HomeScene' | 'BarnScene' | 'TownScene' | 'FruitCatchScene';
 
 /** 오른쪽 아래 행동 버튼에 표시할 상호작용 (명세 7) */
 export interface InteractionPrompt {

@@ -12,11 +12,31 @@ import { SignBoard } from '../../../props/SignBoard';
 import { StaticShadow } from '../../../rendering/bakedShadows';
 import { BARN, BARN_OPENING, FENCE_THICKNESS, GATE_WIDTH, PEN_MAX_X, PEN_MAX_Z, PEN_MIN_X, PEN_MIN_Z, TROUGH, WATER_TROUGH, pen } from './penLayout';
 import { Animal } from './Animal';
+import { useInteractable } from '../../../systems/interaction';
+import { goToScene } from '../../../state/scenes';
+
+/**
+ * 헛간 가운데에서 문 앞(들어가기 버튼이 뜨는 자리)까지, 그리고 버튼이 뜨는 거리.
+ * 문에 바짝 다가가야 뜨게 한다 (헛간에 막혀 캐릭터는 가운데에서 2.25m 까지 다가간다)
+ */
+const BARN_DOOR_FRONT = 2.2;
+const BARN_DOOR_RANGE = 0.75;
 
 /* -------------------------------- 우리 전체 -------------------------------- */
 
 export function AnimalPen(): React.ReactElement {
   const animals = useGameStore((s) => s.animals);
+
+  // 헛간(마굿간) 문 앞에 서면 들어갈 수 있다 (scenes/barn)
+  useInteractable({
+    id: 'barn_door',
+    // 문 소리만 (버튼 딸깍과 겹치지 않게)
+    silentTap: true,
+    position: () => ({ x: BARN.x, z: BARN.z + BARN_DOOR_FRONT }),
+    range: BARN_DOOR_RANGE,
+    prompts: () => [{ id: 'enter_barn', label: '마굿간 들어가기', enabled: true }],
+    onAction: () => goToScene('BarnScene'),
+  });
 
   // 울타리는 네 변을 얇은 상자로 막고, 앞쪽 가운데는 문으로, 뒤쪽은 헛간 문 앞을 비운다 (헛간이 막는다)
   useEffect(() => {

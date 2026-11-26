@@ -16,7 +16,9 @@ import { Player } from './player/Player';
 import { HOME_VIEW, HomeWorld } from './scenes/home/HomeWorld';
 import { TownWorld } from './scenes/town/TownWorld';
 import { YardWorld } from './scenes/yard/YardWorld';
+import { BARN_VIEW, BarnWorld } from './scenes/barn/BarnWorld';
 import { resetWorldScene, useWorldScene } from './state/scenes';
+import { isIndoorScene } from './state/sceneStore';
 import { DevHandle, FrameCap, FrameCounter } from './debug/DebugTools';
 import { DEBUG_HANDLES, setupDevTools } from './debug/devSetup';
 import { TEST_FLAGS } from './debug/testFlags';
@@ -26,9 +28,12 @@ import { InputSystem } from './systems/InputSystem';
 
 /** 집 안에서 벽 너머로 보이는 빈 곳의 색 (하늘이 보이면 어색하다) */
 const INDOOR_BACKGROUND = '#efe2cc';
+/** 마굿간 벽 너머 빈 곳 (지붕 그늘색) */
+const BARN_BACKGROUND = '#4a3324';
 
 export default function WorldRoot(): React.ReactElement {
   const scene = useWorldScene((s) => s.scene);
+  const indoor = isIndoorScene(scene);
 
   useEffect(() => {
     // 게임 화면에 들어올 때는 마당에서 시작한다. 장면이 준비되면 HUD 가 뜬다 (useGameBridge 가 booting 을 끈다)
@@ -52,6 +57,8 @@ export default function WorldRoot(): React.ReactElement {
           밤낮이 칠한 하늘색(노을 · 밤)이 집 안 배경에 남는다 */}
       {scene === 'HomeScene' ? (
         <color key="indoor" attach="background" args={[INDOOR_BACKGROUND]} />
+      ) : scene === 'BarnScene' ? (
+        <color key="barn" attach="background" args={[BARN_BACKGROUND]} />
       ) : (
         <>
           <color key="outdoor" attach="background" args={[PALETTE.skyTop]} />
@@ -62,16 +69,20 @@ export default function WorldRoot(): React.ReactElement {
       <Sun />
       <SoftEnvironment />
       {/* 밤낮: 장면이 바뀌면 바로 그 장면의 하늘색으로 */}
-      <DayNightSystem key={`daynight_${scene}`} outdoor={scene !== 'HomeScene'} />
-      {scene !== 'HomeScene' && <NightStars />}
+      <DayNightSystem key={`daynight_${scene}`} outdoor={!indoor} />
+      {!indoor && <NightStars />}
       {/* 장면이 바뀌면 카메라를 새 자리로 바로 옮긴다 (날아가면 어지럽다) */}
-      {/* 집 안은 방 전체가 보이게 카메라를 고정한다 */}
-      <CameraRig key={`camera_${scene}`} fixed={scene === 'HomeScene' ? HOME_VIEW : undefined} />
+      {/* 집 안 · 마굿간은 방 전체가 보이게 카메라를 고정한다 */}
+      <CameraRig
+        key={`camera_${scene}`}
+        fixed={scene === 'HomeScene' ? HOME_VIEW : scene === 'BarnScene' ? BARN_VIEW : undefined}
+      />
       <InputSystem />
       <InteractionSystem />
 
       {scene === 'YardScene' && <YardWorld />}
       {scene === 'HomeScene' && <HomeWorld />}
+      {scene === 'BarnScene' && <BarnWorld />}
       {scene === 'TownScene' && <TownWorld />}
       <Player />
       <EffectsLayer />

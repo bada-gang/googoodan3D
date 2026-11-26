@@ -7,7 +7,12 @@ import { create } from 'zustand';
 import type { SceneKey } from '@/bridge/events';
 
 /** 3D 로 만든 장면. 미니게임은 아직 정하지 않았다 */
-export type WorldSceneKey = Extract<SceneKey, 'YardScene' | 'HomeScene' | 'TownScene'>;
+export type WorldSceneKey = Extract<SceneKey, 'YardScene' | 'HomeScene' | 'BarnScene' | 'TownScene'>;
+
+/** 지붕 아래 장면 (집 안 · 마굿간): 카메라 고정, 하늘 · 별 · 안개 없음 */
+export function isIndoorScene(scene: WorldSceneKey): boolean {
+  return scene === 'HomeScene' || scene === 'BarnScene';
+}
 
 export interface Spawn {
   x: number;

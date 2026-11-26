@@ -185,6 +185,38 @@ export const MODEL_PROMPTS: Record<string, string> = {
   [MODELS.scenery.bush]: realPlant(
     'A wide low round wild bush: a dense mound of small leafy clumps in fresh greens (#5f9e55 and #7cbf6a), wider than tall, no flowers, no berries.',
   ),
+  /* ---- 마굿간 안 장식 ---- */
+  [MODELS.barnProps.hayBale]: item(
+    'A neat rectangular bale of golden straw hay (#e8c36a) tied with two brown twine bands around it, ' +
+      'soft rounded chunky edges, the straw texture shown only by color streaks, a few short straw tufts. Simple chunky block shape.',
+  ),
+  [MODELS.barnProps.hayPile]: item(
+    'A big soft rounded mound of loose golden hay (#e8c36a) like a small fluffy haystack, wide at the bottom, ' +
+      'the straw shown by color streaks, a few short chunky tufts on top. Simple chunky rounded shape.',
+  ),
+  [MODELS.barnProps.toolRack]: furniture(
+    'A simple wooden farm tool rack (#a3714a): a low wooden stand with a top rail, and three farm tools standing upright side by side ' +
+      'with clear gaps between them, heads at the top: a garden hoe, a pitchfork with three thick blunt tines, and a shovel. ' +
+      'Thick chunky wooden handles and grey metal heads. Flat back so it can stand against a wall.',
+  ),
+  [MODELS.barnProps.bucket]: item(
+    'A small wooden bucket made of planks (#b57f4a) with two dark metal bands and a thick rope handle, filled with clear blue water.',
+  ),
+  [MODELS.barnProps.appleCrate]: item(
+    'A sturdy wooden crate (#c49a6c) made of thick planks, filled with a heap of shiny red apples piled above the rim.',
+  ),
+  [MODELS.barnProps.wheelbarrow]: item(
+    'A cute wooden wheelbarrow (#b57f4a) with one big thick wheel at the front, two sturdy handles at the back and two short legs, ' +
+      'filled with a heap of golden hay (#e8c36a). Chunky sturdy parts.',
+  ),
+  [MODELS.barnProps.lantern]: wallItem(
+    'An old-fashioned farm oil lantern hanging from a short dark iron wall bracket: a dark iron frame (#4a4a4a) with a round glass ' +
+      'chimney and a warm glowing yellow flame inside (#ffd36b), a ring handle on top. Chunky simple shapes.',
+  ),
+  [MODELS.barnProps.milkCan]: item(
+    'An old-fashioned tall metal milk churn, soft silver grey (#c8ccd2) with a rounded shoulder, a lid on top and two small side handles. ' +
+      'Chunky and simple.',
+  ),
   [MODELS.sprout]: item(
     'A tiny young seedling: a short thick green stem with two plump round leaves opening like a little V, no soil, no pot.',
   ),
