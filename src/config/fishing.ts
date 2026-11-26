@@ -41,7 +41,7 @@ const treasure = (def: Omit<FishDef, 'kind'>): FishDef => ({ ...def, kind: 'trea
  * 걸리는 정도(weight)는 합이 100 이라 그대로 % 다 (물고기 90.3, 보물 9.7). 드물수록 값과 막대 난이도를 올린다.
  *  - 낚시는 돈벌이가 되지 않게 값을 낮게 둔다 (사용자 요청). 흔한 물고기 1~4원, 큰 물고기 10원 안팎
  *  - 보물은 지도 33 · 진주 55 · 고래수염 66 · 금화 77 · 빗 88 · 왕관 99 (같은 숫자 두 번)
- *  - 한 번 던질 때 평균 약 8.6원 (막대를 놓치는 것까지 치면 그보다 적다)
+ *  - 한 번 던질 때 평균 약 8.7원 (막대를 놓치는 것까지 치면 그보다 적다)
  * 금붕어는 작지만 드물다 (입질 때 '작은 물고기'로 보여 깜짝 놀라게)
  */
 export const FISH: Record<FishId, FishDef> = {
@@ -51,21 +51,21 @@ export const FISH: Record<FishId, FishDef> = {
   crab: fish({ id: 'crab', name: '꽃게', price: 2, weight: 6.7, size: 'small', speed: 1, zone: 0.27, color: '#e0674a' }),
   crucian: fish({ id: 'crucian', name: '붕어', price: 3, weight: 6.7, size: 'medium', speed: 1, zone: 0.26, color: '#b8a36a' }),
   // 고등어 · 오징어 · 뱀장어 · 문어 등은 바다 낚시에서도 잡힌다 (나중에 바다 낚시터를 만들면 같이 쓴다)
-  mackerel: fish({ id: 'mackerel', name: '고등어', price: 4, weight: 6.7, size: 'medium', speed: 1, zone: 0.25, color: '#5f8fae' }),
+  mackerel: fish({ id: 'mackerel', name: '고등어', price: 3, weight: 6.7, size: 'medium', speed: 1, zone: 0.25, color: '#5f8fae' }),
   hairtail: fish({ id: 'hairtail', name: '갈치', price: 4, weight: 5.7, size: 'medium', speed: 1, zone: 0.25, color: '#d7dde6' }),
   squid: fish({ id: 'squid', name: '오징어', price: 5, weight: 5.2, size: 'medium', speed: 1.1, zone: 0.24, color: '#f0c9b8' }),
-  flounder: fish({ id: 'flounder', name: '넙치', price: 5, weight: 5.2, size: 'medium', speed: 1.1, zone: 0.24, color: '#b8996f' }),
-  catfish: fish({ id: 'catfish', name: '메기', price: 6, weight: 4.7, size: 'medium', speed: 1.1, zone: 0.23, color: '#6f6a5e' }),
-  pufferfish: fish({ id: 'pufferfish', name: '둘이 먹다 하나가 죽어도 모르는 복어', price: 7, weight: 4.7, size: 'medium', speed: 1.1, zone: 0.23, color: '#efd98c' }),
-  trout: fish({ id: 'trout', name: '무지개송어', price: 7, weight: 4.2, size: 'big', speed: 1.2, zone: 0.22, color: '#e59a9a' }),
-  carp: fish({ id: 'carp', name: '비단잉어', price: 8, weight: 3.7, size: 'big', speed: 1.2, zone: 0.21, color: '#e8743b' }),
-  eel: fish({ id: 'eel', name: '뱀장어', price: 10, weight: 3.2, size: 'big', speed: 1.3, zone: 0.2, color: '#3f6f8a' }),
-  stingray: fish({ id: 'stingray', name: '가오리', price: 10, weight: 3.2, size: 'big', speed: 1.3, zone: 0.2, color: '#8fa9bd' }),
-  octopus: fish({ id: 'octopus', name: '문어', price: 12, weight: 2.8, size: 'big', speed: 1.3, zone: 0.2, color: '#d9775f' }),
+  flounder: fish({ id: 'flounder', name: '넙치', price: 6, weight: 5.2, size: 'medium', speed: 1.1, zone: 0.24, color: '#b8996f' }),
+  catfish: fish({ id: 'catfish', name: '메기', price: 7, weight: 4.7, size: 'medium', speed: 1.1, zone: 0.23, color: '#6f6a5e' }),
+  pufferfish: fish({ id: 'pufferfish', name: '둘이 먹다 하나가 죽어도 모르는 복어', price: 8, weight: 4.7, size: 'medium', speed: 1.1, zone: 0.23, color: '#efd98c' }),
+  trout: fish({ id: 'trout', name: '무지개송어', price: 9, weight: 4.2, size: 'big', speed: 1.2, zone: 0.22, color: '#e59a9a' }),
+  carp: fish({ id: 'carp', name: '비단잉어', price: 10, weight: 3.7, size: 'big', speed: 1.2, zone: 0.21, color: '#e8743b' }),
+  eel: fish({ id: 'eel', name: '뱀장어', price: 11, weight: 3.2, size: 'big', speed: 1.3, zone: 0.2, color: '#3f6f8a' }),
+  stingray: fish({ id: 'stingray', name: '가오리', price: 12, weight: 3.2, size: 'big', speed: 1.3, zone: 0.2, color: '#8fa9bd' }),
+  octopus: fish({ id: 'octopus', name: '문어', price: 13, weight: 2.8, size: 'big', speed: 1.3, zone: 0.2, color: '#d9775f' }),
   tuna: fish({ id: 'tuna', name: '참치', price: 14, weight: 2.3, size: 'big', speed: 1.3, zone: 0.19, color: '#355c8a' }),
   goldfish: fish({ id: 'goldfish', name: '금붕어', price: 15, weight: 2.1, size: 'small', speed: 1.4, zone: 0.19, color: '#f08a3c' }),
-  sturgeon: fish({ id: 'sturgeon', name: '철갑상어', price: 25, weight: 1.8, size: 'big', speed: 1.4, zone: 0.19, color: '#7f8c8e' }),
-  salmon: fish({ id: 'salmon', name: '전설의 연어', price: 30, weight: 1.3, size: 'legend', speed: 1.4, zone: 0.19, color: '#f2785a' }),
+  sturgeon: fish({ id: 'sturgeon', name: '철갑상어', price: 20, weight: 1.8, size: 'big', speed: 1.4, zone: 0.19, color: '#7f8c8e' }),
+  salmon: fish({ id: 'salmon', name: '전설의 연어', price: 25, weight: 1.3, size: 'legend', speed: 1.4, zone: 0.19, color: '#f2785a' }),
   rubberDuck: treasure({ id: 'rubberDuck', name: '노란 오리 장난감', price: 1, weight: 3, size: 'thing', speed: 1, zone: 0.26, color: '#f6d24a' }),
   bottle: treasure({ id: 'bottle', name: '유리병 편지', price: 7, weight: 2, size: 'thing', speed: 1.2, zone: 0.23, color: '#9fd3c7' }),
   treasureMap: treasure({ id: 'treasureMap', name: '보물 지도', price: 33, weight: 1, size: 'thing', speed: 1.3, zone: 0.21, color: '#d9b77a' }),
