@@ -38,7 +38,7 @@ const fish = (def: Omit<FishDef, 'kind'>): FishDef => ({ ...def, kind: 'fish' })
 const treasure = (def: Omit<FishDef, 'kind'>): FishDef => ({ ...def, kind: 'treasure' });
 
 /*
- * 걸리는 정도(weight)는 합이 100 이라 그대로 % 다 (물고기 90.2, 보물 9.8). 드물수록 값과 막대 난이도를 올린다.
+ * 걸리는 정도(weight)는 합이 100 이라 그대로 % 다 (물고기 90.3, 보물 9.7). 드물수록 값과 막대 난이도를 올린다.
  *  - 낚시는 돈벌이가 되지 않게 값을 낮게 둔다 (사용자 요청). 흔한 물고기 1~4원, 큰 물고기 10원 안팎
  *  - 보물은 지도 33 · 진주 55 · 고래수염 66 · 금화 77 · 빗 88 · 왕관 99 (같은 숫자 두 번)
  *  - 한 번 던질 때 평균 약 8.6원 (막대를 놓치는 것까지 치면 그보다 적다)
@@ -61,11 +61,11 @@ export const FISH: Record<FishId, FishDef> = {
   carp: fish({ id: 'carp', name: '비단잉어', price: 8, weight: 3.7, size: 'big', speed: 1.2, zone: 0.21, color: '#e8743b' }),
   eel: fish({ id: 'eel', name: '뱀장어', price: 10, weight: 3.2, size: 'big', speed: 1.3, zone: 0.2, color: '#3f6f8a' }),
   stingray: fish({ id: 'stingray', name: '가오리', price: 10, weight: 3.2, size: 'big', speed: 1.3, zone: 0.2, color: '#8fa9bd' }),
-  octopus: fish({ id: 'octopus', name: '문어', price: 12, weight: 2.7, size: 'big', speed: 1.3, zone: 0.2, color: '#d9775f' }),
-  tuna: fish({ id: 'tuna', name: '참치', price: 14, weight: 2.2, size: 'big', speed: 1.3, zone: 0.19, color: '#355c8a' }),
+  octopus: fish({ id: 'octopus', name: '문어', price: 12, weight: 2.8, size: 'big', speed: 1.3, zone: 0.2, color: '#d9775f' }),
+  tuna: fish({ id: 'tuna', name: '참치', price: 14, weight: 2.3, size: 'big', speed: 1.3, zone: 0.19, color: '#355c8a' }),
   goldfish: fish({ id: 'goldfish', name: '금붕어', price: 15, weight: 2.1, size: 'small', speed: 1.4, zone: 0.19, color: '#f08a3c' }),
-  sturgeon: fish({ id: 'sturgeon', name: '철갑상어', price: 25, weight: 1.6, size: 'big', speed: 1.4, zone: 0.19, color: '#7f8c8e' }),
-  salmon: fish({ id: 'salmon', name: '전설의 연어', price: 30, weight: 1.6, size: 'legend', speed: 1.4, zone: 0.19, color: '#f2785a' }),
+  sturgeon: fish({ id: 'sturgeon', name: '철갑상어', price: 25, weight: 1.8, size: 'big', speed: 1.4, zone: 0.19, color: '#7f8c8e' }),
+  salmon: fish({ id: 'salmon', name: '전설의 연어', price: 30, weight: 1.3, size: 'legend', speed: 1.4, zone: 0.19, color: '#f2785a' }),
   rubberDuck: treasure({ id: 'rubberDuck', name: '노란 오리 장난감', price: 1, weight: 3, size: 'thing', speed: 1, zone: 0.26, color: '#f6d24a' }),
   bottle: treasure({ id: 'bottle', name: '유리병 편지', price: 7, weight: 2, size: 'thing', speed: 1.2, zone: 0.23, color: '#9fd3c7' }),
   treasureMap: treasure({ id: 'treasureMap', name: '보물 지도', price: 33, weight: 1, size: 'thing', speed: 1.3, zone: 0.21, color: '#d9b77a' }),
@@ -73,7 +73,7 @@ export const FISH: Record<FishId, FishDef> = {
   baleen: treasure({ id: 'baleen', name: '흰수염고래의 수염 한 줌', price: 66, weight: 0.7, size: 'thing', speed: 1.3, zone: 0.19, color: '#bfe3f2' }),
   coinPouch: treasure({ id: 'coinPouch', name: '해적왕의 금화 주머니', price: 77, weight: 0.7, size: 'thing', speed: 1.4, zone: 0.19, color: '#c98a4b' }),
   mermaidComb: treasure({ id: 'mermaidComb', name: '인어공주의 마법 빗', price: 88, weight: 0.7, size: 'thing', speed: 1.4, zone: 0.19, color: '#f4b8d0' }),
-  crown: treasure({ id: 'crown', name: '간이 필요한 용왕의 왕관', price: 99, weight: 0.7, size: 'legend', speed: 1.4, zone: 0.19, color: '#f6c453' }),
+  crown: treasure({ id: 'crown', name: '간이 필요한 용왕의 왕관', price: 99, weight: 0.6, size: 'legend', speed: 1.4, zone: 0.19, color: '#f6c453' }),
 };
 
 /** 도감 · 가게에 보이는 순서: 물고기 → 보물, 각각 자주 걸리는 것부터 (같으면 싼 것부터) */
@@ -107,6 +107,19 @@ export const FISH_ORDER: FishId[] = [
   'mermaidComb',
   'crown',
 ];
+
+/**
+ * 잡았을 때 팡파레가 나는 것과 그 소리 (src/audio/sfx 'fanfare:salmon' · 'fanfare:crown').
+ * 여기 없는 것은 보통 수확 소리.
+ */
+export const FANFARE: Partial<Record<FishId, 'salmon' | 'crown'>> = {
+  salmon: 'salmon',
+  pearl: 'salmon',
+  baleen: 'crown',
+  coinPouch: 'crown',
+  mermaidComb: 'crown',
+  crown: 'crown',
+};
 
 /** 도감에서 아직 못 잡은 칸에 적는 말 */
 export const FISH_SIZE_LABEL: Record<FishSize, string> = {

@@ -9,7 +9,7 @@
  * 잡은 물고기를 가방 · 도감에 넣는 것은 게임 스토어(fishingSlice)가 한다.
  */
 import { create } from 'zustand';
-import { FISHING, isFishId, rollFish } from '@/config/fishing';
+import { FANFARE, FISHING, isFishId, rollFish } from '@/config/fishing';
 import type { FishId } from '@/types/game';
 import { audio } from '@/audio/sfx';
 import { useGameStore } from './gameStore';
@@ -89,8 +89,9 @@ export const useFishing = create<FishingState>()((set, get) => {
       later(FISHING.reelSeconds, () => {
         const firstTime = useGameStore.getState().catchFish(fish);
         go('caught', { firstTime });
-        // 가장 드문 둘(전설의 연어 · 용왕의 왕관)은 팡파레, 나머지는 수확 소리
-        if (fish === 'salmon' || fish === 'crown') audio.play('fanfare', fish);
+        // 드문 것(전설의 연어 · 큰 보물)은 팡파레, 나머지는 수확 소리 (config/fishing FANFARE)
+        const fanfare = FANFARE[fish];
+        if (fanfare) audio.play('fanfare', fanfare);
         else audio.play('harvest');
       });
     },
