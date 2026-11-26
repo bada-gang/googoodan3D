@@ -50,8 +50,14 @@ const WINDOW = { x: 1.8, y: 1.75, width: 2, height: 1.3 };
 const GLASS_DAY = new Color(PALETTE.windowLight);
 const GLASS_GLOW = new Color(PALETTE.window);
 
+/**
+ * 걷고 가구를 놓는 앞쪽 끝. 앞벽이 없어 바닥이 화면 아래까지 이어지므로, 보이는 마루(화면 아래 끝 근처)까지 쓸 수 있게 한다.
+ * (예전에는 방 깊이 끝 3.5m 까지만이라 화면 아래쪽 마루에 아무것도 못 놓았다. 넓히기만 해서 이미 놓은 가구는 그대로다)
+ */
+const USABLE_FRONT_Z = HALF_D + 0.9;
+
 /** 가구를 놓을 수 있는 바닥 (벽에서 조금 띄운다) */
-const PLACE_BOUNDS = { minX: -HALF_W + 0.25, maxX: HALF_W - 0.25, minZ: BACK_Z + 0.25, maxZ: HALF_D - 0.3 };
+const PLACE_BOUNDS = { minX: -HALF_W + 0.25, maxX: HALF_W - 0.25, minZ: BACK_Z + 0.25, maxZ: USABLE_FRONT_Z };
 
 const RULES: DecorateRules = {
   area: 'home',
@@ -72,7 +78,7 @@ export function HomeWorld(): React.ReactElement {
   const floor = SURFACE_BY_ID[floorId] ?? SURFACE_BY_ID.floor_wood;
 
   useEffect(() => {
-    Object.assign(walkBounds, { minX: -HALF_W + 0.4, maxX: HALF_W - 0.4, minZ: BACK_Z + 0.4, maxZ: HALF_D - 0.2 });
+    Object.assign(walkBounds, { minX: -HALF_W + 0.4, maxX: HALF_W - 0.4, minZ: BACK_Z + 0.4, maxZ: USABLE_FRONT_Z - 0.2 });
     const spawn = useWorldScene.getState().spawn ?? SPAWN;
     placePlayer(spawn.x, spawn.z, spawn.facing ?? SPAWN.facing);
   }, []);

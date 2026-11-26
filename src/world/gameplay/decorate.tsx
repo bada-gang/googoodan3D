@@ -157,9 +157,24 @@ function cancelHold(): void {
 export function decorateFloorHover(x: number, z: number): void {
   const itemId = heldItemId();
   if (!itemId || !rules) return;
+  const r = FURNITURE_3D[itemId].radius;
   const wall = FURNITURE_3D[itemId].wall ? rules.wall : undefined;
-  const at = { x: snap(x), z: wall ? wall.z : snap(z) };
+  // 끝 쪽을 누르면 거절하지 않고 물건이 다 들어가게 안쪽으로 밀어 놓는다.
+  // (침대 · 소파는 반지름이 1m 라, 방 끝 1m 안을 누르면 늘 놓을 수 없었다)
+  const { bounds } = rules;
+  const at = wall
+    ? { x: snap(clampInside(x, wall.minX + r, wall.maxX - r)), z: wall.z }
+    : {
+        x: snap(clampInside(x, bounds.minX + r, bounds.maxX - r)),
+        z: snap(clampInside(z, bounds.minZ + r, bounds.maxZ - r)),
+      };
   useDecorate.setState({ ghost: at, valid: canPlace(itemId, at.x, at.z, useDecorate.getState().movingId) });
+}
+
+/** min ~ max 안으로. 칸 맞추기(snap)로 다시 밖으로 나가지 않게 칸 크기만큼 더 안쪽으로 */
+function clampInside(value: number, min: number, max: number): number {
+  if (min > max) return (min + max) / 2;
+  return Math.min(max - GRID / 2, Math.max(min + GRID / 2, value));
 }
 
 /**
