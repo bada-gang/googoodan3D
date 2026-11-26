@@ -32,8 +32,11 @@ const WALL_THICKNESS = 0.2;
 const VISIBLE_WALL_HEIGHT = 6.5;
 /** 바닥 · 옆벽을 카메라 쪽으로 더 늘리는 길이 (화면 아래 끝까지 바닥이 차게) */
 const FRONT_EXTENSION = 2.5;
-/** 고정 카메라: 방 가운데 앞쪽 위에서 비스듬히 내려다본다 */
-export const HOME_VIEW = { position: [0, 8.6, 9.8], target: [0, 0.4, -0.6] } as {
+/**
+ * 고정 카메라: 방 가운데 앞쪽 위에서 비스듬히 내려다본다.
+ * 2026-11 낮추고 가까이 (사용자 요청: 너무 높다) — 방이 화면을 더 크게 채운다. 가구를 놓는 바닥(앞쪽 끝 · 귀퉁이 포함)은 다 보이게 둔다
+ */
+export const HOME_VIEW = { position: [0, 6.6, 9.0], target: [0, 0.1, 0.3] } as {
   position: [number, number, number];
   target: [number, number, number];
 };
