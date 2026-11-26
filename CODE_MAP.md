@@ -93,7 +93,7 @@ art-src/         생성 원본 (git 에 안 들어감 — 아래 "백업" 참고
 | 마굿간 안: 들어오기 · 나가기, 무엇을 그리는지 | `src/world/scenes/barn/BarnWorld.tsx` |
 | 마굿간 안: 바닥 · 벽 · 기둥 · 입구 문짝 · 칸막이 · 다락 · 사다리 | `src/world/scenes/barn/BarnStructure.tsx` |
 | 마굿간 안: 건초 · 도구 걸이 · 손수레 등 3D 물건 · 등불 | `src/world/scenes/barn/BarnProps.tsx` (모델: `config/models.ts` 의 `barnProps`) |
-| 마굿간 안: 창 아래 · 입구 바닥 빛 | `src/world/scenes/barn/BarnLight.tsx` (어둡기: `rendering/lighting.tsx` 의 `BARN_LIGHT`) |
+| 마굿간 안: 어둡기 · 물건 그림자 | 어둡기 `rendering/lighting.tsx` 의 `BARN_LIGHT`, 그림자 색 · 진하기 `barnLayout.ts` 의 `BARN_SHADOW` (한 번 굽기: `rendering/bakedShadows.tsx`) |
 | 시장 (가게 건물 · 가로등 · 장식) | `src/world/scenes/town/TownWorld.tsx` |
 | 시장 낚시터 (연못 · 데크 · 낚싯대 · 찌) | `src/world/scenes/town/FishingSpot.tsx` (자리: `config/layout.ts` 의 `TOWN.pond`) |
 | 땅 · 흙길 | `src/world/props/Ground.tsx` |

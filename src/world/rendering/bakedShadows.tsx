@@ -152,7 +152,17 @@ export interface ShadowBounds {
  * 장면에 하나: 이 범위의 땅에 정적 물체 그림자를 구워 깐다.
  * 범위는 정적 물체와 그 그림자가 다 들어가게 넉넉히 준다.
  */
-export function BakedShadows({ bounds }: { bounds: ShadowBounds }): null {
+export function BakedShadows({
+  bounds,
+  color = SHADOW_COLOR,
+  opacity = SHADOW_OPACITY,
+}: {
+  bounds: ShadowBounds;
+  /** 그림자 색 (기본: 잔디 위 풀빛 도는 어두운 색). 흙바닥이면 갈색 쪽이 자연스럽다 */
+  color?: Color;
+  /** 그림자 진하기 (낮) */
+  opacity?: number;
+}): null {
   const gl = useThree((s) => s.gl);
   const scene = useThree((s) => s.scene);
   const width = bounds.maxX - bounds.minX;
@@ -203,11 +213,11 @@ export function BakedShadows({ bounds }: { bounds: ShadowBounds }): null {
   useEffect(() => {
     groundShadowUniforms.uBakedMask.value = bake.maskTarget.texture;
     groundShadowUniforms.uBakedBounds.value.set(bounds.minX, bounds.maxX, bounds.minZ, bounds.maxZ);
-    groundShadowUniforms.uBakedColor.value.copy(SHADOW_COLOR).convertLinearToSRGB();
+    groundShadowUniforms.uBakedColor.value.copy(color).convertLinearToSRGB();
     return () => {
       groundShadowUniforms.uBakedOpacity.value = 0;
     };
-  }, [bake, bounds.minX, bounds.maxX, bounds.minZ, bounds.maxZ]);
+  }, [bake, color, bounds.minX, bounds.maxX, bounds.minZ, bounds.maxZ]);
 
   const signature = useRef('');
   const elapsed = useRef(CHECK_EVERY);
@@ -278,7 +288,7 @@ export function BakedShadows({ bounds }: { bounds: ShadowBounds }): null {
 
   useFrame((_, delta) => {
     // 낮엔 진하게, 밤엔 해(달)빛이 약해 옅게 — 실시간 그림자가 옅어지는 정도에 맞춘다
-    groundShadowUniforms.uBakedOpacity.value = SHADOW_OPACITY * (1 - 0.65 * daylight.darkness) * (signature.current ? 1 : 0);
+    groundShadowUniforms.uBakedOpacity.value = opacity * (1 - 0.65 * daylight.darkness) * (signature.current ? 1 : 0);
     elapsed.current += delta;
     if (elapsed.current < CHECK_EVERY) return;
     elapsed.current = 0;

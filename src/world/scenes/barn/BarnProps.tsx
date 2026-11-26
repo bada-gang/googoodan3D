@@ -31,8 +31,8 @@ function Prop({
 }): React.ReactElement {
   return (
     <group position={[x, y, z]} rotation-y={rot} scale={scale}>
-      {/* 마굿간 안 물건은 그림자를 드리우지 않는다 (그리기 호출을 줄이려고, 사용자 요청) */}
-      <GltfModel modelKey={modelKey} fallback={fallback} castShadow={false} />
+      {/* 그림자는 BarnWorld 의 StaticShadow 가 한 번만 그려 바닥에 굽는다 (실시간 그림자에서는 빠진다) */}
+      <GltfModel modelKey={modelKey} fallback={fallback} />
     </group>
   );
 }

@@ -5,6 +5,7 @@
  * 위에서 본 모습 (위가 안쪽 벽, 아래 가운데가 입구):
  *   왼쪽: 칸막이 두 칸 (건초 더미 · 여물통)   가운데: 비운 통로, 쌓인 건초 뭉치   오른쪽: 다락 · 사다리 · 도구 걸이 · 손수레 · 우유 통
  */
+import { Color } from 'three';
 import { PALETTE } from '@/config/artTokens';
 import type { Obstacle } from '../../state/runtime';
 
@@ -52,8 +53,6 @@ export const COLORS = {
   trim: '#f3ead9',
   straw: '#e3bf68',
   beam: PALETTE.woodDark,
-  /** 바닥에 번지는 빛 */
-  sunlight: '#ffdc9c',
   /** 창 · 판자 틈 (낮) */
   window: '#fff1cf',
 } as const;
@@ -83,11 +82,12 @@ export const LANTERNS = [
   { x: HALF_W - WALL_THICKNESS / 2 - 0.02, y: 1.55, z: 0.55, rot: -Math.PI / 2 },
 ];
 
-/** 바닥에 번지는 빛: 다락 창 빛이 닿는 곳, 입구로 스며드는 바깥 빛 (햇빛 줄기 · 먼지는 무거워서 뺐다) */
-export const FLOOR_GLOWS = [
-  { x: LOFT_WINDOW.x - 0.9, z: BACK_Z + 3.4, width: 2.2, depth: 1.6, strength: 0.42 },
-  { x: 0, z: FRONT_Z - 0.6, width: 3.2, depth: 2.2, strength: 0.32 },
-];
+/**
+ * 미리 그린 그림자 (rendering/bakedShadows): 굽는 범위와 색 · 진하기.
+ * 범위 끝 2m 는 그림자가 옅어지므로 방보다 2m 씩 넓게 잡는다. 흙바닥이라 그림자 색은 짙은 갈색.
+ */
+export const BARN_SHADOW_BOUNDS = { minX: -HALF_W - 2, maxX: HALF_W + 2, minZ: BACK_Z - 2, maxZ: FRONT_Z + 2 };
+export const BARN_SHADOW = { color: new Color('#24140a'), opacity: 0.5 };
 
 /* -------------------------------- 부딪힘 -------------------------------- */
 

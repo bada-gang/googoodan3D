@@ -2,19 +2,21 @@
  * 마굿간 건물: 흙바닥과 짚 · 입구 밖 풀밭, 판자 벽(위는 지붕 그늘), 기둥 · 들보 · 창틀, 다락 창,
  * 입구(문틀 · 열린 붉은 문짝), 칸막이, 다락 바닥판, 사다리. 모두 코드로 만든 모양이다 (새 그림 없음).
  *
- * 그림자는 드리우지 않는다 (받기만: 캐릭터 그림자). 가볍게: 움직이지 않는 상자는 색(재질)마다 모양 하나로 합친다 (props/mergedBoxes).
+ * 그림자: 기둥 · 들보는 드리우지 않고, 칸막이 · 다락 · 사다리 · 문짝은 BarnWorld 의 StaticShadow 로 바닥에 한 번 굽는다.
+ * 가볍게: 움직이지 않는 상자는 색(재질)마다 모양 하나로 합친다 (props/mergedBoxes).
  * 상자마다 그리면 그리기 호출이 상자 수만큼(그림자까지 두 배) 늘어 태블릿에서 무겁다.
  * 그래서 이 파일의 그리기는 바닥 · 짚 · 풀밭 · 벽 2 · 들보 · 나무 · 창 빛 · 문짝 · 문 무늬 · 사다리 = 11번이다.
  * 자리 · 색은 barnLayout.ts.
  */
 import { useMemo, useRef } from 'react';
 import { useFrame, type ThreeEvent } from '@react-three/fiber';
-import { Color, PlaneGeometry, type BufferGeometry, type MeshBasicMaterial } from 'three';
+import { Color, PlaneGeometry, type BufferGeometry, type Material, type MeshBasicMaterial } from 'three';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { PALETTE } from '@/config/artTokens';
 import { ASSETS } from '@/config/assets';
 import { ArtTexture } from '../../rendering/assets';
 import { daylight } from '../../rendering/dayNight';
+import { applyGroundShadow } from '../../rendering/groundShadow';
 import { mergedBoxGeometry, type BoxSpec } from '../../props/mergedBoxes';
 import {
   BACK_Z,
@@ -44,11 +46,12 @@ export function Floor({ onTap }: { onTap: (event: ThreeEvent<MouseEvent>) => voi
       <mesh rotation-x={-Math.PI / 2} receiveShadow onClick={onTap}>
         <planeGeometry args={[ROOM.width, ROOM.depth]} />
         <ArtTexture assetKey={ASSETS.textures.path} repeat={[ROOM.width / 2.5, ROOM.depth / 2.5]}>
-          {(map) => <meshStandardMaterial map={map} color={COLORS.floor} roughness={1} />}
+          {/* 미리 그린 그림자를 바닥 재질 안에서 칠한다 (rendering/groundShadow) */}
+          {(map) => <meshStandardMaterial ref={withBakedShadow} map={map} color={COLORS.floor} roughness={1} />}
         </ArtTexture>
       </mesh>
       <mesh geometry={straw} receiveShadow>
-        <meshStandardMaterial color={COLORS.straw} roughness={1} />
+        <meshStandardMaterial ref={withBakedShadow} color={COLORS.straw} roughness={1} />
       </mesh>
       <mesh position={[0, -0.01, FRONT_Z + FRONT_EXTENSION / 2]} rotation-x={-Math.PI / 2}>
         <planeGeometry args={[ROOM.width + 8, FRONT_EXTENSION]} />
@@ -58,6 +61,11 @@ export function Floor({ onTap }: { onTap: (event: ThreeEvent<MouseEvent>) => voi
       </mesh>
     </group>
   );
+}
+
+/** 바닥 · 짚 재질에 미리 그린 그림자를 칠하게 한다 */
+function withBakedShadow(material: Material | null): void {
+  if (material) applyGroundShadow(material);
 }
 
 /** 바닥에 흩어진 짚 가닥. 매번 같은 자리 (씨앗 고정). 통로 가운데는 적게 */
@@ -214,7 +222,7 @@ export function Woodwork(): React.ReactElement {
     return mergedBoxGeometry(boxes);
   }, []);
   return (
-    <mesh geometry={geometry} receiveShadow>
+    <mesh geometry={geometry} castShadow>
       <meshStandardMaterial color={PALETTE.wood} roughness={0.9} />
     </mesh>
   );
@@ -267,7 +275,7 @@ export function Entrance(): React.ReactElement {
   }, []);
   return (
     <group>
-      <mesh geometry={leaves}>
+      <mesh geometry={leaves} castShadow>
         <meshStandardMaterial color={COLORS.barnRed} roughness={0.85} />
       </mesh>
       <mesh geometry={trim}>
@@ -291,7 +299,7 @@ export function Ladder(): React.ReactElement {
     return mergedBoxGeometry(boxes);
   }, []);
   return (
-    <mesh geometry={geometry} position={[PLACE.ladder.x, 0, PLACE.ladder.z]} rotation-x={-0.2}>
+    <mesh geometry={geometry} position={[PLACE.ladder.x, 0, PLACE.ladder.z]} rotation-x={-0.2} castShadow>
       <meshStandardMaterial color={PALETTE.woodLight} roughness={0.9} />
     </mesh>
   );
