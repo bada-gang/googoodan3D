@@ -65,7 +65,7 @@ export const FISH: Record<FishId, FishDef> = {
   tuna: fish({ id: 'tuna', name: '참치', price: 14, weight: 2.3, size: 'big', speed: 1.3, zone: 0.19, color: '#355c8a' }),
   goldfish: fish({ id: 'goldfish', name: '금붕어', price: 15, weight: 2.1, size: 'small', speed: 1.4, zone: 0.19, color: '#f08a3c' }),
   sturgeon: fish({ id: 'sturgeon', name: '철갑상어', price: 20, weight: 1.8, size: 'big', speed: 1.4, zone: 0.19, color: '#7f8c8e' }),
-  salmon: fish({ id: 'salmon', name: '전설의 연어', price: 25, weight: 1.3, size: 'legend', speed: 1.4, zone: 0.19, color: '#f2785a' }),
+  salmon: fish({ id: 'salmon', name: '폭포를 거스르는 전설의 연어', price: 25, weight: 1.3, size: 'legend', speed: 1.4, zone: 0.19, color: '#f2785a' }),
   rubberDuck: treasure({ id: 'rubberDuck', name: '노란 오리 장난감', price: 1, weight: 3, size: 'thing', speed: 1, zone: 0.26, color: '#f6d24a' }),
   bottle: treasure({ id: 'bottle', name: '유리병 편지', price: 7, weight: 2, size: 'thing', speed: 1.2, zone: 0.23, color: '#9fd3c7' }),
   treasureMap: treasure({ id: 'treasureMap', name: '보물 지도', price: 33, weight: 1, size: 'thing', speed: 1.3, zone: 0.21, color: '#d9b77a' }),
