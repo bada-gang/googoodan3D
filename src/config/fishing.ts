@@ -56,7 +56,7 @@ export const FISH: Record<FishId, FishDef> = {
   squid: fish({ id: 'squid', name: '오징어', price: 5, weight: 5.2, size: 'medium', speed: 1.1, zone: 0.24, color: '#f0c9b8' }),
   flounder: fish({ id: 'flounder', name: '넙치', price: 6, weight: 5.2, size: 'medium', speed: 1.1, zone: 0.24, color: '#b8996f' }),
   catfish: fish({ id: 'catfish', name: '메기', price: 7, weight: 4.7, size: 'medium', speed: 1.1, zone: 0.23, color: '#6f6a5e' }),
-  pufferfish: fish({ id: 'pufferfish', name: '가시 복어', price: 8, weight: 4.7, size: 'medium', speed: 1.1, zone: 0.23, color: '#efd98c' }),
+  pufferfish: fish({ id: 'pufferfish', name: '가시복어', price: 8, weight: 4.7, size: 'medium', speed: 1.1, zone: 0.23, color: '#efd98c' }),
   trout: fish({ id: 'trout', name: '무지개송어', price: 9, weight: 4.2, size: 'big', speed: 1.2, zone: 0.22, color: '#e59a9a' }),
   carp: fish({ id: 'carp', name: '비단잉어', price: 10, weight: 3.7, size: 'big', speed: 1.2, zone: 0.21, color: '#e8743b' }),
   eel: fish({ id: 'eel', name: '뱀장어', price: 11, weight: 3.2, size: 'big', speed: 1.3, zone: 0.2, color: '#3f6f8a' }),
