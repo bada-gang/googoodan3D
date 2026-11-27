@@ -27,15 +27,20 @@ const KNOB_TRAVEL = (PAD_SIZE - KNOB_SIZE) / 2 + 6;
 const MENU_CENTER = 0.45;
 /** 이보다 조금 밀면 무시한다 (손가락을 얹기만 해도 움직이지 않게) */
 const DEAD_ZONE = 0.18;
+/** 조이스틱을 화면 구석에서 안쪽 위로 비켜 놓는 거리 (px, 가로 · 세로). 사용자 요청으로 오른쪽 위 대각선으로 조금 */
+const PAD_NUDGE = 26;
+/** 손을 대지 않을 때의 진하기. 움직이는 동안은 또렷하게 (1) */
+const PAD_IDLE_OPACITY = 0.55;
 
 /**
  * 이동 조이스틱. 손가락을 바탕 어디에 대도 그쪽으로 걷기 시작한다.
  * 손가락이 바탕 밖으로 나가도 계속 따라간다(포인터 캡처).
  */
-function Joystick(): React.ReactElement {
+function Joystick({ nudgeX }: { nudgeX: number }): React.ReactElement {
   const padRef = useRef<HTMLDivElement>(null);
   const pointerId = useRef<number | null>(null);
   const [knob, setKnob] = useState({ x: 0, y: 0 });
+  const [active, setActive] = useState(false);
 
   const update = (event: React.PointerEvent<HTMLDivElement>) => {
     const pad = padRef.current;
@@ -62,6 +67,7 @@ function Joystick(): React.ReactElement {
 
   const release = () => {
     pointerId.current = null;
+    setActive(false);
     setKnob({ x: 0, y: 0 });
     gameEvents.emit('move:vector', { x: 0, y: 0 });
   };
@@ -74,6 +80,7 @@ function Joystick(): React.ReactElement {
       onPointerDown={(event) => {
         if (pointerId.current !== null) return;
         pointerId.current = event.pointerId;
+        setActive(true);
         try {
           event.currentTarget.setPointerCapture(event.pointerId);
         } catch {
@@ -92,8 +99,14 @@ function Joystick(): React.ReactElement {
         if (event.pointerId === pointerId.current) release();
       }}
       onContextMenu={(event) => event.preventDefault()}
-      className="pointer-events-auto relative touch-none rounded-full border-4 border-ink bg-cream/70 shadow-[0_5px_0_rgba(74,58,47,0.35)]"
-      style={{ width: PAD_SIZE, height: PAD_SIZE }}
+      className="pointer-events-auto relative touch-none rounded-full border-4 border-ink bg-cream/60 shadow-[0_5px_0_rgba(74,58,47,0.35)] transition-opacity duration-200"
+      style={{
+        width: PAD_SIZE,
+        height: PAD_SIZE,
+        opacity: active ? 1 : PAD_IDLE_OPACITY,
+        // 구석에서 화면 안쪽 위로 비켜 놓는다 (왼손 모드면 오른쪽 구석이라 왼쪽 위로)
+        transform: `translate(${nudgeX}px, ${-PAD_NUDGE}px)`,
+      }}
     >
       {/* 방향 눈금 */}
       {[0, 90, 180, 270].map((angle) => (
@@ -144,7 +157,7 @@ export function TouchControls(): React.ReactElement {
   const canDecorate = scene === 'HomeScene' || scene === 'YardScene';
 
   // 미니게임은 3D 마당이 아니라 자체 조작을 쓴다 (6단계)
-  const moveCluster = inMinigame ? <div /> : <Joystick />;
+  const moveCluster = inMinigame ? <div /> : <Joystick nudgeX={leftHanded ? -PAD_NUDGE : PAD_NUDGE} />;
 
   const actionCluster = (
     <div className="pointer-events-auto flex max-w-[46%] flex-wrap items-end justify-end gap-3">
