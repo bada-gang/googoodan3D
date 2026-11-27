@@ -6,7 +6,7 @@ import { josa } from '@/config/josa';
 import { PALETTE } from '@/config/artTokens';
 import { ANIMAL_SPECIES } from '@/config/catalog';
 import { ANIMAL_REST } from '@/config/balance';
-import { restLeftMs, restLeftText } from './animalRest';
+import { restLeftMs } from './animalRest';
 import type { InteractionPrompt } from '@/bridge/events';
 import { useGameStore } from '@/state/gameStore';
 import type { AnimalInstance } from '@/types/game';
@@ -97,10 +97,11 @@ export function animalPrompts(animalId: string): InteractionPrompt[] {
   const animal = animalById(animalId);
   if (!animal) return [];
   const def = ANIMAL_SPECIES[animal.species];
-  // 쉬는 중: 누를 수 없는 버튼에 남은 시간 (ANIMAL_REST)
+  // 쉬는 중: 누를 수 없는 버튼 (ANIMAL_REST)
   const rest = restLeftMs(animal);
   if (rest > 0) {
-    return [{ id: 'rest', label: `${def.name} 쉬는 중`, enabled: false, hint: `${restLeftText(rest)} 뒤에 다시 돌볼 수 있어요` }];
+    // 남은 시간(카운트다운)은 띄우지 않는다 (사용자 요청)
+    return [{ id: 'rest', label: `${def.name} 쉬는 중`, enabled: false }];
   }
   if (animal.produceReady) {
     return [
