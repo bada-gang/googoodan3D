@@ -40,7 +40,7 @@ export const TREE_SPECIES: Record<TreeSpeciesId, TreeSpecies> = {
     id: 'apple',
     name: '사과나무',
     seedName: '사과 씨앗',
-    seedPrice: 10,
+    seedPrice: 20,
     fruitId: 'apple',
     fruitName: '사과',
     fruitPrice: 11,
@@ -53,7 +53,7 @@ export const TREE_SPECIES: Record<TreeSpeciesId, TreeSpecies> = {
     id: 'orange',
     name: '오렌지나무',
     seedName: '오렌지 씨앗',
-    seedPrice: 20,
+    seedPrice: 40,
     fruitId: 'orange',
     fruitName: '오렌지',
     fruitPrice: 16,
@@ -66,7 +66,7 @@ export const TREE_SPECIES: Record<TreeSpeciesId, TreeSpecies> = {
     id: 'peach',
     name: '복숭아나무',
     seedName: '복숭아 씨앗',
-    seedPrice: 30,
+    seedPrice: 60,
     fruitId: 'peach',
     fruitName: '복숭아',
     // 열매 값은 "문제당 벌이"가 레벨 따라 고르게 오르도록 잡았다 (2026-11 성장 횟수를 모두 1로 바꾼 뒤로는 값만으로 차이가 난다)
@@ -80,7 +80,7 @@ export const TREE_SPECIES: Record<TreeSpeciesId, TreeSpecies> = {
     id: 'cherry',
     name: '체리나무',
     seedName: '체리 씨앗',
-    seedPrice: 40,
+    seedPrice: 80,
     fruitId: 'cherry',
     fruitName: '체리',
     fruitPrice: 22,
@@ -93,7 +93,7 @@ export const TREE_SPECIES: Record<TreeSpeciesId, TreeSpecies> = {
     id: 'grape',
     name: '포도나무',
     seedName: '포도 씨앗',
-    seedPrice: 50,
+    seedPrice: 100,
     fruitId: 'grape',
     fruitName: '포도',
     fruitPrice: 29,
@@ -106,7 +106,7 @@ export const TREE_SPECIES: Record<TreeSpeciesId, TreeSpecies> = {
     id: 'persimmon',
     name: '감나무',
     seedName: '감 씨앗',
-    seedPrice: 75,
+    seedPrice: 150,
     fruitId: 'persimmon',
     fruitName: '감',
     fruitPrice: 33,
@@ -119,7 +119,7 @@ export const TREE_SPECIES: Record<TreeSpeciesId, TreeSpecies> = {
     id: 'banana',
     name: '바나나나무',
     seedName: '바나나 씨앗',
-    seedPrice: 90,
+    seedPrice: 180,
     fruitId: 'banana',
     fruitName: '바나나',
     fruitPrice: 37,
@@ -132,7 +132,7 @@ export const TREE_SPECIES: Record<TreeSpeciesId, TreeSpecies> = {
     id: 'blueberry',
     name: '블루베리나무',
     seedName: '블루베리 씨앗',
-    seedPrice: 105,
+    seedPrice: 210,
     fruitId: 'blueberry',
     fruitName: '블루베리',
     fruitPrice: 42,
@@ -141,12 +141,12 @@ export const TREE_SPECIES: Record<TreeSpeciesId, TreeSpecies> = {
     growthPerStage: 1,
     regrowWater: 1,
   },
-  // 2026-11 추가. 문제당 벌이 귤 약 73 · 키위 약 80 (레벨 따라 고르게 오르게)
+  // 2026-11 추가. 문제당 벌이 귤 약 68 · 키위 약 75 (씨앗 값 2배 반영, 레벨 따라 고르게 오르게)
   tangerine: {
     id: 'tangerine',
     name: '귤나무',
     seedName: '귤 씨앗',
-    seedPrice: 120,
+    seedPrice: 240,
     fruitId: 'tangerine',
     fruitName: '귤',
     fruitPrice: 47,
@@ -159,7 +159,7 @@ export const TREE_SPECIES: Record<TreeSpeciesId, TreeSpecies> = {
     id: 'kiwi',
     name: '키위나무',
     seedName: '키위 씨앗',
-    seedPrice: 140,
+    seedPrice: 280,
     fruitId: 'kiwi',
     fruitName: '키위',
     fruitPrice: 52,
@@ -207,7 +207,7 @@ export interface AnimalSpecies {
 
 /**
  * 생산물 가격은 "같은 레벨(해금 레벨)의 가장 좋은 나무보다 문제당 벌이가 10~15% 높게" 잡았다 (2026-10-05).
- * 동물은 데려오는 값이 크고(112~468원) 종류마다 마릿수 제한이 있어서, 그만큼 조금 더 번다.
+ * 동물은 데려오는 값이 크다 (500~2,300원: 본전까지 생산물을 6~10번 받아야 한다 — 3번 받으면 쉬므로 휴식 2~3번, 2026-11 사용자 요청). 종류마다 마릿수 제한도 있어서, 그만큼 조금 더 번다.
  * 2026-11 부터 모든 동물이 먹이 1번 + 받기 1번 = 2문제다 (나무도 물 한 번에 한 번 자란다).
  * 값은 그 뒤 다시 올렸고, 지금 문제당 벌이는 아래와 같다 (나무는 심기부터 10번 수확까지 24문제 기준).
  *
@@ -218,7 +218,7 @@ export const ANIMAL_SPECIES: Record<AnimalSpeciesId, AnimalSpecies> = {
   chicken: {
     id: 'chicken',
     name: '닭',
-    price: 112,
+    price: 500,
     produceId: 'egg',
     produceName: '달걀',
     producePrice: 30,
@@ -229,7 +229,7 @@ export const ANIMAL_SPECIES: Record<AnimalSpeciesId, AnimalSpecies> = {
   goat: {
     id: 'goat',
     name: '염소',
-    price: 168,
+    price: 820,
     produceId: 'goatMilk',
     produceName: '치즈',
     producePrice: 40,
@@ -240,7 +240,7 @@ export const ANIMAL_SPECIES: Record<AnimalSpeciesId, AnimalSpecies> = {
   sheep: {
     id: 'sheep',
     name: '양',
-    price: 288,
+    price: 1150,
     produceId: 'wool',
     produceName: '양털',
     producePrice: 52,
@@ -251,7 +251,7 @@ export const ANIMAL_SPECIES: Record<AnimalSpeciesId, AnimalSpecies> = {
   cow: {
     id: 'cow',
     name: '젖소',
-    price: 468,
+    price: 1900,
     produceId: 'milk',
     produceName: '우유',
     producePrice: 72,
@@ -263,7 +263,7 @@ export const ANIMAL_SPECIES: Record<AnimalSpeciesId, AnimalSpecies> = {
   bee: {
     id: 'bee',
     name: '꿀벌',
-    price: 650,
+    price: 2300,
     produceId: 'honey',
     produceName: '벌꿀',
     producePrice: 85,
