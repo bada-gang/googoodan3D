@@ -1,10 +1,11 @@
 rules_version = '2';
 
-// 구구 마을 — 한 학급이 하나의 프로젝트를 함께 쓴다.
-// 2D 판(googoodan)과 3D 판(googoodan3D)이 같은 프로젝트를 쓴다. 3D 판은 이름 끝에 3d 가 붙은 컬렉션을 쓴다.
-// ⚠ 규칙은 프로젝트에 한 벌이다. 2D 저장소에도 예전 사본이 있지만 2D 판은 더 고치지 않으므로
-//   이 파일(3D 저장소)이 기준이다. 2D 판 경로(players · saves · stats)도 여기 그대로 두어야 2D 판이 막히지 않는다.
-//   2D 저장소의 사본은 classes3d 가 없으니 그 파일로 올리면 안 된다.
+// 구구 마을 3D (googoodan3D) — 여러 학급이 하나의 프로젝트(googoodan-bada)를 함께 쓴다.
+// 3D 판은 이름 끝에 3d 가 붙은 컬렉션을 쓴다.
+//
+// 2D 판(googoodan)은 더 쓰지 않는다. 2026-11-28 사용자 요청으로 2D 데이터(players · saves · stats)를
+// 지우고(백업: 이 저장소의 backups/, git 에 올리지 않음) 2D 경로도 이 규칙에서 뺐다 — 아래 "그 밖의 경로"로 막힌다.
+// ⚠ 규칙은 프로젝트에 한 벌이다. 이 파일(3D 저장소)이 기준이다. 2D 저장소의 옛 사본으로 올리면 안 된다.
 //
 // 학생은 계정을 만들지 않는다. 대신 앱이 자동으로 익명 로그인을 하고,
 // 규칙은 "로그인한 기기인지"만 확인한다.
@@ -22,27 +23,14 @@ service cloud.firestore {
     }
 
     // 학생 이름 · 캐릭터
-    match /players/{playerId} {
-      allow read, write: if signedIn();
-    }
-
-    // 게임 진행도
-    match /saves/{playerId} {
-      allow read, write: if signedIn();
-    }
-
-    // 학습 통계
-    match /stats/{playerId} {
-      allow read, write: if signedIn();
-    }
-
-    // ---- 3D 판 (googoodan3D) ----
     match /players3d/{playerId} {
       allow read, write: if signedIn();
     }
+    // 게임 진행도
     match /saves3d/{playerId} {
       allow read, write: if signedIn();
     }
+    // 학습 통계
     match /stats3d/{playerId} {
       allow read, write: if signedIn();
     }
@@ -51,7 +39,7 @@ service cloud.firestore {
       allow read, write: if signedIn();
     }
 
-    // 그 밖의 경로는 모두 막는다
+    // 그 밖의 경로(옛 2D 판 players · saves · stats 포함)는 모두 막는다
     match /{document=**} {
       allow read, write: if false;
     }

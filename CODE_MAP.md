@@ -142,7 +142,7 @@ art-src/         생성 원본 (git 에 안 들어감 — 아래 "백업" 참고
 - **새 나무 · 동물 · 가구**: `config/catalog.ts` 에 항목 → `config/models.ts` 에 모델 → `npm run model -- --only 키` → (가구면) `config/furniture3d.ts` 에 크기.
 - **새 장면**: `src/world/scenes/새장면/` 폴더를 만들고, 장면 이름을 `bridge/events.ts` 의 `SceneKey` · `world/state/sceneStore.ts` 에, 그리기를 `world/WorldRoot.tsx` 에 더한다.
 - **새 게임 상태**: 주제에 맞는 `state/game/*Slice.ts` 에 더한다. 저장해야 하면 `types/game.ts` 의 `GameSaveData`, `state/game/saveData.ts`, `sessionSlice.ts` 의 불러오기 · `toSaveData` 를 함께 고친다.
-- **서버 저장 (Firebase)**: 2D 판과 같은 프로젝트(googoodan-bada)를 쓴다. 컬렉션 이름은 `src/data/firebase/collections.ts`, 보안 규칙은 `firestore.rules` (이 파일이 기준. 2D 저장소의 옛 사본에는 학급 `classes3d` 가 없어 그걸로 올리면 안 된다). 학급은 `classes3d`, 학생 문서의 `classId` 가 반을 가리킨다. 설정 값은 `.env.local` 과 Netlify 환경변수의 `VITE_FIREBASE_*`. 다른 저장 방식으로 바꾸려면 `src/data/repositories.ts` 를 구현해 `src/data/index.ts` 에서 바꿔 끼운다.
+- **서버 저장 (Firebase)**: 프로젝트 googoodan-bada. 컬렉션 이름은 `src/data/firebase/collections.ts`, 보안 규칙은 `firestore.rules` (이 파일이 기준, 올리기: `firebase deploy --only firestore:rules`). 옛 2D 판 데이터(players · saves · stats)는 2026-11-28 지웠고 규칙에서도 막았다 (백업: `backups/`, git 에 안 올림). 학급은 `classes3d`, 학생 문서의 `classId` 가 반을 가리킨다. 설정 값은 `.env.local` 과 Netlify 환경변수의 `VITE_FIREBASE_*`. 다른 저장 방식으로 바꾸려면 `src/data/repositories.ts` 를 구현해 `src/data/index.ts` 에서 바꿔 끼운다.
 
 ## 명령
 
