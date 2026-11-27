@@ -1,5 +1,5 @@
 /**
- * 밤낮을 3D 화면에 입힌다. 시각 계산은 config/dayNight.ts (12분 순환, 벽시계 기준).
+ * 밤낮을 3D 화면에 입힌다. 시각 계산은 config/dayNight.ts (14분 순환, 벽시계 기준).
  *
  * 2D 판은 화면 위에 반투명 색을 덮었다. 3D 판은 덮지 않고 빛을 바꾼다:
  *  - 바깥: 하늘 · 안개 색, 햇빛 색과 세기, 밤에는 별
@@ -97,7 +97,7 @@ export function DayNightSystem({ outdoor }: { outdoor: boolean }): null {
   useEffect(apply, [outdoor]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useFrame((_, delta) => {
-    // 12분에 걸쳐 변하는 색이라 0.25초마다 칠해도 계단이 보이지 않는다
+    // 14분에 걸쳐 변하는 색이라 0.25초마다 칠해도 계단이 보이지 않는다
     elapsed.current += delta;
     if (elapsed.current < 0.25) return;
     elapsed.current = 0;
