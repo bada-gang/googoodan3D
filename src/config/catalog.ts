@@ -26,12 +26,12 @@ export interface TreeSpecies {
   /** 열매 맺을 때 한 번에 달리는 개수. HARVEST_BY_ATTEMPTS[0] 과 같아야 무실수 수확이 온전히 들어온다. */
   yield: number;
   unlockLevel: number;
-  /** 단계 하나를 올리는 데 필요한 정답 수 (처음 키울 때) */
-  growthPerStage: number;
   /**
-   * 수확한 뒤 큰 나무에서 다시 열매가 열리기까지 줄 물 (정답 수).
-   * 처음 키울 때와 따로 둔다 — 수확 사이가 길면 지루하다. 수확까지 2~3문제가 되게 잡았다.
+   * 단계 하나를 올리는 데 필요한 정답 수 (처음 키울 때).
+   * 지금은 모든 나무가 1: 물 한 번에 한 번 자란다 (2026-11 사용자 요청. 예전엔 비싼 나무일수록 2~3)
    */
+  growthPerStage: number;
+  /** 수확한 뒤 큰 나무에서 다시 열매가 열리기까지 줄 물 (정답 수). 지금은 모든 나무가 1 */
   regrowWater: number;
 }
 
@@ -69,11 +69,11 @@ export const TREE_SPECIES: Record<TreeSpeciesId, TreeSpecies> = {
     seedPrice: 30,
     fruitId: 'peach',
     fruitName: '복숭아',
-    // 열매 값은 "문제당 벌이"가 레벨 따라 고르게 오르도록 잡았다 (수확 사이 문제 수와 함께 본다)
+    // 열매 값은 "문제당 벌이"가 레벨 따라 고르게 오르도록 잡았다 (2026-11 성장 횟수를 모두 1로 바꾼 뒤로는 값만으로 차이가 난다)
     fruitPrice: 13,
     yield: 4,
     unlockLevel: 3,
-    growthPerStage: 2,
+    growthPerStage: 1,
     regrowWater: 1,
   },
   cherry: {
@@ -86,7 +86,7 @@ export const TREE_SPECIES: Record<TreeSpeciesId, TreeSpecies> = {
     fruitPrice: 15,
     yield: 4,
     unlockLevel: 4,
-    growthPerStage: 2,
+    growthPerStage: 1,
     regrowWater: 1,
   },
   grape: {
@@ -99,8 +99,8 @@ export const TREE_SPECIES: Record<TreeSpeciesId, TreeSpecies> = {
     fruitPrice: 27,
     yield: 4,
     unlockLevel: 5,
-    growthPerStage: 2,
-    regrowWater: 2,
+    growthPerStage: 1,
+    regrowWater: 1,
   },
   persimmon: {
     id: 'persimmon',
@@ -112,8 +112,8 @@ export const TREE_SPECIES: Record<TreeSpeciesId, TreeSpecies> = {
     fruitPrice: 30,
     yield: 4,
     unlockLevel: 6,
-    growthPerStage: 3,
-    regrowWater: 2,
+    growthPerStage: 1,
+    regrowWater: 1,
   },
   banana: {
     id: 'banana',
@@ -125,8 +125,8 @@ export const TREE_SPECIES: Record<TreeSpeciesId, TreeSpecies> = {
     fruitPrice: 34,
     yield: 4,
     unlockLevel: 7,
-    growthPerStage: 3,
-    regrowWater: 2,
+    growthPerStage: 1,
+    regrowWater: 1,
   },
   blueberry: {
     id: 'blueberry',
@@ -138,8 +138,8 @@ export const TREE_SPECIES: Record<TreeSpeciesId, TreeSpecies> = {
     fruitPrice: 40,
     yield: 4,
     unlockLevel: 8,
-    growthPerStage: 3,
-    regrowWater: 2,
+    growthPerStage: 1,
+    regrowWater: 1,
   },
 };
 
@@ -163,7 +163,7 @@ export interface AnimalSpecies {
   produceId: ProduceId;
   produceName: string;
   producePrice: number;
-  /** 생산물이 나오기까지 필요한 먹이 주기 횟수 */
+  /** 생산물이 나오기까지 필요한 먹이 주기 횟수. 지금은 모든 동물이 1 (먹이 한 번 → 받기, 2026-11 사용자 요청) */
   careGoal: number;
   unlockLevel: number;
   /** 우리에 둘 수 있는 최대 마릿수 (목장 넓이 · 화면 혼잡을 보고 정함) */
@@ -173,10 +173,11 @@ export interface AnimalSpecies {
 /**
  * 생산물 가격은 "같은 레벨(해금 레벨)의 가장 좋은 나무보다 문제당 벌이가 10~15% 높게" 잡았다 (2026-10-05).
  * 동물은 데려오는 값이 크고(112~468원) 종류마다 마릿수 제한이 있어서, 그만큼 조금 더 번다.
- * 모든 동물이 먹이 2번 + 받기 1번 = 3문제로, 나무의 수확 사이(2~3문제)와 리듬을 맞췄다.
+ * 2026-11 부터 모든 동물이 먹이 1번 + 받기 1번 = 2문제다 (나무도 물 한 번에 한 번 자란다).
+ * 값은 그대로 두어서, 지금 문제당 벌이는 아래와 같다 (나무는 심기부터 10번 수확까지 24문제 기준).
  *
  *   문제당 벌이 = (생산물값 × 3 − 먹이값 2원 × 돌봄횟수) / (돌봄횟수 + 1)   (한 번에 맞히면 3개)
- *   닭 24.7 (Lv2 오렌지 21.5) · 염소 32.7 (Lv4 체리 29.5) · 양 43.7 (Lv6 감 39.3) · 젖소 60.7 (Lv8 블루베리 52.7)
+ *   닭 38 (Lv2 오렌지 17) · 염소 50 (Lv4 체리 22.8) · 양 66.5 (Lv6 감 46.3) · 젖소 92 (Lv8 블루베리 61.8)
  */
 export const ANIMAL_SPECIES: Record<AnimalSpeciesId, AnimalSpecies> = {
   chicken: {
@@ -186,7 +187,7 @@ export const ANIMAL_SPECIES: Record<AnimalSpeciesId, AnimalSpecies> = {
     produceId: 'egg',
     produceName: '달걀',
     producePrice: 26,
-    careGoal: 2,
+    careGoal: 1,
     unlockLevel: 2,
     maxCount: 2,
   },
@@ -195,9 +196,9 @@ export const ANIMAL_SPECIES: Record<AnimalSpeciesId, AnimalSpecies> = {
     name: '염소',
     price: 168,
     produceId: 'goatMilk',
-    produceName: '염소젖',
+    produceName: '치즈',
     producePrice: 34,
-    careGoal: 2,
+    careGoal: 1,
     unlockLevel: 4,
     maxCount: 2,
   },
@@ -208,7 +209,7 @@ export const ANIMAL_SPECIES: Record<AnimalSpeciesId, AnimalSpecies> = {
     produceId: 'wool',
     produceName: '양털',
     producePrice: 45,
-    careGoal: 2,
+    careGoal: 1,
     unlockLevel: 6,
     maxCount: 2,
   },
@@ -219,7 +220,7 @@ export const ANIMAL_SPECIES: Record<AnimalSpeciesId, AnimalSpecies> = {
     produceId: 'milk',
     produceName: '우유',
     producePrice: 62,
-    careGoal: 2,
+    careGoal: 1,
     unlockLevel: 8,
     maxCount: 2,
   },
@@ -255,7 +256,7 @@ export const SELLABLE_NAME: Record<SellableId, string> = {
   banana: '바나나',
   blueberry: '블루베리',
   egg: '달걀',
-  goatMilk: '염소젖',
+  goatMilk: '치즈',
   wool: '양털',
   milk: '우유',
   ...fishRecord((fish) => FISH[fish].name),

@@ -65,7 +65,8 @@ export const ART_PROMPTS: Record<string, string> = {
   [ASSETS.crops.banana]: 'one hand of three plump curved yellow bananas (#f6d24a) joined at a short green stem, with small brown tips',
   [ASSETS.crops.blueberry]: 'a small cluster of five round dusty-blue blueberries (#4f6fc4) with tiny star-shaped crowns, on a short twig with one small green leaf',
   [ASSETS.crops.egg]: 'one smooth cream-white chicken egg standing upright',
-  [ASSETS.crops.goatMilk]: 'a small round clay jug of goat milk with a light-brown body and a cream rim, with a little rope tied around the neck',
+  // 염소의 생산물: 치즈 (키는 옛 이름 goatMilk 그대로 — 저장된 가방과 맞춰야 한다)
+  [ASSETS.crops.goatMilk]: 'a cute wedge of creamy pale-yellow goat cheese (#f4e3a1) with a few round holes, next to a small round cheese wheel with a soft white rind, simple chunky shapes',
   [ASSETS.crops.wool]: 'a fluffy bundle of soft white sheep wool, like a cloud, tied with a pink ribbon',
   [ASSETS.crops.milk]: 'a glass bottle of fresh white milk with a sky-blue cap',
 
@@ -98,7 +99,8 @@ export const ART_PROMPTS: Record<string, string> = {
   [ASSETS.crops.rubberDuck]: 'one classic bright yellow rubber duck bath toy (#f6d24a) with an orange beak and small black eyes, shiny and wet with a few water drops on it, side view, facing left',
   [ASSETS.crops.baleen]: 'one handful of blue whale baleen: a bundle of five long gently curved flat baleen plates with fine hair-like fringes at their tips, tied together in the middle with a thin rope, shimmering sky-blue and pearly silver (#bfe3f2) with a soft magical glow and a few sparkles around it',
   [ASSETS.crops.coinPouch]: 'one plump brown leather coin pouch of a pirate king, tied with a red cord, its top open and overflowing with shiny gold coins (#f6c453) and one small red gem, a little gold anchor charm hanging from the cord, a soft golden shine',
-  [ASSETS.crops.mermaidComb]: 'one magical hair comb of a mermaid princess: a handle shaped like a pearly pink scallop seashell (#f4b8d0) decorated with small white pearls and a tiny aqua starfish, with neat fine comb teeth, a soft pink-and-aqua magical glow and a few sparkles',
+  // 인어공주의 목소리로 만든 머리핀 (키는 옛 이름 mermaidComb 그대로)
+  [ASSETS.crops.mermaidComb]: 'one magical hairpin made from the singing voice of a mermaid princess: an elegant pearly pink-and-aqua hairpin (#f4b8d0) whose head is a small spiral seashell with soft glowing sound-wave ripples and two tiny floating music notes made of light curling out of it, one small teardrop pearl dangling below, a soft dreamy pink-and-aqua magical glow and a few sparkles',
 
   /* ---- 씨앗 봉투: 글자 대신 열매 그림 ---- */
   [ASSETS.seeds.apple]: 'a small kraft-paper seed packet, folded at the top, with a picture of a red apple printed on the front',

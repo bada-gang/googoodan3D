@@ -72,7 +72,8 @@ export const FISH: Record<FishId, FishDef> = {
   pearl: treasure({ id: 'pearl', name: '대왕 진주 조개', price: 55, weight: 1, size: 'thing', speed: 1.3, zone: 0.19, color: '#f3d9e2' }),
   baleen: treasure({ id: 'baleen', name: '흰수염고래의 수염 한 줌', price: 66, weight: 0.7, size: 'legend', speed: 1.3, zone: 0.19, color: '#bfe3f2' }),
   coinPouch: treasure({ id: 'coinPouch', name: '해적왕의 금화 주머니', price: 77, weight: 0.7, size: 'legend', speed: 1.4, zone: 0.19, color: '#c98a4b' }),
-  mermaidComb: treasure({ id: 'mermaidComb', name: '인어공주의 마법 빗', price: 88, weight: 0.7, size: 'legend', speed: 1.4, zone: 0.19, color: '#f4b8d0' }),
+  // id 는 저장된 가방 · 도감과 맞아야 해서 옛 이름(mermaidComb, 마법 빗)을 그대로 둔다. 지금은 머리핀이다
+  mermaidComb: treasure({ id: 'mermaidComb', name: '인어공주의 목소리로 만든 머리핀', price: 88, weight: 0.7, size: 'legend', speed: 1.4, zone: 0.19, color: '#f4b8d0' }),
   crown: treasure({ id: 'crown', name: '간이 필요한 용왕의 왕관', price: 99, weight: 0.6, size: 'legend', speed: 1.4, zone: 0.19, color: '#f6c453' }),
 };
 
