@@ -19,7 +19,7 @@ import { useInteractable } from '../../../systems/interaction';
 import { obstacles, type Obstacle } from '../../../state/runtime';
 import { ANIMAL_BODY } from './penLayout';
 import { useAnimalResting } from './animalRest';
-import { type AnimalMotion, animalPrompts, handleAnimalAction, motions, randomSpot, startSpot } from './animalActions';
+import { type AnimalMotion, animalPrompts, handleAnimalAction, inRestArea, motions, randomSpot, restSpot, startSpot } from './animalActions';
 
 /* ---------------------------------- 동물 ---------------------------------- */
 
@@ -30,6 +30,9 @@ export function Animal({ animal, index }: { animal: AnimalInstance; index: numbe
   const produceReady = useGameStore((s) => s.animals.find((a) => a.id === animal.id)?.produceReady ?? false);
   // 생산물을 여러 번 받으면 잠시 쉰다 (zzz)
   const resting = useAnimalResting(animal.id);
+  // useFrame 안에서 읽는다 (매 프레임 새 값)
+  const restingRef = useRef(resting);
+  restingRef.current = resting;
 
   const motion = useMemo<AnimalMotion>(() => {
     const spot = startSpot(animal, index, size.radius);
@@ -74,7 +77,13 @@ export function Animal({ animal, index }: { animal: AnimalInstance; index: numbe
     const busy = motion.emote && performance.now() - motion.emote.startedAt < 1200;
 
     // 돌아다니기: 쉬다가 → 우리 안 아무 곳으로 걸어가기
-    if (!motion.target && !busy && now > motion.restUntil) motion.target = randomSpot(motion, size.radius);
+    // 쉬는 동안에는 건초통 · 물통 앞으로 간다. 이미 다른 곳으로 걷던 중이면 그 길을 버리고 통 앞으로
+    const restingNow = restingRef.current;
+    if (restingNow && motion.target && !inRestArea(motion.target.x, motion.target.z, size.radius)) motion.target = null;
+    if (restingNow && !motion.target && !inRestArea(motion.x, motion.z, size.radius)) motion.restUntil = 0;
+    if (!motion.target && !busy && now > motion.restUntil) {
+      motion.target = restingNow ? restSpot(size.radius) : randomSpot(motion, size.radius);
+    }
     motion.moving = false;
     if (motion.target && !busy) {
       const dx = motion.target.x - motion.x;
@@ -89,7 +98,10 @@ export function Animal({ animal, index }: { animal: AnimalInstance; index: numbe
       }
       if (distance < 0.1 || crowded) {
         motion.target = null;
-        motion.restUntil = now + 1.6 + Math.random() * 3.4;
+        // 통 앞에서 쉬는 동안은 오래 머물고, 가끔 통 쪽으로 고개를 숙여 먹는다
+        const atTrough = restingNow && inRestArea(motion.x, motion.z, size.radius);
+        motion.restUntil = now + (atTrough ? 4 + Math.random() * 5 : 1.6 + Math.random() * 3.4);
+        if (atTrough && Math.random() < 0.6) motion.emote = { kind: 'eat', startedAt: performance.now() };
       } else {
         const step = Math.min(distance, size.speed * dt);
         motion.x += (dx / distance) * step;
@@ -99,6 +111,12 @@ export function Animal({ animal, index }: { animal: AnimalInstance; index: numbe
         motion.facing += diff * Math.min(1, dt * 5);
         motion.moving = true;
       }
+    }
+    // 통 앞에서 쉬는 동안은 천천히 통 쪽(오른쪽)을 본다
+    if (!motion.moving && restingNow && inRestArea(motion.x, motion.z, size.radius)) {
+      let turnTo = Math.PI / 2 - motion.facing;
+      turnTo = Math.atan2(Math.sin(turnTo), Math.cos(turnTo));
+      motion.facing += turnTo * Math.min(1, dt * 3);
     }
     obstacle.x = motion.x;
     obstacle.z = motion.z;

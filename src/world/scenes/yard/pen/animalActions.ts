@@ -71,6 +71,31 @@ function spotAt(u: number, v: number, radius: number): { x: number; z: number } 
   return { x: PEN_MIN_X + m + u * (pen.width - m * 2), z: PEN_MIN_Z + m + v * (pen.depth - m * 2) };
 }
 
+/**
+ * 쉬는 동물이 머무는 곳: 건초통 · 물통(우리 오른쪽에 ㅣ자) 바로 앞 띠. 통에서 조금 띄우고, 통 길이만큼 위아래로.
+ */
+const REST_AREA = {
+  maxX: Math.min(TROUGH.x, WATER_TROUGH.x) - 0.35 - 0.25,
+  width: 1.4,
+  minZ: Math.min(TROUGH.z - TROUGH.length / 2, WATER_TROUGH.z - WATER_TROUGH.length / 2) + 0.2,
+  maxZ: Math.max(TROUGH.z + TROUGH.length / 2, WATER_TROUGH.z + WATER_TROUGH.length / 2) - 0.2,
+};
+
+/** 쉬는 동안 걸어갈 곳: 통 앞 띠 안 아무 곳이나 (몸이 통에 닿지 않게 반지름만큼 더 띄운다) */
+export function restSpot(radius: number): { x: number; z: number } {
+  const maxX = REST_AREA.maxX - radius;
+  return {
+    x: maxX - Math.random() * REST_AREA.width,
+    z: REST_AREA.minZ + Math.random() * (REST_AREA.maxZ - REST_AREA.minZ),
+  };
+}
+
+/** 이 자리가 통 앞 쉬는 띠 안인지 */
+export function inRestArea(x: number, z: number, radius: number): boolean {
+  const maxX = REST_AREA.maxX - radius;
+  return x <= maxX + 0.05 && x >= maxX - REST_AREA.width - 0.05 && z >= REST_AREA.minZ - 0.05 && z <= REST_AREA.maxZ + 0.05;
+}
+
 /** 다음에 걸어갈 곳. 우리 안 아무 곳이나 (통 자리와 통을 지나는 길은 빼고) */
 export function randomSpot(from: { x: number; z: number }, radius: number): { x: number; z: number } {
   for (let tries = 0; tries < 12; tries += 1) {
