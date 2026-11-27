@@ -259,14 +259,14 @@ export const ANIMAL_SPECIES: Record<AnimalSpeciesId, AnimalSpecies> = {
     unlockLevel: 8,
     maxCount: 2,
   },
-  // 꿀벌: 양봉장 자리에 통으로 놓는다 (우리 안을 걷지 않는다). 사는 단위는 통 하나. 벌꿀 280원은 사용자가 정함 (문제당 벌이 약 419)
+  // 꿀벌: 양봉장 자리에 통으로 놓는다 (우리 안을 걷지 않는다). 사는 단위는 통 하나. 벌꿀 90원(3개 270원)은 사용자가 정함 (문제당 벌이 약 134)
   bee: {
     id: 'bee',
     name: '꿀벌',
     price: 2300,
     produceId: 'honey',
     produceName: '벌꿀',
-    producePrice: 280,
+    producePrice: 90,
     careGoal: 1,
     unlockLevel: 10,
     maxCount: 2,
