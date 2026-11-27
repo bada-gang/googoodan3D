@@ -135,6 +135,10 @@ export interface AnimalInstance {
   produceReady: boolean;
   /** 우리 안에서의 상대 위치(0~1). 배치 재현용. */
   spot: number;
+  /** 지난 휴식 뒤로 생산물을 받은 횟수 (config/balance ANIMAL_REST). 옛 저장에는 없다 */
+  collects?: number;
+  /** 이 시각(Date.now, ms)까지 쉰다. 옛 저장에는 없다 */
+  restUntil?: number;
 }
 
 /* -------------------------------- 아이템 --------------------------------- */

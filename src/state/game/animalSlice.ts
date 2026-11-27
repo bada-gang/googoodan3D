@@ -1,5 +1,5 @@
 /** 동물: 들이기, 먹이 주기, 생산물 받기. */
-import { produceAmount } from '@/config/balance';
+import { produceAmount, ANIMAL_REST } from '@/config/balance';
 import { ANIMAL_SPECIES } from '@/config/catalog';
 import type { AnimalInstance, AnimalSpeciesId, SellableId } from '@/types/game';
 import type { GameSlice } from './types';
@@ -8,6 +8,8 @@ export interface ProduceResult {
   produce: SellableId;
   /** 실제로 받은 개수. 세 번 틀리면 0 일 수 있다. */
   count: number;
+  /** 이번으로 정해진 횟수를 채워 쉬기 시작했는지 (config/balance ANIMAL_REST) */
+  rests: boolean;
 }
 
 export interface AnimalSlice {
@@ -48,6 +50,8 @@ export const createAnimalSlice: GameSlice<AnimalSlice> = (set, get) => ({
   feedAnimal: (animalId) => {
     const animal = get().animals.find((a) => a.id === animalId);
     if (!animal || animal.produceReady) return false;
+    // 쉬는 중에는 돌볼 수 없다 (ANIMAL_REST)
+    if ((animal.restUntil ?? 0) > Date.now()) return false;
     // 먹이를 하나 쓴다. 없으면 줄 수 없다.
     if (!get().consumeItem('feed')) return false;
     const goal = ANIMAL_SPECIES[animal.species].careGoal;
@@ -69,9 +73,21 @@ export const createAnimalSlice: GameSlice<AnimalSlice> = (set, get) => ({
     // 한 번에 맞힐수록 많이 받는다. (요청 6)
     const count = produceAmount(wrongAttempts);
     if (count > 0) get().addItem(produce, count);
+    // 정해진 횟수만큼 받으면 잠시 쉰다 (ANIMAL_REST)
+    const collects = (animal.collects ?? 0) + 1;
+    const rests = collects >= ANIMAL_REST.collectsBeforeRest;
     set((s) => ({
-      animals: s.animals.map((a) => (a.id === animalId ? { ...a, produceReady: false } : a)),
+      animals: s.animals.map((a) =>
+        a.id === animalId
+          ? {
+              ...a,
+              produceReady: false,
+              collects: rests ? 0 : collects,
+              restUntil: rests ? Date.now() + ANIMAL_REST.restMinutes * 60_000 : a.restUntil,
+            }
+          : a,
+      ),
     }));
-    return { produce, count };
+    return { produce, count, rests };
   },
 });

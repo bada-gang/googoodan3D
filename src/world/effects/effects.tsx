@@ -88,12 +88,15 @@ export function Marker({
   follow,
   height,
   nearDistance = 4.5,
+  kind = 'ready',
 }: {
   x?: number;
   z?: number;
   follow?: () => { x: number; z: number };
   height: number;
   nearDistance?: number;
+  /** ready: 금색 느낌표 (받을 것이 있다) · sleep: zzz (가축이 쉬는 중) */
+  kind?: 'ready' | 'sleep';
 }): React.ReactElement {
   const sprite = useRef<Sprite>(null);
   const material = useRef<SpriteMaterial>(null);
@@ -109,7 +112,7 @@ export function Marker({
   return (
     // 건물 · 나무 뒤에 있어도 가려지지 않게 맨 나중에, 깊이 검사 없이 그린다
     <sprite ref={sprite} position={[x, height, z]} scale={MARKER_SIZE} renderOrder={10}>
-      <spriteMaterial ref={material} map={markerTexture()} transparent depthTest={false} depthWrite={false} toneMapped={false} />
+      <spriteMaterial ref={material} map={kind === 'sleep' ? sleepTexture() : markerTexture()} transparent depthTest={false} depthWrite={false} toneMapped={false} />
     </sprite>
   );
 }
@@ -154,4 +157,46 @@ function markerTexture(): CanvasTexture {
   markerTextureCache = new CanvasTexture(canvas);
   markerTextureCache.colorSpace = SRGBColorSpace;
   return markerTextureCache;
+}
+
+let sleepTextureCache: CanvasTexture | null = null;
+
+/**
+ * 쉬는 가축 머리 위 "zzz": 느낌표와 같은 크기의 연보라 동그라미 + 진한 테두리 + 크기가 다른 Z 셋.
+ * 느낌표처럼 글자 대신 선으로 그린다 (글꼴이 늦게 와도 모양이 같다).
+ */
+function sleepTexture(): CanvasTexture {
+  if (sleepTextureCache) return sleepTextureCache;
+  const size = 128;
+  const canvas = document.createElement('canvas');
+  canvas.width = size;
+  canvas.height = size;
+  const g = canvas.getContext('2d')!;
+  const c = size / 2;
+  g.beginPath();
+  g.arc(c, c, c - 7, 0, Math.PI * 2);
+  g.fillStyle = '#d9d2f5';
+  g.fill();
+  g.lineWidth = 10;
+  g.strokeStyle = PALETTE.outline;
+  g.stroke();
+  // Z 하나: 윗변 → 대각선 → 아랫변
+  const drawZ = (x: number, y: number, s: number, width: number) => {
+    g.beginPath();
+    g.moveTo(x, y);
+    g.lineTo(x + s, y);
+    g.lineTo(x, y + s);
+    g.lineTo(x + s, y + s);
+    g.lineWidth = width;
+    g.lineJoin = 'round';
+    g.lineCap = 'round';
+    g.strokeStyle = PALETTE.outline;
+    g.stroke();
+  };
+  drawZ(24, 66, 30, 9);
+  drawZ(62, 46, 21, 7.5);
+  drawZ(89, 30, 14, 6);
+  sleepTextureCache = new CanvasTexture(canvas);
+  sleepTextureCache.colorSpace = SRGBColorSpace;
+  return sleepTextureCache;
 }

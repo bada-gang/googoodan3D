@@ -18,6 +18,7 @@ import { Marker } from '../../../effects/effects';
 import { useInteractable } from '../../../systems/interaction';
 import { obstacles, type Obstacle } from '../../../state/runtime';
 import { ANIMAL_BODY } from './penLayout';
+import { useAnimalResting } from './animalRest';
 import { type AnimalMotion, animalPrompts, handleAnimalAction, motions, randomSpot, startSpot } from './animalActions';
 
 /* ---------------------------------- 동물 ---------------------------------- */
@@ -27,6 +28,8 @@ export function Animal({ animal, index }: { animal: AnimalInstance; index: numbe
   const body = useRef<Group>(null);
   const size = ANIMAL_BODY[animal.species];
   const produceReady = useGameStore((s) => s.animals.find((a) => a.id === animal.id)?.produceReady ?? false);
+  // 생산물을 여러 번 받으면 잠시 쉰다 (zzz)
+  const resting = useAnimalResting(animal.id);
 
   const motion = useMemo<AnimalMotion>(() => {
     const spot = startSpot(animal, index, size.radius);
@@ -149,6 +152,7 @@ export function Animal({ animal, index }: { animal: AnimalInstance; index: numbe
         </group>
       </group>
       {produceReady && <Marker follow={() => motion} height={size.marker} />}
+      {!produceReady && resting && <Marker follow={() => motion} height={size.marker} kind="sleep" />}
     </>
   );
 }

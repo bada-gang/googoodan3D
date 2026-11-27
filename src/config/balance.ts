@@ -120,6 +120,15 @@ export function produceAmount(wrongAttempts: number): number {
   return amountFor(PRODUCE_BY_ATTEMPTS, wrongAttempts);
 }
 
+/**
+ * 가축 휴식: 한 마리(꿀벌은 한 통)에서 생산물을 이만큼 받으면 잠시 쉰다 (2026-11 사용자 요청).
+ * 쉬는 동안은 돌보기 · 받기를 못 하고 머리 위에 zzz 가 뜬다 (world/scenes/yard/pen/animalRest).
+ */
+export const ANIMAL_REST = {
+  collectsBeforeRest: 3,
+  restMinutes: 3,
+} as const;
+
 /* --------------------------------- 랜덤 상자 -------------------------------- */
 
 /** 소량의 돈만 들어간다. 과도한 확률형 보상을 만들지 않는다. (명세 31) */

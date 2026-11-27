@@ -5,6 +5,8 @@
 import { josa } from '@/config/josa';
 import { PALETTE } from '@/config/artTokens';
 import { ANIMAL_SPECIES } from '@/config/catalog';
+import { ANIMAL_REST } from '@/config/balance';
+import { restLeftMs, restLeftText } from './animalRest';
 import type { InteractionPrompt } from '@/bridge/events';
 import { useGameStore } from '@/state/gameStore';
 import type { AnimalInstance } from '@/types/game';
@@ -95,6 +97,11 @@ export function animalPrompts(animalId: string): InteractionPrompt[] {
   const animal = animalById(animalId);
   if (!animal) return [];
   const def = ANIMAL_SPECIES[animal.species];
+  // 쉬는 중: 누를 수 없는 버튼에 남은 시간 (ANIMAL_REST)
+  const rest = restLeftMs(animal);
+  if (rest > 0) {
+    return [{ id: 'rest', label: `${def.name} 쉬는 중`, enabled: false, hint: `${restLeftText(rest)} 뒤에 다시 돌볼 수 있어요` }];
+  }
   if (animal.produceReady) {
     return [
       {
@@ -130,7 +137,7 @@ function above(animalId: string, height: number): { x: number; y: number; z: num
 
 export function handleAnimalAction(animalId: string, actionId: string): void {
   const animal = animalById(animalId);
-  if (!animal) return;
+  if (!animal || restLeftMs(animal) > 0) return;
   const def = ANIMAL_SPECIES[animal.species];
   const body = ANIMAL_BODY[animal.species];
 
@@ -160,6 +167,7 @@ export function handleAnimalAction(animalId: string, actionId: string): void {
       burstStars(above(animalId, body.marker * 0.7), 6 + result.count * 4);
       floatText(above(animalId, body.marker + 0.4), `${def.produceName} +${result.count}`, PALETTE.goldShade);
       toast(`${def.produceName} ${result.count}개를 얻었어요`, 'reward');
+      if (result.rests) toast(`${josa(def.name, '이/가')} ${ANIMAL_REST.restMinutes}분 동안 쉬어요. 조금 뒤에 다시 와 주세요`, 'info');
       awardExperience('ANIMAL', math);
     });
   }
