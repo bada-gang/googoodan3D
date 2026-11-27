@@ -43,6 +43,8 @@ export const KIND_PROMPT: Record<Exclude<AssetKind, 'thumbnail'>, (subject: stri
 export const ART_ADJUST: Record<string, { saturation?: number; brightness?: number }> = {
   // 생성된 잔디가 팔레트(#a8d66f)보다 쨍하다
   [ASSETS.textures.grass]: { saturation: 0.82 },
+  // 귤: 더 쨍하고 먹음직스럽게 (사용자 요청)
+  [ASSETS.crops.tangerine]: { saturation: 1.3, brightness: 1.04 },
 };
 
 /** 키별 "무엇" */

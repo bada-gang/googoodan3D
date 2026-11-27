@@ -86,10 +86,10 @@ art-src/         생성 원본 (git 에 안 들어감 — 아래 "백업" 참고
 | 나무 모양 · 흔들림 · 단계별 크기 | `src/world/scenes/yard/farm/Tree.tsx` |
 | 열매 위치 · 색 · 수확할 때 날아가기 | `src/world/scenes/yard/farm/Fruits.tsx` |
 | 울타리 · 헛간 · 여물통 · '마굿간 들어가기' 버튼 거리 | `src/world/scenes/yard/pen/AnimalPen.tsx` |
-| 우리 크기 · 문 · 동물 크기와 걷는 빠르기 | `src/world/scenes/yard/pen/penLayout.ts` |
+| 우리 크기 · 문 · 건초통 · 물통 자리(오른쪽에 ㅣ자) · 동물 크기와 걷는 빠르기 | `src/world/scenes/yard/pen/penLayout.ts` |
 | 동물 움직임 (걷기 · 먹기 · 기뻐하기) | `src/world/scenes/yard/pen/Animal.tsx` |
 | 가축 휴식 (3번 받으면 3분 쉼 · zzz · 남은 시간 버튼) | 숫자 `config/balance.ts` 의 `ANIMAL_REST`, 규칙 `src/world/scenes/yard/pen/animalRest.ts`, zzz 그림 `world/effects/effects.tsx` 의 `Marker kind="sleep"` |
-| 양봉 통 자리 (우리 안 앞쪽 왼쪽 구석, 동물 · 꾸미기 금지) · 통마다 꿀벌 수 | `src/world/scenes/yard/apiary/apiaryLayout.ts` |
+| 양봉 통 자리 (우리 안 왼쪽 울타리 앞 세로로, 동물 · 꾸미기 금지) · 통마다 꿀벌 수 | `src/world/scenes/yard/apiary/apiaryLayout.ts` |
 | 양봉 통 (돌보기 · 벌꿀 받기는 다른 가축과 같은 `pen/animalActions`) | `src/world/scenes/yard/apiary/Apiary.tsx` |
 | 통 둘레를 나는 꿀벌 (코드로 만든 모양 · 인스턴싱) | `src/world/scenes/yard/apiary/BeeSwarm.tsx` |
 | 집 안 (방 크기 · 벽 · 문) | `src/world/scenes/home/HomeWorld.tsx` |

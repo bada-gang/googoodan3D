@@ -88,10 +88,10 @@ export function AnimalPen(): React.ReactElement {
         <group position={[BARN.x, 0, BARN.z]}>
           <GltfModel modelKey={MODELS.buildings.barn} fallback={<FallbackBarn />} />
         </group>
-        <group position={[TROUGH.x, 0, TROUGH.z]} rotation-y={Math.PI / 2}>
+        <group position={[TROUGH.x, 0, TROUGH.z]} rotation-y={TROUGH.rot}>
           <GltfModel modelKey={MODELS.buildings.trough} fallback={<FallbackTrough />} />
         </group>
-        <group position={[WATER_TROUGH.x, 0, WATER_TROUGH.z]} rotation-y={-Math.PI / 2}>
+        <group position={[WATER_TROUGH.x, 0, WATER_TROUGH.z]} rotation-y={WATER_TROUGH.rot}>
           <GltfModel modelKey={MODELS.buildings.waterTrough} fallback={<FallbackWaterTrough />} />
         </group>
         {/* 표지판은 울타리와 겹치지 않게 앞쪽 왼쪽 모서리 바깥에 */}

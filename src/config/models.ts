@@ -225,8 +225,10 @@ export const MODEL_MANIFEST: ModelSpec[] = [
   model(MODELS.fruits.banana, 'models/fruits/banana.glb', 'tiny', 0.26, ASSETS.crops.banana),
   model(MODELS.fruits.blueberry, 'models/fruits/blueberry.glb', 'tiny', 0.2, ASSETS.crops.blueberry),
   // 귤 · 키위: 아이콘 그림(잎 · 단면)이 아니라 3D 용 통 열매 그림을 따로 만든다
-  model(MODELS.fruits.tangerine, 'models/fruits/tangerine.glb', 'tiny', 0.2),
-  model(MODELS.fruits.kiwi, 'models/fruits/kiwi.glb', 'tiny', 0.2),
+  // 귤은 오렌지처럼 껍질을 선명한 주황으로 맞춘다 (사용자: 더 쨍하고 먹음직스럽게)
+  { ...model(MODELS.fruits.tangerine, 'models/fruits/tangerine.glb', 'tiny', 0.2), color: { warmHue: 27, saturation: 1.1, brightness: 1.05 } },
+  // 키위는 껍질을 더 진한 갈색으로 (사용자 요청)
+  { ...model(MODELS.fruits.kiwi, 'models/fruits/kiwi.glb', 'tiny', 0.2), color: { brightness: 0.68, saturation: 1.25 } },
 ];
 
 export const MODEL_SPEC_BY_KEY: Record<string, ModelSpec> = Object.fromEntries(

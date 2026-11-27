@@ -12,10 +12,13 @@ export const PEN_MAX_Z = pen.center.z + pen.depth / 2;
 export const GATE_WIDTH = 1.8;
 /** 울타리 두께 (부딪힘) */
 export const FENCE_THICKNESS = 0.2;
-/** 여물통(건초) 자리 (우리 안 왼쪽 벽 앞, 세로로) */
-export const TROUGH = { x: PEN_MIN_X + 0.9, z: pen.center.z, length: 1.6 };
-/** 물통 자리 (우리 안 오른쪽 벽 앞, 세로로). 여물통과 마주 본다 */
-export const WATER_TROUGH = { x: PEN_MAX_X - 0.9, z: pen.center.z, length: 1.6 };
+/**
+ * 여물통(건초) · 물통: 둘 다 우리 안 오른쪽 벽 앞에 세로로, 한 줄(ㅣ자)로 놓는다 — 위(안쪽)가 건초, 아래(앞쪽)가 물.
+ * 왼쪽 벽 앞은 양봉 통 자리다 (yard/apiary). rot: 통이 우리 안쪽(왼쪽)을 보게
+ */
+const TROUGH_GAP = 0.5;
+export const TROUGH = { x: PEN_MAX_X - 0.9, z: pen.center.z - (1.6 + TROUGH_GAP) / 2, length: 1.6, rot: -Math.PI / 2 };
+export const WATER_TROUGH = { x: PEN_MAX_X - 0.9, z: pen.center.z + (1.6 + TROUGH_GAP) / 2, length: 1.6, rot: -Math.PI / 2 };
 /** 헛간 모델의 반 너비 · 반 깊이 (3.7m 정사각형, 모델을 재서 맞춤) */
 const BARN_HALF = 1.85;
 /** 헛간은 우리 가운데(앞문과 같은 x), 앞면이 뒤 울타리에 닿게 */

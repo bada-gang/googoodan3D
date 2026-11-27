@@ -120,7 +120,8 @@ export function animalPrompts(animalId: string): InteractionPrompt[] {
       id: 'feed',
       label: def.careLabel ?? `${def.name} 먹이 주기`,
       enabled: feed > 0,
-      hint: feed > 0 ? `돌봄 ${animal.care} / ${def.careGoal} · 먹이 ${feed}개` : '먹이가 없어요. 농장 가게에서 사 오세요',
+      // 돌봄 횟수 · 남은 먹이 개수는 띄우지 않는다 (사용자 요청). 먹이가 없을 때만 알려 준다
+      hint: feed > 0 ? undefined : '먹이가 없어요. 농장 가게에서 사 오세요',
     },
   ];
 }
