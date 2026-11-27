@@ -72,7 +72,7 @@ function spotAt(u: number, v: number, radius: number): { x: number; z: number } 
 }
 
 /**
- * 쉬는 동물이 머무는 곳: 건초통 · 물통(우리 오른쪽에 ㅣ자) 바로 앞 띠. 통에서 조금 띄우고, 통 길이만큼 위아래로.
+ * 쉬기 시작한 동물이 한 번 걸어가는 곳: 건초통 · 물통(우리 오른쪽에 ㅣ자) 바로 앞 띠. 도착한 뒤에는 원래대로 돌아다닌다.
  */
 const REST_AREA = {
   maxX: Math.min(TROUGH.x, WATER_TROUGH.x) - 0.35 - 0.25,
@@ -88,12 +88,6 @@ export function restSpot(radius: number): { x: number; z: number } {
     x: maxX - Math.random() * REST_AREA.width,
     z: REST_AREA.minZ + Math.random() * (REST_AREA.maxZ - REST_AREA.minZ),
   };
-}
-
-/** 이 자리가 통 앞 쉬는 띠 안인지 */
-export function inRestArea(x: number, z: number, radius: number): boolean {
-  const maxX = REST_AREA.maxX - radius;
-  return x <= maxX + 0.05 && x >= maxX - REST_AREA.width - 0.05 && z >= REST_AREA.minZ - 0.05 && z <= REST_AREA.maxZ + 0.05;
 }
 
 /** 다음에 걸어갈 곳. 우리 안 아무 곳이나 (통 자리와 통을 지나는 길은 빼고) */
