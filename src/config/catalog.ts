@@ -141,6 +141,33 @@ export const TREE_SPECIES: Record<TreeSpeciesId, TreeSpecies> = {
     growthPerStage: 1,
     regrowWater: 1,
   },
+  // 2026-11 추가. 문제당 벌이 귤 약 73 · 키위 약 80 (레벨 따라 고르게 오르게)
+  tangerine: {
+    id: 'tangerine',
+    name: '귤나무',
+    seedName: '귤 씨앗',
+    seedPrice: 120,
+    fruitId: 'tangerine',
+    fruitName: '귤',
+    fruitPrice: 47,
+    yield: 4,
+    unlockLevel: 9,
+    growthPerStage: 1,
+    regrowWater: 1,
+  },
+  kiwi: {
+    id: 'kiwi',
+    name: '키위나무',
+    seedName: '키위 씨앗',
+    seedPrice: 140,
+    fruitId: 'kiwi',
+    fruitName: '키위',
+    fruitPrice: 52,
+    yield: 4,
+    unlockLevel: 10,
+    growthPerStage: 1,
+    regrowWater: 1,
+  },
 };
 
 export const TREE_LIST = Object.values(TREE_SPECIES);
@@ -168,6 +195,14 @@ export interface AnimalSpecies {
   unlockLevel: number;
   /** 우리에 둘 수 있는 최대 마릿수 (목장 넓이 · 화면 혼잡을 보고 정함) */
   maxCount: number;
+  /** 돌보기 버튼 · 문제 문구를 바꿀 때 (꿀벌: '아카시아꽃 주기'). 없으면 '○○ 먹이 주기' */
+  careLabel?: string;
+  careQuestion?: string;
+  /** 돌봤을 때 떠오르는 글자. 없으면 '냠냠' */
+  careText?: string;
+  /** 세는 단위 · 사는 곳 (가게 문구). 없으면 '마리' · '우리' */
+  countUnit?: string;
+  homeName?: string;
 }
 
 /**
@@ -224,6 +259,23 @@ export const ANIMAL_SPECIES: Record<AnimalSpeciesId, AnimalSpecies> = {
     unlockLevel: 8,
     maxCount: 2,
   },
+  // 꿀벌: 양봉장 자리에 통으로 놓는다 (우리 안을 걷지 않는다). 사는 단위는 통 하나. 문제당 벌이 약 127
+  bee: {
+    id: 'bee',
+    name: '꿀벌',
+    price: 650,
+    produceId: 'honey',
+    produceName: '벌꿀',
+    producePrice: 85,
+    careGoal: 1,
+    unlockLevel: 10,
+    maxCount: 2,
+    careLabel: '아카시아꽃 주기',
+    careQuestion: '꿀벌에게 아카시아꽃을 줄까요?',
+    careText: '윙윙',
+    countUnit: '통',
+    homeName: '양봉장',
+  },
 };
 
 export const ANIMAL_LIST = Object.values(ANIMAL_SPECIES);
@@ -239,10 +291,13 @@ export const SELL_PRICE: Record<SellableId, number> = {
   persimmon: TREE_SPECIES.persimmon.fruitPrice,
   banana: TREE_SPECIES.banana.fruitPrice,
   blueberry: TREE_SPECIES.blueberry.fruitPrice,
+  tangerine: TREE_SPECIES.tangerine.fruitPrice,
+  kiwi: TREE_SPECIES.kiwi.fruitPrice,
   egg: ANIMAL_SPECIES.chicken.producePrice,
   goatMilk: ANIMAL_SPECIES.goat.producePrice,
   wool: ANIMAL_SPECIES.sheep.producePrice,
   milk: ANIMAL_SPECIES.cow.producePrice,
+  honey: ANIMAL_SPECIES.bee.producePrice,
   ...fishRecord((fish) => FISH[fish].price),
 };
 
@@ -255,10 +310,13 @@ export const SELLABLE_NAME: Record<SellableId, string> = {
   persimmon: '감',
   banana: '바나나',
   blueberry: '블루베리',
+  tangerine: '귤',
+  kiwi: '키위',
   egg: '달걀',
   goatMilk: '치즈',
   wool: '양털',
   milk: '우유',
+  honey: '벌꿀',
   ...fishRecord((fish) => FISH[fish].name),
 };
 
@@ -271,10 +329,13 @@ export const SELLABLE_ORDER: SellableId[] = [
   'persimmon',
   'banana',
   'blueberry',
+  'tangerine',
+  'kiwi',
   'egg',
   'goatMilk',
   'wool',
   'milk',
+  'honey',
   ...FISH_ORDER,
 ];
 

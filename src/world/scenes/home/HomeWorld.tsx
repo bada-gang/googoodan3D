@@ -142,7 +142,7 @@ export function HomeWorld(): React.ReactElement {
       <Window />
       <Door />
 
-      <PlacedFurnitureLayer area="home" />
+      <PlacedFurnitureLayer rules={RULES} />
     </group>
   );
 }

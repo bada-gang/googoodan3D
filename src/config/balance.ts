@@ -50,6 +50,8 @@ export const UNLOCKS: UnlockDef[] = [
   { level: 6, label: '감나무 · 양' },
   { level: 7, label: '바나나나무 · 별빛 세트' },
   { level: 8, label: '블루베리나무 · 젖소' },
+  { level: 9, label: '귤나무' },
+  { level: 10, label: '키위나무 · 꿀벌' },
 ];
 
 export function unlocksAtLevel(level: number): UnlockDef | undefined {

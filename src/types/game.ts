@@ -83,7 +83,17 @@ export interface GameSessionSettings {
 
 /* ---------------------------------- 농장 ---------------------------------- */
 
-export type TreeSpeciesId = 'apple' | 'orange' | 'peach' | 'cherry' | 'grape' | 'persimmon' | 'banana' | 'blueberry';
+export type TreeSpeciesId =
+  | 'apple'
+  | 'orange'
+  | 'peach'
+  | 'cherry'
+  | 'grape'
+  | 'persimmon'
+  | 'banana'
+  | 'blueberry'
+  | 'tangerine'
+  | 'kiwi';
 
 /** 나무 성장 단계. (명세 20, 46) */
 export type TreeStage = 'seed' | 'sprout' | 'sapling' | 'mature' | 'fruiting';
@@ -112,7 +122,10 @@ export interface FarmPlot {
 
 /* ---------------------------------- 동물 ---------------------------------- */
 
-export type AnimalSpeciesId = 'chicken' | 'goat' | 'sheep' | 'cow';
+/** bee(꿀벌)는 우리 안을 걷지 않고 양봉장 자리에 통으로 놓인다 (world/scenes/yard/apiary) */
+export type AnimalSpeciesId = 'chicken' | 'goat' | 'sheep' | 'cow' | 'bee';
+/** 우리 안을 걸어 다니는 동물 (꿀벌 빼고) */
+export type PenAnimalId = Exclude<AnimalSpeciesId, 'bee'>;
 
 export interface AnimalInstance {
   id: string;
@@ -128,7 +141,7 @@ export interface AnimalInstance {
 
 export type SeedId = `seed_${TreeSpeciesId}`;
 export type FruitId = TreeSpeciesId;
-export type ProduceId = 'egg' | 'wool' | 'milk' | 'goatMilk';
+export type ProduceId = 'egg' | 'wool' | 'milk' | 'goatMilk' | 'honey';
 /** 시장 연못에서 낚는 것: 물고기 20종 + 물속 보물 8종 (config/fishing) */
 export type FishId =
   | 'minnow'

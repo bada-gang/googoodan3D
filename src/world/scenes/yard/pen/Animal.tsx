@@ -12,7 +12,7 @@ import { useFrame } from '@react-three/fiber';
 import type { Group } from 'three';
 import { MODELS } from '@/config/models';
 import { useGameStore } from '@/state/gameStore';
-import type { AnimalInstance, AnimalSpeciesId } from '@/types/game';
+import type { AnimalInstance, AnimalSpeciesId, PenAnimalId } from '@/types/game';
 import { GltfModel } from '../../../rendering/assets';
 import { Marker } from '../../../effects/effects';
 import { useInteractable } from '../../../systems/interaction';
@@ -142,7 +142,8 @@ export function Animal({ animal, index }: { animal: AnimalInstance; index: numbe
       <group ref={root}>
         <group ref={body}>
           <GltfModel
-            modelKey={MODELS.animals[animal.species]}
+            // 꿀벌은 여기 오지 않는다 (AnimalPen 이 우리 동물만 넘긴다)
+            modelKey={MODELS.animals[animal.species as PenAnimalId]}
             fallback={<FallbackAnimal species={animal.species} />}
           />
         </group>

@@ -283,26 +283,31 @@ export function DecorateSystem({ rules: sceneRules }: { rules: DecorateRules }):
   return null;
 }
 
-/** 이 장면에 놓인 물건들과 들고 있는 물건의 미리보기 */
-export function PlacedFurnitureLayer({ area }: { area: PlacementArea }): React.ReactElement {
+/**
+ * 이 장면에 놓인 물건들과 들고 있는 물건의 미리보기.
+ * 규칙(벽에 거는 높이)은 장면이 직접 넘긴다. 모듈의 rules 는 DecorateSystem 이 그린 뒤(useEffect)에야 바뀌어서,
+ * 장면에 들어오는 첫 그림에서는 아직 없거나 앞 장면 것이다 — 그걸 읽었더니 다시 들어오면 시계 · 액자가 바닥에 붙어 있었다.
+ */
+export function PlacedFurnitureLayer({ rules: sceneRules }: { rules: DecorateRules }): React.ReactElement {
+  const area = sceneRules.area;
   const placed = useGameStore((s) => (area === 'home' ? s.home.placed : s.yard.placed));
   const movingId = useDecorate((s) => s.movingId);
   return (
     <group>
       {placed.map((item) =>
-        item.instanceId === movingId ? null : <PlacedFurniture key={item.instanceId} item={item} />,
+        item.instanceId === movingId ? null : <PlacedFurniture key={item.instanceId} item={item} wallY={sceneRules.wall?.y} />,
       )}
-      <Ghost />
+      <Ghost wallY={sceneRules.wall?.y} />
     </group>
   );
 }
 
-/** 벽에 거는 물건은 바닥이 아니라 벽 높이에 */
-function heightOf(itemId: string): number {
-  return FURNITURE_3D[itemId]?.wall && rules?.wall ? rules.wall.y : 0;
+/** 벽에 거는 물건은 바닥이 아니라 벽 높이에 (wallY: 장면의 벽 높이, 벽이 없는 장면이면 undefined) */
+function heightOf(itemId: string, wallY: number | undefined): number {
+  return FURNITURE_3D[itemId]?.wall && wallY !== undefined ? wallY : 0;
 }
 
-function PlacedFurniture({ item }: { item: PlacedItem }): React.ReactElement {
+function PlacedFurniture({ item, wallY }: { item: PlacedItem; wallY: number | undefined }): React.ReactElement {
   const size = FURNITURE_3D[item.itemId];
 
   // 캐릭터가 부딪힌다 (카펫 · 돌길 · 벽에 건 것 빼고)
@@ -317,7 +322,7 @@ function PlacedFurniture({ item }: { item: PlacedItem }): React.ReactElement {
 
   return (
     <group
-      position={[item.x, heightOf(item.itemId), item.z]}
+      position={[item.x, heightOf(item.itemId, wallY), item.z]}
       rotation-y={(item.rotation ?? 0) * (Math.PI / 2)}
       onClick={(event) => {
         if (tapPlaced(item)) event.stopPropagation();
@@ -334,7 +339,7 @@ function PlacedFurniture({ item }: { item: PlacedItem }): React.ReactElement {
 }
 
 /** 들고 있는 물건의 반투명 미리보기. 놓을 수 없는 자리면 빨갛게 */
-function Ghost(): React.ReactElement | null {
+function Ghost({ wallY }: { wallY: number | undefined }): React.ReactElement | null {
   const ghost = useDecorate((s) => s.ghost);
   const valid = useDecorate((s) => s.valid);
   const pendingItemId = useDecorate((s) => s.pendingItemId);
@@ -373,7 +378,7 @@ function Ghost(): React.ReactElement | null {
 
   if (!ghost || !itemId) return null;
   return (
-    <group position={[ghost.x, heightOf(itemId), ghost.z]} rotation-y={rotation * (Math.PI / 2)}>
+    <group position={[ghost.x, heightOf(itemId, wallY), ghost.z]} rotation-y={rotation * (Math.PI / 2)}>
       <GltfModel
         key={itemId}
         modelKey={furnitureModelKey(itemId)}

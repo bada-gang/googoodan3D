@@ -101,7 +101,8 @@ export function AnimalPen(): React.ReactElement {
           </group>
         )}
       </StaticShadow>
-      {animals.map((animal, index) => (
+      {/* 꿀벌은 우리가 아니라 양봉장에 산다 (yard/apiary) */}
+      {animals.filter((animal) => animal.species !== 'bee').map((animal, index) => (
         <Animal key={animal.id} animal={animal} index={index} />
       ))}
     </group>

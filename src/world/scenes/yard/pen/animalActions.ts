@@ -12,6 +12,7 @@ import { audio } from '@/audio/sfx';
 import { burstStars, floatText } from '../../../effects/effects';
 import { askMath, awardExperience, toast } from '../../../gameplay/gameplay';
 import { ANIMAL_BODY, PEN_MIN_X, PEN_MIN_Z, TROUGH, WATER_TROUGH, pen } from './penLayout';
+import { APIARY_AREA } from '../apiary/apiaryLayout';
 
 /* ------------------------------- 움직임 상태 ------------------------------- */
 
@@ -36,8 +37,17 @@ export const motions = new Map<string, AnimalMotion>();
  * 예전에는 울타리에서 0.8m 안쪽만 다녀서 가장자리 · 구석이 늘 비어 있었다.
  */
 const WALL_GAP = 0.15;
-/** 여물통 · 물통 자리 (가운데 기준 반 너비 · 반 길이). 통은 세로로 놓여 있다 */
-const TROUGHS = [TROUGH, WATER_TROUGH].map((t) => ({ x: t.x, z: t.z, halfX: 0.35, halfZ: t.length / 2 }));
+/** 여물통 · 물통 · 양봉 구석 자리 (가운데 기준 반 너비 · 반 길이). 동물이 들어가지 않는다 */
+const TROUGHS = [
+  ...[TROUGH, WATER_TROUGH].map((t) => ({ x: t.x, z: t.z, halfX: 0.35, halfZ: t.length / 2 })),
+  // 양봉 통 구석 (yard/apiary). 통이 없어도 비워 둔다
+  {
+    x: (APIARY_AREA.minX + APIARY_AREA.maxX) / 2,
+    z: (APIARY_AREA.minZ + APIARY_AREA.maxZ) / 2,
+    halfX: (APIARY_AREA.maxX - APIARY_AREA.minX) / 2,
+    halfZ: (APIARY_AREA.maxZ - APIARY_AREA.minZ) / 2,
+  },
+];
 
 /** 이 자리에 몸이 통에 닿는지 */
 function hitsTrough(x: number, z: number, radius: number): boolean {
@@ -101,7 +111,7 @@ export function animalPrompts(animalId: string): InteractionPrompt[] {
   return [
     {
       id: 'feed',
-      label: `${def.name} 먹이 주기`,
+      label: def.careLabel ?? `${def.name} 먹이 주기`,
       enabled: feed > 0,
       hint: feed > 0 ? `돌봄 ${animal.care} / ${def.careGoal} · 먹이 ${feed}개` : '먹이가 없어요. 농장 가게에서 사 오세요',
     },
@@ -125,12 +135,12 @@ export function handleAnimalAction(animalId: string, actionId: string): void {
   const body = ANIMAL_BODY[animal.species];
 
   if (actionId === 'feed') {
-    askMath('ANIMAL', `${def.name}에게 먹이를 줄까요?`, (math) => {
+    askMath('ANIMAL', def.careQuestion ?? `${def.name}에게 먹이를 줄까요?`, (math) => {
       if (!useGameStore.getState().feedAnimal(animalId)) return;
       audio.play('animal', animalById(animalId)?.species);
       emote(animalId, 'eat');
       burstStars(above(animalId, body.marker * 0.5), 6);
-      floatText(above(animalId, body.marker), '냠냠', PALETTE.accentPink);
+      floatText(above(animalId, body.marker), def.careText ?? '냠냠', PALETTE.accentPink);
       if (animalById(animalId)?.produceReady) {
         toast(`${josa(def.produceName, '이/가')} 준비됐어요!`, 'reward');
         burstStars(above(animalId, body.marker * 0.7), 9);

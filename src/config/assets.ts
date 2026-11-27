@@ -32,10 +32,13 @@ export const ASSETS = {
     persimmon: 'crop_persimmon',
     banana: 'crop_banana',
     blueberry: 'crop_blueberry',
+    tangerine: 'crop_tangerine',
+    kiwi: 'crop_kiwi',
     egg: 'crop_egg',
     goatMilk: 'crop_goat_milk',
     wool: 'crop_wool',
     milk: 'crop_milk',
+    honey: 'crop_honey',
     // 물고기 (시장 연못에서 낚는다. config/fishing)
     minnow: 'fish_minnow',
     paleChub: 'fish_pale_chub',
@@ -76,6 +79,8 @@ export const ASSETS = {
     persimmon: 'seedbag_persimmon',
     banana: 'seedbag_banana',
     blueberry: 'seedbag_blueberry',
+    tangerine: 'seedbag_tangerine',
+    kiwi: 'seedbag_kiwi',
   },
   /**
    * 목록/상점에서 쓰는 동물 썸네일.
@@ -87,6 +92,8 @@ export const ASSETS = {
     goat: 'icon_goat',
     sheep: 'icon_sheep',
     cow: 'icon_cow',
+    // 꿀벌은 양봉 통 그림 (models.ts 의 beehive 가 만든다)
+    bee: 'icon_bee',
   },
   ui: {
     coin: 'ui_coin',

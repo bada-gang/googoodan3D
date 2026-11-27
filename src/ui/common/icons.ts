@@ -51,6 +51,9 @@ function fallbackInfoOf(assetKey: string): { label: string; color: string } {
       goatMilk: '#f4ecd8',
       wool: '#fbf7ef',
       milk: '#ffffff',
+      tangerine: '#f59a2a',
+      kiwi: '#8a6a3c',
+      honey: '#f2b632',
       ...Object.fromEntries(FISH_ORDER.map((fish) => [fish, FISH[fish].color])),
     } as Record<SellableId, string>;
     for (const [id, key] of Object.entries(ASSETS.crops)) {

@@ -75,7 +75,7 @@ export function FarmShopOverlay(): React.ReactElement {
 
   const buyAnimal = async (animal: (typeof ANIMAL_LIST)[number]) => {
     if (ownedCount(animal.id) >= animal.maxCount) {
-      pushToast({ text: `${josa(animal.name, '은/는')} ${animal.maxCount}마리까지 키울 수 있어요`, tone: 'warn' });
+      pushToast({ text: `${josa(animal.name, '은/는')} ${animal.maxCount}${animal.countUnit ?? '마리'}까지 키울 수 있어요`, tone: 'warn' });
       return;
     }
     if (money < animal.price) {
@@ -87,7 +87,7 @@ export function FarmShopOverlay(): React.ReactElement {
     if (!useGameStore.getState().buyAnimal(animal.id)) return;
     audio.play('coin');
     awardCorrect('SHOP', math);
-    pushToast({ text: `${josa(animal.name, '이/가')} 우리에 왔어요!`, tone: 'reward' });
+    pushToast({ text: `${josa(animal.name, '이/가')} ${animal.homeName ?? '우리'}에 왔어요!`, tone: 'reward' });
   };
 
   /* -------------------------------- 판매 -------------------------------- */
@@ -203,7 +203,7 @@ export function FarmShopOverlay(): React.ReactElement {
                     <ItemCard
                       key={animal.id}
                       icon={animalIcon(animal.id)}
-                      name={`${animal.name} ${owned}/${animal.maxCount}마리`}
+                      name={`${animal.name} ${owned}/${animal.maxCount}${animal.countUnit ?? '마리'}`}
                       sub={`${animal.produceName} · 한 개 ${animal.producePrice}${CURRENCY}`}
                       price={full ? undefined : animal.price}
                       disabled={full || money < animal.price}

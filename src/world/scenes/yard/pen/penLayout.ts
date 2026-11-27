@@ -29,4 +29,6 @@ export const ANIMAL_BODY: Record<AnimalSpeciesId, { radius: number; marker: numb
   goat: { radius: 0.45, marker: 1.6, speed: 0.7, color: PALETTE.woodLight },
   sheep: { radius: 0.5, marker: 1.55, speed: 0.6, color: PALETTE.sheep },
   cow: { radius: 0.65, marker: 2.0, speed: 0.55, color: PALETTE.cow },
+  // 꿀벌: 걷지 않는 양봉 통 (반지름 · 느낌표 높이는 통 기준, yard/apiary)
+  bee: { radius: 0.55, marker: 1.55, speed: 0, color: '#f2c14e' },
 };

@@ -39,7 +39,7 @@ export function setupDevTools(): void {
     }
     if (new URLSearchParams(window.location.search).has('dev-animals')) {
       const store = useGameStore.getState();
-      for (const species of ['chicken', 'goat', 'sheep', 'cow'] as const) {
+      for (const species of ['chicken', 'goat', 'sheep', 'cow', 'bee'] as const) {
         if (!store.animals.some((a) => a.species === species)) useGameStore.getState().addAnimal(species);
       }
     }

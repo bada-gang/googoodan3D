@@ -6,7 +6,7 @@
  * 준비된 모델은 public/assets/model-manifest.json 의 `ready` 에 들어간다.
  * 준비되지 않은 키는 3D 월드가 코드로 만든 임시 모양을 쓴다.
  */
-import type { AnimalSpeciesId, CharacterId, TreeSpeciesId } from '@/types/game';
+import type { CharacterId, PenAnimalId, TreeSpeciesId } from '@/types/game';
 import { ASSETS, furnitureTextureKey } from './assets';
 import { FURNITURE } from './catalog';
 import { FURNITURE_3D, WALL_ITEM_DEPTH } from './furniture3d';
@@ -28,6 +28,8 @@ export const MODELS = {
     waterTrough: 'model_building_water_trough',
     seedShop: 'model_building_seed_shop',
     furnitureShop: 'model_building_furniture_shop',
+    /** 꿀벌 양봉 통 (yard/apiary). 꿀벌 자체는 코드로 그린다 */
+    beehive: 'model_building_beehive',
   },
   /** 밭의 나무. 열매 없이 만들고, 열매 모델을 따로 단다 (어린나무는 같은 모델을 작게) */
   trees: {
@@ -39,6 +41,8 @@ export const MODELS = {
     persimmon: 'model_tree_persimmon',
     banana: 'model_tree_banana',
     blueberry: 'model_tree_blueberry',
+    tangerine: 'model_tree_tangerine',
+    kiwi: 'model_tree_kiwi',
   },
   /** 맵 가장자리 숲의 앞줄 (world/props/Ground 의 Surroundings). 놓을 때마다 방향 · 크기를 달리한다 */
   scenery: {
@@ -76,6 +80,8 @@ export const MODELS = {
     persimmon: 'model_fruit_persimmon',
     banana: 'model_fruit_banana',
     blueberry: 'model_fruit_blueberry',
+    tangerine: 'model_fruit_tangerine',
+    kiwi: 'model_fruit_kiwi',
   },
 } as const;
 
@@ -152,7 +158,7 @@ const TREE_HEIGHT: Partial<Record<TreeSpeciesId, number>> = {
 };
 
 /** 동물 키 (m). 캐릭터 키가 1.2 — 2학년 아이 옆에 섰을 때 그럴듯하게 */
-const ANIMAL_HEIGHT: Record<AnimalSpeciesId, number> = {
+const ANIMAL_HEIGHT: Record<PenAnimalId, number> = {
   chicken: 0.55,
   goat: 0.95,
   sheep: 0.9,
@@ -171,6 +177,8 @@ export const MODEL_MANIFEST: ModelSpec[] = [
   model(MODELS.buildings.waterTrough, 'models/buildings/water_trough.glb', 'medium', 0.55),
   model(MODELS.buildings.seedShop, 'models/buildings/seed_shop.glb', 'large', 3.6),
   model(MODELS.buildings.furnitureShop, 'models/buildings/furniture_shop.glb', 'large', 3.8),
+  // 양봉 통: 가게 · 가방의 꿀벌 그림도 이 원본 그림으로 만든다
+  { ...model(MODELS.buildings.beehive, 'models/buildings/beehive.glb', 'medium', 1.05), thumbnail: ASSETS.icons.bee },
 
   ...(Object.entries(MODELS.trees) as [TreeSpeciesId, string][]).map(([id, key]) =>
     model(key, `models/trees/${id}.glb`, 'medium', TREE_HEIGHT[id] ?? 2.9),
@@ -190,7 +198,7 @@ export const MODEL_MANIFEST: ModelSpec[] = [
   { ...model(MODELS.barnProps.lantern, 'models/barn/lantern.glb', 'small', 0.65), depth: 0.4 },
   model(MODELS.barnProps.milkCan, 'models/barn/milk_can.glb', 'small', 0.8),
 
-  ...(Object.entries(ANIMAL_HEIGHT) as [AnimalSpeciesId, number][]).map(([id, height]) => ({
+  ...(Object.entries(ANIMAL_HEIGHT) as [PenAnimalId, number][]).map(([id, height]) => ({
     ...model(MODELS.animals[id], `models/animals/${id}.glb`, 'medium', height),
     orient: true,
     thumbnail: ASSETS.icons[id],
@@ -216,6 +224,9 @@ export const MODEL_MANIFEST: ModelSpec[] = [
   model(MODELS.fruits.persimmon, 'models/fruits/persimmon.glb', 'tiny', 0.2, ASSETS.crops.persimmon),
   model(MODELS.fruits.banana, 'models/fruits/banana.glb', 'tiny', 0.26, ASSETS.crops.banana),
   model(MODELS.fruits.blueberry, 'models/fruits/blueberry.glb', 'tiny', 0.2, ASSETS.crops.blueberry),
+  // 귤 · 키위: 아이콘 그림(잎 · 단면)이 아니라 3D 용 통 열매 그림을 따로 만든다
+  model(MODELS.fruits.tangerine, 'models/fruits/tangerine.glb', 'tiny', 0.2),
+  model(MODELS.fruits.kiwi, 'models/fruits/kiwi.glb', 'tiny', 0.2),
 ];
 
 export const MODEL_SPEC_BY_KEY: Record<string, ModelSpec> = Object.fromEntries(

@@ -24,6 +24,8 @@ import { input, obstacles, walkBounds } from '../../state/runtime';
 import { GROUND_MARGIN, GrassGround, PathNetwork } from '../../props/Ground';
 import { ForestWall, forestShadowBounds } from '../../props/ForestWall';
 import { SignBoard } from '../../props/SignBoard';
+import { Apiary } from './apiary/Apiary';
+import { APIARY_AREA } from './apiary/apiaryLayout';
 import { AnimalPen } from './pen/AnimalPen';
 import { plantWithMath } from './farm/farmActions';
 import { FarmPlot } from './farm/FarmPlot';
@@ -48,7 +50,10 @@ const YARD_DECORATE_RULES: DecorateRules = {
     );
     // 집 문 앞은 비워 둔다 (집에 못 들어가게 막히지 않게)
     const atDoor = Math.hypot(x - YARD.house.door.x, z - YARD.house.door.z) < radius + 1.2;
-    return inFarm || atDoor;
+    // 양봉 통 자리 (우리 안 구석, 꿀벌을 사면 통이 놓인다)
+    const r = APIARY_AREA;
+    const inApiary = x + radius > r.minX && x - radius < r.maxX && z + radius > r.minZ && z - radius < r.maxZ;
+    return inFarm || atDoor || inApiary;
   },
 };
 
@@ -93,7 +98,7 @@ export function YardWorld(): React.ReactElement {
   return (
     <group onClick={onTap} onPointerMove={(event) => decorateFloorHover(event.point.x, event.point.z)}>
       <DecorateSystem rules={YARD_DECORATE_RULES} />
-      <PlacedFurnitureLayer area="yard" />
+      <PlacedFurnitureLayer rules={YARD_DECORATE_RULES} />
       <group position={[centerX, 0, centerZ]}>
         <GrassGround width={width} depth={depth} />
       </group>
@@ -136,6 +141,7 @@ export function YardWorld(): React.ReactElement {
       )}
 
       <AnimalPen />
+      <Apiary />
       <StaticShadow>
         <TownGate />
       </StaticShadow>

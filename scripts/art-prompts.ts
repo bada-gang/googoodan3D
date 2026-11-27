@@ -69,6 +69,10 @@ export const ART_PROMPTS: Record<string, string> = {
   [ASSETS.crops.goatMilk]: 'a cute wedge of creamy pale-yellow goat cheese (#f4e3a1) with a few round holes, next to a small round cheese wheel with a soft white rind, simple chunky shapes',
   [ASSETS.crops.wool]: 'a fluffy bundle of soft white sheep wool, like a cloud, tied with a pink ribbon',
   [ASSETS.crops.milk]: 'a glass bottle of fresh white milk with a sky-blue cap',
+  // 2026-11 추가: 귤 · 키위 · 벌꿀
+  [ASSETS.crops.tangerine]: 'one small round bright orange mandarin tangerine (#f59a2a), slightly flattened, with a softly dimpled peel and two small glossy green leaves on a short stem',
+  [ASSETS.crops.kiwi]: 'one whole oval kiwi fruit with fuzzy brown skin (#8a6a3c) next to one kiwi cut in half showing bright green juicy flesh (#8cc63f) with a pale cream center and a ring of tiny black seeds',
+  [ASSETS.crops.honey]: 'a round glass honey jar full of glowing golden honey (#f2b632) with a red-and-white checkered cloth lid tied with a string, and a wooden honey dipper leaning against it with a drip of honey',
 
   /* ---- 물고기: 옆모습, 머리가 왼쪽 ---- */
   [ASSETS.crops.minnow]: 'one tiny slender silver-gray minnow fish (#b9c9d6) with a pale belly and big round eye, side view, head pointing left',
@@ -111,6 +115,8 @@ export const ART_PROMPTS: Record<string, string> = {
   [ASSETS.seeds.persimmon]: 'a small kraft-paper seed packet, folded at the top, with a picture of an orange persimmon printed on the front',
   [ASSETS.seeds.banana]: 'a small kraft-paper seed packet, folded at the top, with a picture of a bunch of yellow bananas printed on the front',
   [ASSETS.seeds.blueberry]: 'a small kraft-paper seed packet, folded at the top, with a picture of a cluster of blue blueberries printed on the front',
+  [ASSETS.seeds.tangerine]: 'a small kraft-paper seed packet, folded at the top, with a picture of an orange tangerine with a green leaf printed on the front',
+  [ASSETS.seeds.kiwi]: 'a small kraft-paper seed packet, folded at the top, with a picture of a green kiwi fruit cut in half printed on the front',
 
   /* ---- UI ---- */
   [ASSETS.ui.coin]: 'one thick shiny gold coin (#f6c453) with a simple embossed star in the middle, tilted slightly',

@@ -217,6 +217,12 @@ class AudioEngine {
         this.tone({ freq: midiToFreq(55), start: now, duration: 0.3, gain: 0.4, type: 'sine', glideTo: midiToFreq(62) });
         break;
       case 'animal':
+        if (variant === 'bee') {
+          // 꿀벌은 녹음이 없어 합성음: 낮은 톱니파 둘을 살짝 어긋나게 겹쳐 '웅—'
+          this.tone({ freq: 220, start: now, duration: 0.45, gain: 0.18, type: 'sawtooth', glideTo: 232 });
+          this.tone({ freq: 226, start: now, duration: 0.45, gain: 0.14, type: 'sawtooth', glideTo: 214 });
+          break;
+        }
         this.tone({ freq: midiToFreq(71), start: now, duration: 0.16, gain: 0.4, type: 'sawtooth', glideTo: midiToFreq(76) });
         break;
       case 'levelUp':

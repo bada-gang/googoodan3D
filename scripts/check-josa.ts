@@ -11,7 +11,7 @@ const line = (...parts: string[]) => console.log('  ' + parts.join('   '));
 
 console.log('동물');
 for (const a of ANIMAL_LIST)
-  line(`${josa(a.name, '이/가')} 우리에 왔어요!`, `${josa(a.name, '을/를')} 데려와 볼까요?`, `${josa(a.name, '은/는')} 2마리까지`, `${josa(a.produceName, '이/가')} 준비됐어요!`, `${josa(a.produceName, '을/를')} 받아 볼까요?`);
+  line(`${josa(a.name, '이/가')} ${a.homeName ?? '우리'}에 왔어요!`, `${josa(a.name, '을/를')} 데려와 볼까요?`, `${josa(a.name, '은/는')} ${a.maxCount}${a.countUnit ?? '마리'}까지`, `${josa(a.produceName, '이/가')} 준비됐어요!`, `${josa(a.produceName, '을/를')} 받아 볼까요?`);
 console.log('나무');
 for (const t of TREE_LIST)
   line(`${josa(t.seedName, '을/를')} 심어 볼까요?`, `${josa(t.name, '을/를')} 키워 볼까요?`, `${josa(t.fruitName, '을/를')} 따 볼까요?`, `${josa(t.name, '이/가')} 열매를 다 맺었어요`);

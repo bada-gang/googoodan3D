@@ -145,6 +145,12 @@ export const MODEL_PROMPTS: Record<string, string> = {
     'A long low wooden feeding trough on short legs, filled with golden hay and grains (#f6c453). Simple chunky shapes.',
   ),
   /* 목장 물통. 건초 여물통과 짝을 이루게 같은 나무 통 모양으로 */
+  /* 꿀벌 양봉 통. 꿀벌은 코드로 그린다 (world/scenes/yard/apiary) */
+  [MODELS.buildings.beehive]: item(
+    'A cute wooden beehive box for a small farm: two stacked pale honey-yellow wooden boxes (#f2c14e) with a slightly overhanging soft white lid roof, ' +
+      'a small slot entrance at the bottom front with a tiny landing board, standing on a short sturdy wooden stand, ' +
+      'a little golden honey drip painted on one side. Simple chunky shapes, no bees.',
+  ),
   [MODELS.buildings.waterTrough]: item(
     'A long low wooden water trough on short legs, the same chunky wooden style as a farm feeding trough, ' +
       'filled almost to the brim with clear light-blue water (#7cc6e8) with a few soft white highlights. Simple chunky shapes.',
@@ -168,6 +174,14 @@ export const MODEL_PROMPTS: Record<string, string> = {
     'A banana plant: one thick smooth upright pseudo-stem trunk made of wrapped leaf sheaths (light olive green #a8b86a with soft brown streaks), ' +
       'and at the top a crown of seven or eight very large long paddle-shaped bright green leaves (#6fbf6a) with a pale midrib, ' +
       'arching outward in every direction and drooping at the tips like a fountain. Taller than wide.',
+  ),
+  [MODELS.trees.tangerine]: tree(
+    'A small mandarin tangerine tree: a compact very round dense crown of small glossy dark-green leaves (#4f9a4c), short sturdy light-brown trunk. Smaller and rounder than an orange tree.',
+  ),
+  // 키위는 덩굴이라 포도처럼 기둥 하나 + 넓은 잎 덩어리로 (시렁은 3D 변환에서 가로대가 사라진다)
+  [MODELS.trees.kiwi]: tree(
+    'A kiwi vine trained like a small tree: a thick twisting fuzzy brown vine trunk wrapped around one sturdy wooden post, ' +
+      'with a wide slightly flat-topped canopy of large round heart-shaped green leaves (#6fae4f).',
   ),
   [MODELS.trees.blueberry]: realPlant(
     'A blueberry bush: a rounded shrub that is wider than tall, with several thin brown woody stems rising from one base and branching, ' +
@@ -306,6 +320,14 @@ export const MODEL_PROMPTS: Record<string, string> = {
   ),
 
   /* ---- 열매 ---- */
+  [MODELS.fruits.tangerine]: item(
+    'One small round bright orange mandarin tangerine fruit (#f59a2a), slightly flattened, with a perfectly smooth rounded surface ' +
+      '(peel texture only as subtle color, not bumps) and a tiny green stem nub on top. No leaves.',
+  ),
+  [MODELS.fruits.kiwi]: item(
+    'One whole oval kiwi fruit with brown skin (#8a6a3c), the fuzz shown only as subtle color, a perfectly smooth simple surface, ' +
+      'not cut open. No leaves.',
+  ),
   [MODELS.fruits.orange]: item(
     'One round orange fruit (#f2953a) with a perfectly smooth rounded surface (peel texture only as subtle color, ' +
       'not as bumps), a short thick brown stem on top and one small, thick, plump green leaf lying close against the fruit.',

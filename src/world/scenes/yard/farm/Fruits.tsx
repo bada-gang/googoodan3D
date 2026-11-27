@@ -21,6 +21,8 @@ const FRUIT_COLOR: Record<TreeSpeciesId, string> = {
   persimmon: '#ea8034',
   banana: '#f6d24a',
   blueberry: '#4f6fc4',
+  tangerine: '#f59a2a',
+  kiwi: '#8a6a3c',
 };
 
 /**
