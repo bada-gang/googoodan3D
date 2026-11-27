@@ -178,7 +178,8 @@ export const MODEL_MANIFEST: ModelSpec[] = [
   model(MODELS.buildings.seedShop, 'models/buildings/seed_shop.glb', 'large', 3.6),
   model(MODELS.buildings.furnitureShop, 'models/buildings/furniture_shop.glb', 'large', 3.8),
   // 양봉 통: 가게 · 가방의 꿀벌 그림도 이 원본 그림으로 만든다
-  { ...model(MODELS.buildings.beehive, 'models/buildings/beehive.glb', 'medium', 1.05), thumbnail: ASSETS.icons.bee },
+  // 작은 물건이라 small 예산 (medium 으로 만들었더니 한 통이 나무 한 그루만큼 무거웠다)
+  { ...model(MODELS.buildings.beehive, 'models/buildings/beehive.glb', 'small', 1.05), thumbnail: ASSETS.icons.bee },
 
   ...(Object.entries(MODELS.trees) as [TreeSpeciesId, string][]).map(([id, key]) =>
     model(key, `models/trees/${id}.glb`, 'medium', TREE_HEIGHT[id] ?? 2.9),

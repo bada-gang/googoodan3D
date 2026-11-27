@@ -1,13 +1,13 @@
 /**
  * 양봉 통 둘레를 날아다니는 작은 꿀벌. 새 그림 없이 코드로 만든다 (노란 몸 · 검은 줄 · 반투명 날개).
  *
- * 통마다 3~4마리 (apiaryLayout BEES_PER_HIVE). 가볍게: 몇 마리든 몸 · 줄무늬 · 날개를 각각 인스턴싱으로 한 번에 그린다 (그리기 3번).
+ * 통마다 2~3마리 (apiaryLayout BEES_PER_HIVE). 가볍게: 몇 마리든 몸(줄무늬 포함, 꼭짓점 색) · 날개를 각각 인스턴싱으로 한 번에 그린다 (그리기 2번).
  * 그림자는 만들지 않는다 (작아서 티가 안 나고, 움직여서 미리 그릴 수도 없다).
  * 움직임: 통 둘레를 저마다 다른 반지름 · 높이 · 빠르기로 돌며 위아래로 출렁이고, 날개는 빠르게 파닥인다.
  */
 import { useLayoutEffect, useMemo, useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
-import { CylinderGeometry, DoubleSide, Euler, Matrix4, Quaternion, Vector3, type InstancedMesh } from 'three';
+import { Color, CylinderGeometry, DoubleSide, Euler, Float32BufferAttribute, Matrix4, Quaternion, SphereGeometry, Vector3, type BufferGeometry, type InstancedMesh } from 'three';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { BEE_ORBIT, BEES_PER_HIVE } from './apiaryLayout';
 
@@ -37,13 +37,26 @@ const wingPosition = new Vector3();
 const wingRotation = new Quaternion();
 const ONE = new Vector3(1, 1, 1);
 
-/** 검은 줄 두 줄: 몸(앞뒤 = z 축)을 감싸는 얇은 고리 둘을 한 모양으로 */
-function stripeGeometry() {
-  const rings = [-0.03, 0.035].map((z) =>
-    new CylinderGeometry(BODY.radius * 1.03, BODY.radius * 1.03, BODY.radius * 0.32, 10, 1, true).rotateX(Math.PI / 2).translate(0, 0, z),
-  );
-  const merged = mergeGeometries(rings, false);
-  for (const ring of rings) ring.dispose();
+/** 모양 전체에 한 색을 꼭짓점 색으로 칠한다 */
+function paint(geometry: BufferGeometry, hex: string): BufferGeometry {
+  const c = new Color(hex);
+  const count = geometry.getAttribute('position').count;
+  const colors = new Float32Array(count * 3);
+  for (let i = 0; i < count; i++) colors.set([c.r, c.g, c.b], i * 3);
+  geometry.setAttribute('color', new Float32BufferAttribute(colors, 3));
+  return geometry;
+}
+
+/** 몸: 노란 공 + 몸(앞뒤 = z 축)을 감싸는 검은 고리 둘을 한 모양으로 (그리기 1번) */
+function bodyGeometry(): BufferGeometry {
+  const parts = [
+    paint(new SphereGeometry(BODY.radius, 10, 8), BEE_YELLOW),
+    ...[-0.03, 0.035].map((z) =>
+      paint(new CylinderGeometry(BODY.radius * 1.03, BODY.radius * 1.03, BODY.radius * 0.32, 10, 1, true).rotateX(Math.PI / 2).translate(0, 0, z), BEE_BLACK),
+    ),
+  ];
+  const merged = mergeGeometries(parts, false);
+  for (const part of parts) part.dispose();
   return merged;
 }
 
@@ -68,12 +81,11 @@ export function BeeSwarm({ hives }: { hives: { x: number; z: number }[] }): Reac
   );
   const count = paths.length;
   const bodies = useRef<InstancedMesh>(null);
-  const stripes = useRef<InstancedMesh>(null);
   const wings = useRef<InstancedMesh>(null);
-  const stripeShape = useMemo(stripeGeometry, []);
+  const bodyShape = useMemo(bodyGeometry, []);
 
   useLayoutEffect(() => {
-    for (const mesh of [bodies.current, stripes.current, wings.current]) if (mesh) mesh.count = mesh === wings.current ? count * 2 : count;
+    for (const mesh of [bodies.current, wings.current]) if (mesh) mesh.count = mesh === wings.current ? count * 2 : count;
   }, [count]);
 
   useFrame(({ clock }) => {
@@ -88,7 +100,6 @@ export function BeeSwarm({ hives }: { hives: { x: number; z: number }[] }): Reac
       rotation.setFromEuler(euler.set(0, heading, 0));
       matrix.compose(position, rotation, scale.set(1, 1, BODY.length));
       bodies.current?.setMatrixAt(i, matrix);
-      stripes.current?.setMatrixAt(i, matrix);
       // 날개 둘: 등 위 좌우, 빠르게 파닥
       const flap = Math.sin(t * 38 + p.phase) * 0.6;
       for (const side of [-1, 1]) {
@@ -97,19 +108,14 @@ export function BeeSwarm({ hives }: { hives: { x: number; z: number }[] }): Reac
         wings.current?.setMatrixAt(i * 2 + (side > 0 ? 1 : 0), wingMatrix.multiplyMatrices(matrix, wingOffset));
       }
     });
-    for (const mesh of [bodies.current, stripes.current, wings.current]) if (mesh) mesh.instanceMatrix.needsUpdate = true;
+    for (const mesh of [bodies.current, wings.current]) if (mesh) mesh.instanceMatrix.needsUpdate = true;
   });
 
   return (
     <group>
-      {/* 몸: 앞뒤로 긴 노란 공 */}
-      <instancedMesh ref={bodies} args={[undefined, undefined, Math.max(1, count)]} frustumCulled={false}>
-        <sphereGeometry args={[BODY.radius, 10, 8]} />
-        <meshStandardMaterial color={BEE_YELLOW} roughness={0.6} />
-      </instancedMesh>
-      {/* 검은 줄무늬 두 줄 (몸을 감싸는 얇은 띠). 몸과 같은 행렬이라 몸 길이만큼 같이 늘어난다 */}
-      <instancedMesh ref={stripes} args={[stripeShape, undefined, Math.max(1, count)]} frustumCulled={false}>
-        <meshStandardMaterial color={BEE_BLACK} roughness={0.7} side={DoubleSide} />
+      {/* 몸: 앞뒤로 긴 노란 공 + 검은 줄 둘 (고리는 안쪽이 비어 있어 양면으로) */}
+      <instancedMesh ref={bodies} args={[bodyShape, undefined, Math.max(1, count)]} frustumCulled={false}>
+        <meshStandardMaterial vertexColors roughness={0.65} side={DoubleSide} />
       </instancedMesh>
       {/* 날개: 반투명 흰 판 */}
       <instancedMesh ref={wings} args={[undefined, undefined, Math.max(2, count * 2)]} frustumCulled={false}>
