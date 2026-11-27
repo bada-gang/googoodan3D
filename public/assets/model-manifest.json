@@ -21,6 +21,8 @@
     "model_tree_persimmon",
     "model_tree_banana",
     "model_tree_blueberry",
+    "model_tree_tangerine",
+    "model_tree_kiwi",
     "model_plant_sprout",
     "model_scenery_tree",
     "model_scenery_pine",
@@ -68,6 +70,8 @@
     "model_fruit_grape",
     "model_fruit_persimmon",
     "model_fruit_banana",
-    "model_fruit_blueberry"
+    "model_fruit_blueberry",
+    "model_fruit_tangerine",
+    "model_fruit_kiwi"
   ]
 }

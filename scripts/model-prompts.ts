@@ -324,9 +324,10 @@ export const MODEL_PROMPTS: Record<string, string> = {
     'One small round bright orange mandarin tangerine fruit (#f59a2a), slightly flattened, with a perfectly smooth rounded surface ' +
       '(peel texture only as subtle color, not bumps) and a tiny green stem nub on top. No leaves.',
   ),
+  // 처음 문구('fuzzy brown ... oval')는 그림 생성기가 거절했다. 과일 이름과 색 위주로 쓴다
   [MODELS.fruits.kiwi]: item(
-    'One whole oval kiwi fruit with brown skin (#8a6a3c), the fuzz shown only as subtle color, a perfectly smooth simple surface, ' +
-      'not cut open. No leaves.',
+    'One whole kiwifruit, a small egg-shaped fruit with light brown skin (#9a7a4a) and a tiny dry tip at one end, ' +
+      'a perfectly smooth simple surface, not cut open. No leaves. A cute fruit icon for a farming game.',
   ),
   [MODELS.fruits.orange]: item(
     'One round orange fruit (#f2953a) with a perfectly smooth rounded surface (peel texture only as subtle color, ' +
