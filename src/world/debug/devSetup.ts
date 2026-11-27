@@ -3,6 +3,7 @@
  *   ?dev-furniture  가구 · 장식을 하나씩 가방에
  *   ?dev-animals    동물을 한 마리씩
  *   ?dev-ready      밭마다 열매, 동물 생산물 준비 (저장된 상태를 실제로 바꾼다 — 시험 학생으로만)
+ *   ?dev-all        전부 있음: 10레벨 · 돈 · 모든 동물(최대 마릿수) · 밭 8칸에 열매 맺은 나무 · 씨앗 · 가구 · 물고기 도감 (devAll.ts)
  */
 import { gameEvents } from '@/bridge/eventBus';
 import { FURNITURE } from '@/config/catalog';
@@ -10,6 +11,7 @@ import { useGameStore } from '@/state/gameStore';
 import { decorateFloorHover, decorateFloorTap, useDecorate } from '../gameplay/decorate';
 import { input, obstacles, player } from '../state/runtime';
 import { useWorldScene } from '../state/scenes';
+import { fillEverything } from './devAll';
 
 /** 배포본에서도 주소에 ?debug 를 붙이면 콘솔 손잡이(__googooWorld · __googooR3f)를 열어 둔다 (태블릿 성능 점검용) */
 export const DEBUG_HANDLES = typeof location !== 'undefined' && new URLSearchParams(location.search).has('debug');
@@ -43,6 +45,8 @@ export function setupDevTools(): void {
         if (!store.animals.some((a) => a.species === species)) useGameStore.getState().addAnimal(species);
       }
     }
+    // ?dev-all 이면 지금 고른 학생을 "전부 있음"으로 채운다 (오프라인 시험용, devAll.ts)
+    if (new URLSearchParams(window.location.search).has('dev-all')) fillEverything();
     // ?dev-ready 면 밭마다 열매가 열리고(빈 밭엔 사과나무) 동물은 생산물이 준비된다 (수확 소리 · 연출 시험용)
     if (new URLSearchParams(window.location.search).has('dev-ready')) {
       useGameStore.setState((s) => ({

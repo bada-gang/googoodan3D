@@ -165,6 +165,7 @@ art-src/         생성 원본 (git 에 안 들어감 — 아래 "백업" 참고
 | `?noshadow` `?noaa` `?pbrground` `?cap30` | 성능 비교용으로 하나씩 끄거나 바꾸기 | 모두 |
 | `?debug` | 오류 자세히 보기, 콘솔 손잡이 | 모두 |
 | `?dev-animals` `?dev-furniture` `?dev-ready` | 동물 · 가구 · 다 자란 나무를 바로 받기 | 개발 서버만 |
+| `?dev-all` | 지금 고른 학생을 "전부 있음"으로 (10레벨 · 9,999원 · 모든 동물 최대 · 밭 8칸 열매 · 씨앗 · 가구 · 물고기). 시험 이름 "전부있음" 에 쓴다 (`world/debug/devAll.ts`) | 오프라인 서버(5174)만 — 학급 서버에서는 하지 않는다 |
 | `?dev-fish=crown` | 낚시할 때 늘 그것이 문다 (물고기 id: `config/fishing.ts`. 막대 빠르기 시험용) | 개발 서버만 |
 | `?daytime=day` / `sunset` / `night` | 시간대 고정 | 개발 서버만 |
 | `?fastday=20` | 밤낮을 20배 빠르게 | 개발 서버만 |
