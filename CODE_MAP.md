@@ -105,6 +105,7 @@ art-src/         생성 원본 (git 에 안 들어감 — 아래 "백업" 참고
 | 시장 낚시터 (연못 · 데크 · 낚싯대 · 찌) | `src/world/scenes/town/FishingSpot.tsx` (자리: `config/layout.ts` 의 `TOWN.pond`) |
 | 땅 · 흙길 | `src/world/props/Ground.tsx` |
 | 카펫 (3D 모델 대신 코드로 그린 무늬: 포근한 · 알록달록) | `src/world/props/DrawnRug.tsx` |
+| 창밖 풍경 그림 (집 안 창 · 마굿간 다락 창, 시간에 따라 어두워짐. 그림 키 `ASSETS.environment.homeWindow` · `barnWindow`) | `src/world/props/WindowView.tsx` |
 | 정글짐 · 그네 (3D 모델 대신 코드로 만든 막대, 물건 하나가 그리기 호출 1번) | `src/world/props/CodeFurniture.tsx` (색 다른 부품 합치기: `props/coloredParts.ts`) |
 | 놓은 가구 모양 고르기 (카펫 / 코드 가구 / 3D 모델) | `src/world/gameplay/decorate.tsx` 의 `FurnitureBody` |
 | 맵을 둘러싼 숲 벽 (앞줄 3D 나무 · 뒷줄 침엽수 모델, 12m 토막으로 화면 밖 안 그림 · 어두워지는 잔디 숲 바닥, 길 틈) | `src/world/props/ForestWall.tsx` |

@@ -5,7 +5,7 @@
  * 그림자: 기둥 · 들보는 드리우지 않고, 칸막이 · 다락 · 사다리 · 문짝은 BarnWorld 의 StaticShadow 로 바닥에 한 번 굽는다.
  * 가볍게: 움직이지 않는 상자는 색(재질)마다 모양 하나로 합친다 (props/mergedBoxes).
  * 상자마다 그리면 그리기 호출이 상자 수만큼(그림자까지 두 배) 늘어 태블릿에서 무겁다.
- * 그래서 이 파일의 그리기는 바닥 · 짚 · 풀밭 · 벽 2 · 들보 · 나무 · 창 빛 · 문짝 · 문 무늬 · 사다리 = 11번이다.
+ * 그래서 이 파일의 그리기는 바닥 · 짚 · 풀밭 · 벽 2 · 들보 · 나무 · 판자 틈 빛 · 다락 창 풍경 · 문짝 · 문 무늬 · 사다리 = 12번이다.
  * 자리 · 색은 barnLayout.ts.
  */
 import { useMemo, useRef } from 'react';
@@ -18,6 +18,7 @@ import { ArtTexture } from '../../rendering/assets';
 import { daylight } from '../../rendering/dayNight';
 import { applyGroundShadow } from '../../rendering/groundShadow';
 import { mergedBoxGeometry, type BoxSpec } from '../../props/mergedBoxes';
+import { WindowView } from '../../props/WindowView';
 import {
   BACK_Z,
   COLORS,
@@ -129,15 +130,15 @@ export function Walls(): React.ReactElement {
   );
 }
 
-/** 다락 창과 판자 틈의 빛 (한 모양). 낮에는 밝은 크림색, 밤에는 바깥 하늘색 */
+/**
+ * 다락 창(풍경 그림, props/WindowView)과 판자 틈 2개의 빛(그대로: 낮에는 밝은 크림색, 밤에는 바깥 하늘색).
+ * 다락 창에 그림이 들어가 판 하나가 늘었다 (그리기 1번)
+ */
 const WINDOW_DAY = new Color(COLORS.window);
 function WindowLight(): React.ReactElement {
   const geometry = useMemo(() => {
     const z = BACK_Z + WALL_THICKNESS / 2 + 0.02;
-    const panes = [
-      new PlaneGeometry(LOFT_WINDOW.width, LOFT_WINDOW.height).translate(LOFT_WINDOW.x, LOFT_WINDOW.y, z),
-      ...SLITS.map((x) => new PlaneGeometry(0.05, 1.5).translate(x, 1.95, z)),
-    ];
+    const panes = SLITS.map((x) => new PlaneGeometry(0.05, 1.5).translate(x, 1.95, z));
     const merged = mergeGeometries(panes, false);
     for (const pane of panes) pane.dispose();
     return merged;
@@ -147,9 +148,18 @@ function WindowLight(): React.ReactElement {
     material.current?.color.copy(WINDOW_DAY).lerp(daylight.sky, Math.min(1, daylight.darkness * 1.2));
   });
   return (
-    <mesh geometry={geometry}>
-      <meshBasicMaterial ref={material} color={WINDOW_DAY} toneMapped={false} />
-    </mesh>
+    <>
+      <mesh geometry={geometry}>
+        <meshBasicMaterial ref={material} color={WINDOW_DAY} toneMapped={false} />
+      </mesh>
+      <WindowView
+        assetKey={ASSETS.environment.barnWindow}
+        width={LOFT_WINDOW.width}
+        height={LOFT_WINDOW.height}
+        position={[LOFT_WINDOW.x, LOFT_WINDOW.y, BACK_Z + WALL_THICKNESS / 2 + 0.02]}
+        fallbackColor={COLORS.window}
+      />
+    </>
   );
 }
 

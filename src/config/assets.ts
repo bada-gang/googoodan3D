@@ -135,6 +135,10 @@ export const ASSETS = {
   environment: {
     /** 시작 화면 배경 그림 */
     title: 'env_title',
+    /** 집 안 창밖 풍경: 집 뒤 잔디와 우거진 나무 (scenes/home HomeStructure 의 WindowGlass) */
+    homeWindow: 'env_home_window',
+    /** 마굿간 다락 창 풍경: 높은 창이라 나무 윗부분과 하늘 (scenes/barn BarnStructure) */
+    barnWindow: 'env_barn_window',
   },
   /** 캐릭터 고르기 그림. 캐릭터 3D 모델의 원본 그림으로 만든다 */
   portraits: {

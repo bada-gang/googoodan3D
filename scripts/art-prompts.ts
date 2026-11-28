@@ -180,6 +180,15 @@ export const ART_PROMPTS: Record<string, string> = {
     'a row of round fruit trees, a fenced pen with chickens and fluffy sheep on the right, rolling green hills behind, ' +
     'blue sky. Keep the center of the image calm and open (a menu panel will cover the center)',
 
+  // 창밖 풍경 (2026-11). 창에 그대로 보이는 그림이라 글자 · 사람 · 동물 없이 차분하게
+  [ASSETS.environment.homeWindow]:
+    'the view through a cozy cottage window at the back of the house: a strip of soft green lawn in the near foreground, ' +
+    'behind it a dense grove of round leafy green trees of different heights filling most of the view, ' +
+    'a little bright blue sky with soft clouds peeking above the treetops. Calm, simple shapes, no buildings, no people, no animals, no window frame',
+  [ASSETS.environment.barnWindow]:
+    'the view through a high loft window of a farm barn: the leafy round tops of tall green trees across the lower half, ' +
+    'bright blue sky with a few soft white clouds filling the upper half. Calm, simple shapes, no buildings, no people, no animals, no window frame',
+
   /* ---- 연출 ---- */
   [ASSETS.particles.star]: 'one small glowing golden yellow star',
   [ASSETS.particles.sparkle]: 'one four-pointed white and pale-gold twinkle sparkle',

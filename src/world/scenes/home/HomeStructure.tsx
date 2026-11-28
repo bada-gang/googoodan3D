@@ -7,15 +7,16 @@
  *  - 나무 부품은 그림자를 드리우지 않는다 (문 그림자는 필요 없다, 창틀 그림자는 벽에 져서 안 보였다)
  * 벽지 · 바닥은 흰 바탕 무늬 질감에 고른 색을 곱해 칠한다 (상점 미리보기와 같은 계산 — icons.ts surfaceStyle).
  */
-import { useEffect, useMemo, useRef } from 'react';
-import { useFrame, type ThreeEvent } from '@react-three/fiber';
-import { Color, type Material, type MeshStandardMaterial } from 'three';
+import { useEffect, useMemo } from 'react';
+import type { ThreeEvent } from '@react-three/fiber';
+import type { Material } from 'three';
 import { PALETTE } from '@/config/artTokens';
+import { ASSETS } from '@/config/assets';
 import { ArtTexture } from '../../rendering/assets';
-import { daylight } from '../../rendering/dayNight';
 import { applyGroundShadow } from '../../rendering/groundShadow';
 import { mergedBoxGeometry } from '../../props/mergedBoxes';
 import { coloredPartsGeometry, type Part } from '../../props/coloredParts';
+import { WindowView } from '../../props/WindowView';
 import {
   BACK_Z,
   DOOR,
@@ -26,9 +27,6 @@ import {
   WALL_THICKNESS,
   WINDOW,
 } from './homeLayout';
-
-const GLASS_DAY = new Color(PALETTE.windowLight);
-const GLASS_GLOW = new Color(PALETTE.window);
 
 /** 흰 바탕 무늬 질감 × 고른 색 */
 function SurfaceMaterial({
@@ -165,19 +163,15 @@ export function Woodwork(): React.ReactElement {
   );
 }
 
-/** 창문 유리: 밝은 하늘색 (빛이 들어오는 느낌). 바깥 하늘색을 따라 노을 · 밤이 된다 */
+/** 창밖 풍경: 집 뒤 잔디와 우거진 나무 그림 (props/WindowView, 시간에 따라 어두워진다) */
 export function WindowGlass(): React.ReactElement {
-  const glass = useRef<MeshStandardMaterial>(null);
-  useFrame(() => {
-    if (!glass.current) return;
-    const k = Math.min(1, daylight.darkness * 1.2);
-    glass.current.color.copy(GLASS_DAY).lerp(daylight.sky, k);
-    glass.current.emissive.copy(GLASS_GLOW).lerp(daylight.sky, k);
-  });
   return (
-    <mesh position={[WINDOW.x, WINDOW.y, BACK_Z + WALL_THICKNESS / 2 + 0.03]}>
-      <planeGeometry args={[WINDOW.width, WINDOW.height]} />
-      <meshStandardMaterial ref={glass} color={PALETTE.windowLight} emissive={PALETTE.window} emissiveIntensity={0.35} roughness={0.4} />
-    </mesh>
+    <WindowView
+      assetKey={ASSETS.environment.homeWindow}
+      width={WINDOW.width}
+      height={WINDOW.height}
+      position={[WINDOW.x, WINDOW.y, BACK_Z + WALL_THICKNESS / 2 + 0.03]}
+      fallbackColor={PALETTE.windowLight}
+    />
   );
 }

@@ -86,6 +86,8 @@
     "tex_floor_star",
     "tex_water",
     "env_title",
+    "env_home_window",
+    "env_barn_window",
     "particle_star",
     "particle_sparkle",
     "furniture_bed_basic",
