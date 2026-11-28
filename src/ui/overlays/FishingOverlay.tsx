@@ -95,8 +95,12 @@ function BiteGame(): React.ReactElement {
     const at = position.current;
     const hit = Math.abs(at - zoneCenter) <= zone / 2;
     setStopped({ at, hit });
-    // 잡았을 때 손맛: '쿵-팅' 소리 + 막대 흔들림 · 표시 튀어 오름 (styles/index.css 의 fish-hit-*)
-    if (hit) audio.play('reel');
+    // 잡았을 때 손맛: '쿵-팅' 소리 + 진동 + 막대 흔들림 · 표시 튀어 오름 (styles/index.css 의 fish-hit-*)
+    if (hit) {
+      audio.play('reel');
+      // 짧은 진동 (안드로이드 태블릿만 된다. 아이패드 · 지원하지 않는 기기는 아무 일 없음)
+      navigator.vibrate?.(50);
+    }
     window.setTimeout(() => reel(hit), STOP_SHOW_MS);
   };
 
