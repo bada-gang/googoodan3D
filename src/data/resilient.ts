@@ -17,14 +17,12 @@ import type {
   RepositoryBundle,
 } from './repositories';
 
-/** 기다린다고 나아지지 않는 오류들. 규칙·인증·설정 문제다. */
-const FATAL_CODES = new Set([
-  'permission-denied',
-  'unauthenticated',
-  'failed-precondition',
-  'unimplemented',
-  'invalid-argument',
-]);
+/**
+ * 기다린다고 나아지지 않는 오류들. 규칙·인증·설정 문제다.
+ * invalid-argument(저장 내용이 잘못됨, 예: 빈 값)는 넣지 않는다 — 이 기기 저장으로 내려가면 그 수업 내내
+ * 서버에 아무것도 안 올라간다 (2026-11 버그). 그 한 번만 실패하고, 다음 저장 때 서버에 다시 시도한다.
+ */
+const FATAL_CODES = new Set(['permission-denied', 'unauthenticated', 'failed-precondition', 'unimplemented']);
 
 function isFatal(error: unknown): boolean {
   const code = (error as { code?: unknown })?.code;

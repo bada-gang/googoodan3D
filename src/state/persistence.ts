@@ -80,7 +80,11 @@ export async function flushSave(): Promise<void> {
   try {
     await Promise.all(writes);
   } catch (error) {
-    console.error('[persistence] 저장 실패', error);
+    console.error('[persistence] 저장 실패 — 다음 저장 때 다시 올린다', error);
+    // 실패한 것을 '이미 썼다'로 남기지 않는다. 다음 저장(20초 뒤)에 두 문서를 다시 쓴다
+    writtenSave = [];
+    writtenStats = null;
+    scheduleSave();
   }
 }
 
