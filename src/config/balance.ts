@@ -41,14 +41,15 @@ export interface UnlockDef {
   label: string;
 }
 
+/** 레벨마다 열리는 나무 · 가축. 꾸미기 물건(가구 · 벽지 · 바닥재)은 해금이 없다 (config/decor) */
 export const UNLOCKS: UnlockDef[] = [
-  { level: 1, label: '사과나무 · 기본 가구' },
-  { level: 2, label: '오렌지나무 · 닭 · 포근한 방 세트' },
-  { level: 3, label: '복숭아나무 · 자연 숲 세트' },
+  { level: 1, label: '사과나무' },
+  { level: 2, label: '오렌지나무 · 닭' },
+  { level: 3, label: '복숭아나무' },
   { level: 4, label: '체리나무 · 염소' },
-  { level: 5, label: '포도나무 · 융단 바닥' },
+  { level: 5, label: '포도나무' },
   { level: 6, label: '감나무 · 양' },
-  { level: 7, label: '바나나나무 · 별빛 세트' },
+  { level: 7, label: '바나나나무' },
   { level: 8, label: '블루베리나무 · 젖소' },
   { level: 9, label: '귤나무' },
   { level: 10, label: '키위나무 · 꿀벌' },
