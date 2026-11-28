@@ -356,9 +356,11 @@ export const MODEL_PROMPTS: Record<string, string> = {
     'A playground seesaw seen from the side: one long thick yellow (#f6d24a) plank balanced on a short sturdy red pivot in the middle, ' +
       'a chunky round handle and a seat at each end. Simple solid shapes.',
   ),
+  // 시안 4개 중 사용자가 고른 코끼리 미끄럼틀 (scripts/gen-drafts.ts 로 그린 B)
   [furnitureModelKey('slide')]: furniture(
-    'A chunky playground slide: on the left a short wide staircase with solid steps up to a small platform with low solid side walls, ' +
-      'on the right a wide smooth orange (#f2a65a) slide with raised edges curving down to the ground. Solid thick shapes, no thin bars.',
+    'A cute elephant-shaped playground slide: a big friendly light blue (#8fc8ea) elephant standing sideways, with chunky solid steps ' +
+      'on its back side going up to the top of its head, and its long trunk curving down to the ground as a smooth wide slide. ' +
+      'Big round ears, small smiling eyes. Simple solid shapes, no thin parts.',
   ),
   [furnitureModelKey('merry_go_round')]: furniture(
     'A playground merry-go-round: a wide low round mint-green (#8fd8c4) spinning platform with colorful segments, ' +
@@ -367,9 +369,12 @@ export const MODEL_PROMPTS: Record<string, string> = {
   [furnitureModelKey('birdhouse')]: furniture(
     'A cute little orange (#f2a65a) wooden birdhouse with a red pointed roof, a round hole and a small perch, on top of one straight wooden post.',
   ),
-  [furnitureModelKey('scarecrow')]: furniture(
-    'A friendly farm scarecrow standing on a wooden post with arms stretched out: a smiling burlap face, a wide straw hat (#e3bf68), ' +
-      'a patched blue shirt with straw poking out of the sleeves, a small crow-free happy look.',
+  // 처음 것은 소매 끝 짚 다발 때문에 3D 변환에서 팔이 앞뒤로 두 겹씩(4겹) 생겼다.
+  // 비스듬히 본 그림 + 짚 다발 없는 단순한 소매 끝(둥근 장갑)으로 다시 그린다
+  [furnitureModelKey('scarecrow')]: item(
+    'A friendly farm scarecrow on one wooden post: a smiling burlap face, a wide straw hat (#e3bf68), ' +
+      'a patched blue shirt. Exactly ONE pair of arms: two thick simple sleeves stretched straight out sideways, ' +
+      'each ending in one plain round brown glove. No straw tufts on the sleeves, no extra arms. Chunky simple toy-like shapes.',
   ),
   [furnitureModelKey('mailbox')]: furniture(
     'A cute wooden mailbox with a rounded red top (#d65f4f), a small raised yellow flag on the side, on one thick wooden post.',

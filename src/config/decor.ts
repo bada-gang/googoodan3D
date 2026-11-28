@@ -123,7 +123,7 @@ export const FURNITURE: FurnitureDef[] = [
   { id: 'bed_basic', name: '나무 침대', category: 'rest', shape: 'bed', area: 'home', price: 1500, width: 210, height: 120, tint: '#c08a52' },
   { id: 'bed_starlight', name: '별빛 침대', category: 'rest', shape: 'bed', area: 'home', price: 3000, width: 215, height: 124, tint: '#b8a0e0' },
   { id: 'sofa_cozy', name: '포근한 소파', category: 'rest', shape: 'sofa', area: 'home', price: 2200, width: 220, height: 128, tint: '#f0a6a0' },
-  { id: 'beanbag', name: '빈백 소파', category: 'rest', shape: 'beanbag', area: 'home', price: 1800, width: 120, height: 90, tint: '#f6c453' },
+  { id: 'beanbag', name: '빈백', category: 'rest', shape: 'beanbag', area: 'home', price: 1800, width: 120, height: 90, tint: '#f6c453' },
   { id: 'rocking_chair', name: '흔들의자', category: 'rest', shape: 'rockingChair', area: 'home', price: 1500, width: 110, height: 120, tint: '#b57f4a' },
 
   { id: 'desk_basic', name: '나무 책상', category: 'study', shape: 'desk', area: 'home', price: 1200, width: 160, height: 112, tint: '#c08a52' },
@@ -157,7 +157,7 @@ export const FURNITURE: FurnitureDef[] = [
   { id: 'sandbox', name: '모래 놀이터', category: 'play', shape: 'sandbox', area: 'yard', price: 5000, width: 210, height: 70, tint: '#e9cf8f' },
   { id: 'seesaw', name: '시소', category: 'play', shape: 'seesaw', area: 'yard', price: 6000, width: 260, height: 90, tint: '#f6d24a' },
   { id: 'swing', name: '그네', category: 'play', shape: 'swing', area: 'yard', price: 8000, width: 230, height: 220, tint: '#7fb8e6', codeBuilt: true },
-  { id: 'slide', name: '미끄럼틀', category: 'play', shape: 'slide', area: 'yard', price: 9000, width: 220, height: 200, tint: '#f2a65a' },
+  { id: 'slide', name: '미끄럼틀', category: 'play', shape: 'slide', area: 'yard', price: 9000, width: 220, height: 200, tint: '#8fc8ea' },
   { id: 'jungle_gym', name: '정글짐', category: 'play', shape: 'jungleGym', area: 'yard', price: 10000, width: 200, height: 190, tint: '#e8524a', codeBuilt: true },
   { id: 'merry_go_round', name: '회전 놀이기구', category: 'play', shape: 'merryGoRound', area: 'yard', price: 12000, width: 230, height: 130, tint: '#8fd8c4' },
 

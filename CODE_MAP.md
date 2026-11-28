@@ -163,6 +163,7 @@ art-src/         생성 원본 (git 에 안 들어감 — 아래 "백업" 참고
 | `npm run art` | 그림 만들기 (Codex) |
 | `npm run model` | 3D 모델 만들기 (Hunyuan3D 서버를 먼저 켠다: `F:\ai\hunyuan21\run-googoo-api.bat`) |
 | `npm run model -- --reoptimize` | 변환 원본으로 경량화만 다시 (서버 없이) |
+| `npx tsx --tsconfig tsconfig.scripts.json scripts/gen-drafts.ts <폴더> 이름=설명 ...` | 모델 시안 여러 장 그리기 (고른 것을 `art-src/models/<키>.concept.png` 로 두고 `npm run model -- --only 키 --force`) |
 | `npm run audio` | 소리 다시 만들기 (`art-src/audio-src` → `public/assets/audio`) |
 
 ## 주소 옵션

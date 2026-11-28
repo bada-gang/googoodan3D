@@ -73,28 +73,45 @@ const GYM_RED = '#e8524a';
 const GYM_YELLOW = '#f6d24a';
 const GYM_BLUE = '#7fb8e6';
 
-/** 3×3 기둥, 2층 가로대. 가로 · 세로 1.7m, 높이 1.7m (FURNITURE_3D.jungle_gym) */
-function jungleGym(): Part[] {
+/** 정글짐 한 칸의 크기 (m): 가로 · 세로 · 높이 */
+const GYM_CELL = 0.6;
+const GYM_LEVEL = 0.75;
+
+/** 칸 줄(xs · zs 는 기둥이 서는 선)을 y0 에서 y1 높이까지: 기둥 + 위 가로대 (+ 꼭대기 마개) */
+function gymLayer(xs: number[], zs: number[], y0: number, y1: number, post: string, bar: string, caps: boolean): Part[] {
   const parts: Part[] = [];
-  const grid = [-0.85, 0, 0.85];
-  const levels = [0.85, 1.7];
-  for (const x of grid) {
-    for (const z of grid) {
-      parts.push({ from: [x, 0, z], to: [x, 1.76, z], radius: 0.075, color: GYM_RED });
-      // 기둥 꼭대기 둥근 마개 대신 작은 상자 (면 수 절약)
-      parts.push({ at: [x, 1.78, z], size: [0.18, 0.07, 0.18], color: GYM_YELLOW });
+  for (const x of xs) {
+    for (const z of zs) {
+      parts.push({ from: [x, y0, z], to: [x, y1 + 0.04, z], radius: 0.075, color: post });
+      // 꼭대기 둥근 마개 대신 작은 상자 (면 수 절약)
+      if (caps) parts.push({ at: [x, y1 + 0.06, z], size: [0.18, 0.07, 0.18], color: GYM_YELLOW });
     }
   }
-  levels.forEach((y, level) => {
-    const color = level === 0 ? GYM_YELLOW : GYM_BLUE;
-    for (const line of grid) {
-      for (let i = 0; i < grid.length - 1; i++) {
-        parts.push({ from: [grid[i], y, line], to: [grid[i + 1], y, line], radius: 0.06, color });
-        parts.push({ from: [line, y, grid[i]], to: [line, y, grid[i + 1]], radius: 0.06, color });
-      }
-    }
-  });
+  for (const z of zs) {
+    for (let i = 0; i < xs.length - 1; i++) parts.push({ from: [xs[i], y1, z], to: [xs[i + 1], y1, z], radius: 0.06, color: bar });
+  }
+  for (const x of xs) {
+    for (let i = 0; i < zs.length - 1; i++) parts.push({ from: [x, y1, zs[i]], to: [x, y1, zs[i + 1]], radius: 0.06, color: bar });
+  }
   return parts;
+}
+
+/** 칸 수만큼 가운데 맞춘 선 자리 (칸 n 개면 선 n+1 개) */
+function gymLines(cells: number): number[] {
+  return Array.from({ length: cells + 1 }, (_, i) => (i - cells / 2) * GYM_CELL);
+}
+
+/**
+ * 아래층 4×3 칸, 그 가운데 위에 2×1 칸 (사용자 요청).
+ * 가로 2.4m · 세로 1.8m · 높이 1.5m (FURNITURE_3D.jungle_gym)
+ */
+function jungleGym(): Part[] {
+  return [
+    // 아래층: 빨간 기둥 · 노란 가로대. 위층이 올라가는 가운데 기둥은 위층 기둥이 이어서 세운다
+    ...gymLayer(gymLines(4), gymLines(3), 0, GYM_LEVEL, GYM_RED, GYM_YELLOW, false),
+    // 위층: 파란 가로대, 꼭대기 노란 마개
+    ...gymLayer(gymLines(2), gymLines(1), GYM_LEVEL, GYM_LEVEL * 2, GYM_RED, GYM_BLUE, true),
+  ];
 }
 
 /* -------------------------------- 그네 -------------------------------- */

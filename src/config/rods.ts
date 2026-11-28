@@ -39,7 +39,7 @@ export const RODS: RodDef[] = [
   },
   {
     id: 'star',
-    name: '반짝이 별 낚싯대',
+    name: '별똥별 낚싯대',
     price: 6000,
     ability: '막대가 천천히 움직여요',
     icon: ASSETS.tools.rodStar,
@@ -51,7 +51,7 @@ export const RODS: RodDef[] = [
     id: 'dragon',
     name: '포세이돈의 낚싯대',
     price: 15000,
-    ability: '레어템이 두 배 잘 걸려요',
+    ability: '특별한 것들을 더 잘 낚아요',
     icon: ASSETS.tools.rodDragon,
     zoneScale: 1,
     speedScale: 1,

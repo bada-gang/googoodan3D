@@ -23,7 +23,7 @@ export const APIARY_AREA = {
   maxZ: pen.center.z + 1.7,
 };
 
-/** 통마다 날아다니는 꿀벌 수 (첫 통 3, 둘째 통 2) */
-export const BEES_PER_HIVE = [3, 2];
+/** 통마다 날아다니는 꿀벌 수 (두 통 모두 2마리) */
+export const BEES_PER_HIVE = [2, 2];
 /** 꿀벌이 통 둘레를 도는 반지름 (m) — 우리 울타리를 크게 넘지 않게 */
 export const BEE_ORBIT = { min: 0.35, max: 0.75 };

@@ -121,7 +121,7 @@ export const ART_PROMPTS: Record<string, string> = {
   [ASSETS.seeds.kiwi]: 'a small kraft-paper seed packet, folded at the top, with a picture of a green kiwi fruit cut in half printed on the front',
 
   /* ---- 코드로 만드는 놀이기구의 가게 그림 (3D 모델이 없어 따로 그린다) ---- */
-  [furnitureTextureKey('jungle_gym')]: 'a small cube-shaped playground climbing frame (jungle gym) made of thick rounded bars in bright red (#e8524a), yellow and sky blue, two levels high',
+  [furnitureTextureKey('jungle_gym')]: 'a wide low playground climbing frame (jungle gym) made of thick rounded bars: a bottom layer 4 cells wide and 3 cells deep and one cell high with red posts and yellow bars, and on top of it in the middle a smaller section 2 cells wide and 1 cell deep with blue bars and small yellow caps on the posts',
   [furnitureTextureKey('swing')]: 'a playground swing set: a sky-blue (#7fb8e6) A-frame with two swings hanging on chains, each with a yellow seat',
 
   /* ---- 잡화: 낚싯대 (config/rods) ---- */
@@ -151,12 +151,14 @@ export const ART_PROMPTS: Record<string, string> = {
     'clear stylized pond water surface like the water in a cozy toy fountain: bright clear turquoise (#4fc3e0) with soft lighter cyan wavy ripple highlights and gentle rounded caustic light patterns, a few tiny white sparkles',
   [ASSETS.textures.floorCarpet]: 'a soft woven carpet, near-white (#f4f4f4) with a subtle light-gray diamond weave pattern',
   // 2026-11 추가 벽지 · 바닥재. 색까지 그린다 (방에서는 흰색으로 곱해 그대로 보인다)
-  [ASSETS.textures.wallCloud]: 'children room wallpaper: a soft pale sky-blue (#d9ecfa) background with a scattered pattern of small fluffy white clouds',
+  [ASSETS.textures.wallCloud]: 'children room wallpaper: a plain soft pale sky-blue (#d9ecfa) background with a few small fluffy white clouds. SPARSE pattern: only about 6 motifs in the whole image, spread far apart with lots of plain empty background between them, nothing crowded',
   [ASSETS.textures.wallStripe]: 'children room wallpaper with even vertical stripes, alternating soft cream (#fbf3e6) and pale coral pink (#f3c9c4), 6 stripes across',
-  [ASSETS.textures.wallHeart]: 'a simple wallpaper pattern made ONLY of small plain pastel pink heart shapes (#f6b8c8) evenly scattered on a plain soft cream-white background (#fdf5f2). Nothing else at all: no animals, no buildings, no objects, no other shapes, only hearts',
-  [ASSETS.textures.wallLeaf]: 'children room wallpaper: a soft pale mint (#eef7ea) background with a scattered pattern of small simple green leaves (#9dcf8f) at different angles',
-  [ASSETS.textures.wallStrawberry]: 'children room wallpaper: a soft cream-white (#fff8f2) background with a scattered pattern of small cute red strawberries (#ea6a6a) with green tops',
+  [ASSETS.textures.wallHeart]: 'a simple wallpaper pattern made ONLY of small plain pastel pink heart shapes (#f6b8c8) on a plain soft cream-white background (#fdf5f2). Nothing else at all: no animals, no buildings, no objects, no other shapes, only hearts. SPARSE pattern: only about 6 motifs in the whole image, spread far apart with lots of plain empty background between them, nothing crowded',
+  [ASSETS.textures.wallLeaf]: 'children room wallpaper: a plain soft pale mint (#eef7ea) background with a few small simple green leaves (#9dcf8f) at different angles. SPARSE pattern: only about 6 motifs in the whole image, spread far apart with lots of plain empty background between them, nothing crowded',
+  [ASSETS.textures.wallStrawberry]: 'children room wallpaper: a plain soft cream-white (#fff8f2) background with a few small cute red strawberries (#ea6a6a) with green tops. SPARSE pattern: only about 6 motifs in the whole image, spread far apart with lots of plain empty background between them, nothing crowded',
   [ASSETS.textures.floorMarble]: 'polished white marble floor tiles (#f4f4f2) with very soft pale gray veins and thin light-gray grout lines, 2 by 2 tiles',
+  // 별빛 바닥 전용 (별빛 벽지와 따로): 별을 듬성듬성. 흰 바탕 × 바닥 색
+  [ASSETS.textures.floorStar]: 'floor surface: almost pure white (#f6f6f6) background with a few small light-gray five-pointed stars. SPARSE pattern: only about 6 motifs in the whole image, spread far apart with lots of plain empty background between them, nothing crowded',
 
   /* ---- 배경 ---- */
   [ASSETS.environment.title]:

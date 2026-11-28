@@ -415,12 +415,15 @@ function FurnitureBody({
   if (DRAWN_RUGS[itemId]) return <DrawnRug itemId={itemId} ghost={ghost} tint={tint} />;
   if (isCodeFurniture(itemId)) return <CodeFurniture itemId={itemId} ghost={ghost} tint={tint} />;
   return (
-    <GltfModel
-      modelKey={furnitureModelKey(itemId)}
-      castShadow={!ghost && castShadow}
-      onLoaded={onLoaded}
-      fallback={<FallbackFurniture itemId={itemId} ghost={ghost} tint={tint} />}
-    />
+    // 가로로만 늘리는 물건 (furniture3d 의 stretch, 긴 꽃밭)
+    <group scale-x={FURNITURE_3D[itemId]?.stretch ?? 1}>
+      <GltfModel
+        modelKey={furnitureModelKey(itemId)}
+        castShadow={!ghost && castShadow}
+        onLoaded={onLoaded}
+        fallback={<FallbackFurniture itemId={itemId} ghost={ghost} tint={tint} />}
+      />
+    </group>
   );
 }
 

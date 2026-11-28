@@ -1,6 +1,6 @@
 /**
  * 가구 가게의 잡화 칸: 낚싯대 (config/rods). 사면 바로 쓸 수 있고, 가진 것 중 하나를 골라 쓴다.
- * 살 때만 곱셈 문제를 푼다 (가구와 같다). 기본 낚싯대로 돌아가기도 여기서.
+ * 살 때만 곱셈 문제를 푼다 (가구와 같다). 기본 낚싯대(맨 왼쪽)로 돌아가기도 여기서.
  */
 import { josa } from '@/config/josa';
 import { RODS, rodUnlockKey, type RodDef } from '@/config/rods';
@@ -55,8 +55,16 @@ export function RodShelf(): React.ReactElement {
   return (
     <div className="mb-5">
       <p className="font-game mb-2 text-[1.25rem] text-ink">낚싯대</p>
-      <p className="mb-3 text-[1rem] text-ink-soft">낚싯대마다 힘이 하나씩 있어요. 가진 낚싯대 중 하나를 골라 써요.</p>
+      <p className="mb-3 text-[1rem] text-ink-soft">낚싯대마다 특별한 힘이 하나씩 있어요. 가진 낚싯대 중 하나를 골라 써요.</p>
       <div className="grid grid-cols-4 gap-3">
+        {/* 기본 낚싯대: 맨 왼쪽. 처음부터 가지고 있다 (특별한 힘이 없어 설명은 없다) */}
+        <ItemCard
+          icon={BASIC_ROD_ICON}
+          name="기본 낚싯대"
+          selected={equipped === null}
+          actionLabel={equipped === null ? '쓰는 중' : '쓰기'}
+          onClick={() => equipped !== null && use(null)}
+        />
         {RODS.map((rod) => {
           const owned = unlocked.includes(rodUnlockKey(rod.id));
           const using = equipped === rod.id;
@@ -74,17 +82,6 @@ export function RodShelf(): React.ReactElement {
             />
           );
         })}
-        {/* 기본 낚싯대: 산 낚싯대가 있을 때만 돌아갈 수 있게 보인다 */}
-        {RODS.some((rod) => unlocked.includes(rodUnlockKey(rod.id))) && (
-          <ItemCard
-            icon={BASIC_ROD_ICON}
-            name="기본 낚싯대"
-            sub="특별한 힘은 없어요"
-            selected={equipped === null}
-            actionLabel={equipped === null ? '쓰는 중' : '쓰기'}
-            onClick={() => equipped !== null && use(null)}
-          />
-        )}
       </div>
     </div>
   );

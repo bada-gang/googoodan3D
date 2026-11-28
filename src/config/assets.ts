@@ -127,6 +127,8 @@ export const ASSETS = {
     wallLeaf: 'tex_wall_leaf',
     wallStrawberry: 'tex_wall_strawberry',
     floorMarble: 'tex_floor_marble',
+    /** 별빛 바닥: 별빛 벽지 질감은 바닥에서 너무 촘촘해 따로 (듬성듬성) */
+    floorStar: 'tex_floor_star',
     /** 시장 낚시터 연못 물 (분수대 물과 같은 느낌) */
     water: 'tex_water',
   },
@@ -168,7 +170,7 @@ export function surfaceTextureKey(
   surface: { pattern?: SurfacePattern },
   kind: 'wall' | 'floor',
 ): string {
-  if (surface.pattern === 'star') return ASSETS.textures.wallStar;
+  if (surface.pattern === 'star') return kind === 'floor' ? ASSETS.textures.floorStar : ASSETS.textures.wallStar;
   if (surface.pattern === 'check') return ASSETS.textures.floorCheck;
   if (surface.pattern === 'carpet') return ASSETS.textures.floorCarpet;
   if (surface.pattern === 'cloud') return ASSETS.textures.wallCloud;
