@@ -19,8 +19,8 @@ function newId(prefix: string): string {
 }
 
 export class LocalPlayerRepository implements PlayerRepository {
-  async listProfiles(): Promise<PlayerProfile[]> {
-    const profiles = readJson<PlayerProfile[]>(KEYS.profiles, []);
+  async listProfiles(classId?: string): Promise<PlayerProfile[]> {
+    const profiles = readJson<PlayerProfile[]>(KEYS.profiles, []).filter((p) => !classId || p.classId === classId);
     return [...profiles].sort((a, b) => (b.lastPlayedAt ?? '').localeCompare(a.lastPlayedAt ?? ''));
   }
 

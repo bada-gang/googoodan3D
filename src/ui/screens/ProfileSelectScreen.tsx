@@ -37,10 +37,10 @@ export function ProfileSelectScreen({
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
+    // 반을 골랐으면 그 반 학생만 서버에서 읽는다 (모든 반 학생을 읽고 거르면 읽기가 반 수만큼 늘어난다)
     void repositories()
-      .player.listProfiles()
-      .then((all) => {
-        const list = classRoom ? all.filter((p) => p.classId === classRoom.id) : all;
+      .player.listProfiles(classRoom?.id)
+      .then((list) => {
         setProfiles(list);
         // 이름이 하나도 없으면 만들기 화면부터 보여 준다. 만들기를 막아 둔 학기에는
         // 그냥 빈 목록을 보여 주고 선생님을 부르게 한다.

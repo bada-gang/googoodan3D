@@ -13,7 +13,11 @@ import type { AvatarId, CharacterId, ClassRoom, GameSaveData, PlayerProfile } fr
 import type { LearningStats } from '@/types/learning';
 
 export interface PlayerRepository {
-  listProfiles(): Promise<PlayerProfile[]>;
+  /**
+   * 학생 목록. classId 를 주면 그 반 학생만 (서버에서 골라 읽는다 — 다른 반 학생 문서를 읽지 않아 읽기 횟수가 줄어든다).
+   * 주지 않으면 모든 학생.
+   */
+  listProfiles(classId?: string): Promise<PlayerProfile[]>;
   getProfile(playerId: string): Promise<PlayerProfile | null>;
   createProfile(
     displayName: string,

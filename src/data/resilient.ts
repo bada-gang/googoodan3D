@@ -64,7 +64,7 @@ export function createResilientBundle(
   }
 
   const player: PlayerRepository = {
-    listProfiles: () => run((b) => b.player.listProfiles()),
+    listProfiles: (classId) => run((b) => b.player.listProfiles(classId)),
     getProfile: (id) => run((b) => b.player.getProfile(id)),
     createProfile: (name, avatar, character, classId) =>
       run((b) => b.player.createProfile(name, avatar, character, classId)),

@@ -19,8 +19,10 @@ import {
   doc,
   getDoc,
   getDocs,
+  query,
   setDoc,
   updateDoc,
+  where,
 } from 'firebase/firestore';
 import { sortClasses, type AvatarId, type CharacterId, type ClassRoom, type GameSaveData, type PlayerProfile } from '@/types/game';
 import type { LearningStats } from '@/types/learning';
@@ -40,8 +42,10 @@ function newPlayerId(): string {
 }
 
 export class FirebasePlayerRepository implements PlayerRepository {
-  async listProfiles(): Promise<PlayerProfile[]> {
-    const snapshot = await getDocs(collection(firestore(), PLAYERS));
+  async listProfiles(classId?: string): Promise<PlayerProfile[]> {
+    // 반을 주면 그 반 학생 문서만 서버에서 골라 읽는다 (Firestore 는 읽은 문서 수만큼 센다)
+    const players = collection(firestore(), PLAYERS);
+    const snapshot = await getDocs(classId ? query(players, where('classId', '==', classId)) : players);
     return snapshot.docs
       .map((d) => ({ id: d.id, ...d.data() }) as PlayerProfile)
       .sort((a, b) => (b.lastPlayedAt ?? '').localeCompare(a.lastPlayedAt ?? ''));

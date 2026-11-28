@@ -47,6 +47,13 @@ export function TeacherApp(): React.ReactElement {
   const activePick: ClassPick | null = classes.length === 0 ? null : validPick ? pick : classes[0].id;
   const activeClass = classes.find((c) => c.id === activePick) ?? null;
 
+  // 고른 반 학생의 기록(진행도 · 통계)만 서버에서 읽는다 (학급이 없으면 모든 학생). 목록을 다 읽은 뒤에
+  const listReady = state.data !== null;
+  const { showDetails } = state;
+  useEffect(() => {
+    if (listReady) showDetails(activePick);
+  }, [listReady, activePick, showDetails]);
+
   useEffect(() => {
     if (activePick === null) return;
     try {
@@ -117,6 +124,10 @@ export function TeacherApp(): React.ReactElement {
             <span className="text-[0.9rem] text-ink-soft tabular-nums">
               {rows.length}/{MAX_STUDENTS_PER_CLASS}명
             </span>
+            {/* 학생들이 지금 게임하며 쌓은 기록을 다시 읽는다 (자동으로는 다시 읽지 않는다 — 서버 읽기 절약) */}
+            <Button disabled={state.loading} onClick={() => void state.refresh()}>
+              새로고침
+            </Button>
             <Button
               tone="primary"
               disabled={state.data === null || classFull}
@@ -139,7 +150,10 @@ export function TeacherApp(): React.ReactElement {
         {state.data === null && state.loading ? (
           <EmptyNote>불러오는 중이에요…</EmptyNote>
         ) : (
-          <StudentTable rows={rows} onSelect={(row) => setSelectedId(row.profile.id)} />
+          <>
+            {state.loading && <p className="mb-2 text-[0.9rem] text-ink-soft">기록을 불러오는 중이에요…</p>}
+            <StudentTable rows={rows} onSelect={(row) => setSelectedId(row.profile.id)} />
+          </>
         )}
       </Card>
 

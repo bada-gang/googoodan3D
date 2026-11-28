@@ -67,7 +67,7 @@ art-src/         생성 원본 (git 에 안 들어감 — 아래 "백업" 참고
 | 가구 놓기 · 옮기기 · 돌리기 · 치우기 (저장되는 것) | `src/state/game/decorateSlice.ts` |
 | 꾸미기 조작 (3D 에서 들고 다니기, 놓을 수 있는지) | `src/world/gameplay/decorate.tsx` |
 | 저장 데이터 모양 · 옛 저장본 고치기 | `src/state/game/saveData.ts` |
-| 자동 저장 시점 | `src/state/persistence.ts` |
+| 자동 저장 시점 (20초마다 모아서, 레벨업 · 장면 이동 · 앱 닫기는 바로, 바뀐 문서만 — Firebase 쓰기 절약) | `src/state/persistence.ts` (`SAVE_EVERY_MS`) |
 | 문제 출제 (어떤 문제를 낼지, 고른 묶음끼리 같은 확률) | `src/math/questionGenerator.ts` |
 | 나눗셈 · 뺄셈 묶음 (문제 범위 · 헷갈리는 오답 · 힌트) | `src/math/problemSets.ts` |
 | 묶음 이름 · 예시 (선택 화면 · 교사 화면) | `src/config/curriculum.ts` |
@@ -125,6 +125,8 @@ art-src/         생성 원본 (git 에 안 들어감 — 아래 "백업" 참고
 | 반 고르기 → 반 비밀번호(숫자 4자리, 있으면) → 이름 고르기 → 연습할 것 고르기(구구단 · 나눗셈 · 뺄셈) → 게임 (학급이 없으면 반 고르기를 건너뜀) | `src/App.tsx`, `src/ui/screens/` |
 | 학생이 이름 · 캐릭터 바꾸기 (연습할 것 고르기 화면) | `src/ui/screens/TableSelectScreen.tsx` |
 | 학급 만들기 · 이름 · 비밀번호 바꾸기 · 지우기, 학생 반 옮기기 (선생님 화면) | `src/teacher/ClassBar.tsx`, `src/teacher/StudentDetail.tsx` |
+| 선생님 화면 데이터 읽기 (이름 목록은 전부, 진행도 · 통계는 고른 반만 · 읽은 학생은 기억 · [새로고침]) | `src/teacher/useClassData.ts` |
+| 학생 이름 고르기에서 고른 반 학생만 서버에서 읽기 | `src/ui/screens/ProfileSelectScreen.tsx` → `player.listProfiles(classId)` (`src/data/firebase/FirebaseRepositories.ts`) |
 | 위쪽 HUD (돈 · 레벨) | `src/ui/hud/GameHUD.tsx` |
 | 조이스틱 · 행동 버튼 | `src/ui/hud/TouchControls.tsx` |
 | 문제 팝업 | `src/ui/overlays/MathQuestionOverlay.tsx` |
