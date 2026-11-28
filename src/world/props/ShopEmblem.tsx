@@ -7,7 +7,7 @@
  *
  * ⚠ 지금은 쓰지 않는다 (2026-10-05). 붙여 보니 건물과 그림 느낌이 달라 이질적이라 뺐다 — 사용자가 나중에 쓸 수도 있어 보관만 한다.
  * 다시 붙이려면 TownWorld 의 가게(Shop) 모델 옆에 아래 자리로 놓는다 (가게 중심 기준 x · 높이 · 앞쪽, 반지름):
- *   농장 가게 sprout [0.02, 2.6, 1.7] 반지름 0.52 / 가구 가게 chair [0.02, 2.41, 1.05] 반지름 0.56
+ *   농장 가게 sprout [0.02, 2.6, 1.7] 반지름 0.52 / 만물상 chair [0.02, 2.41, 1.05] 반지름 0.56
  */
 import { useEffect, useMemo } from 'react';
 import { CanvasTexture, SRGBColorSpace } from 'three';

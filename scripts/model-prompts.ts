@@ -349,8 +349,10 @@ export const MODEL_PROMPTS: Record<string, string> = {
   ),
 
   /* ---- 2026-11 추가: 마당 (놀이터 · 정원 · 쉼터) ---- */
-  [furnitureModelKey('sandbox')]: furniture(
-    'A low square wooden sandbox frame (#c08a52) filled with smooth pale sand (#e9cf8f), a red toy bucket and a yellow shovel and a small sand castle in it.',
+  // 정사각형 큰 모래 놀이터 (사용자 요청: 두 배 · 정사각형). 크기는 furniture3d 에서 가로 2.4m 로 맞춘다
+  [furnitureModelKey('sandbox')]: item(
+    'A big low SQUARE wooden sandbox (#c08a52), exactly as wide as it is deep, with a low thick wooden frame and small corner seats, ' +
+      'filled with smooth pale sand (#e9cf8f), a red toy bucket, a yellow shovel and a small sand castle in it.',
   ),
   [furnitureModelKey('seesaw')]: furniture(
     'A playground seesaw seen from the side: one long thick yellow (#f6d24a) plank balanced on a short sturdy red pivot in the middle, ' +

@@ -76,7 +76,7 @@ export function InventoryOverlay(): React.ReactElement {
               ? '씨앗이 없어요. 시장의 농장 가게에 가 보세요.'
               : tab === 'supply'
                 ? '물과 먹이가 없어요. 시장의 농장 가게에서 살 수 있어요.'
-                : '가구가 없어요. 시장의 가구 가게에 가 보세요.'}
+                : '가구가 없어요. 시장의 만물상에 가 보세요.'}
         </EmptyNote>
       ) : (
         <div className="grid grid-cols-4 gap-3 sm:grid-cols-5">

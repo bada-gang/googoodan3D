@@ -1,7 +1,7 @@
 /**
  * 시장. 마당 오른쪽 끝 표지판으로 들어온다. (2D 판 TownScene)
  *
- * 농장 가게 · 가구 가게 두 곳이 길 뒤쪽에 서 있고, 가운데 분수 광장이 있다. 가구 가게 맞은편(길 앞쪽)에는 낚시터.
+ * 농장 가게 · 만물상 두 곳이 길 뒤쪽에 서 있고, 가운데 분수 광장이 있다. 만물상 맞은편(길 앞쪽)에는 낚시터.
  * 가게에 들어가는 것 자체는 자유이고, 실제로 사고팔 때 문제를 낸다 (명세 78 — React 가게 화면이 맡는다).
  * 꾸미기는 집 · 마당에서만 한다.
  */
@@ -122,7 +122,7 @@ export function TownWorld(): React.ReactElement {
         ]}
       />
 
-      {/* 가구 가게 맞은편 낚시터 (연못 · 데크 · 낚싯대) */}
+      {/* 만물상 맞은편 낚시터 (연못 · 데크 · 낚싯대) */}
       <FishingSpot />
 
       <StaticShadow>
@@ -138,7 +138,7 @@ export function TownWorld(): React.ReactElement {
         />
         <Shop
           id="furniture"
-          label="가구 가게"
+          label="만물상"
           modelKey={MODELS.buildings.furnitureShop}
           position={TOWN.furnitureShop.position}
           door={TOWN.furnitureShop.door}

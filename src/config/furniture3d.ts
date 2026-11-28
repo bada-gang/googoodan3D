@@ -71,7 +71,8 @@ export const FURNITURE_3D: Record<string, Furniture3D> = {
   streetlamp: { height: 2.4, radius: 0.3, glow: { y: 2.08, size: 1.8 } },
   fountain: { height: 1.4, radius: 1.0 },
   // 2026-11 추가: 놀이터 (정글짐 · 그네는 코드로 만든다 — 모델 없음) · 정원 · 쉼터
-  sandbox: { height: 0.45, radius: 1.1, budget: 'small' },
+  // 정사각형 2.4m × 2.4m (높이 대신 가로로 맞춘다)
+  sandbox: { width: 2.4, radius: 1.5, budget: 'small' },
   seesaw: { height: 0.8, radius: 1.5, budget: 'small' },
   swing: { height: 2.2, radius: 1.3 },
   slide: { height: 2.0, radius: 1.4 },

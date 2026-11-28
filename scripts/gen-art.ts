@@ -19,9 +19,10 @@ import { appendFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } fr
 import path from 'node:path';
 import sharp from 'sharp';
 import { ASSET_MANIFEST as ALL_ASSETS, type AssetKind, type AssetSpec } from '@/config/assets';
-import { ART_ADJUST, ART_PROMPTS, KIND_PROMPT } from './art-prompts';
+import { ART_ADJUST, ART_PATTERN, ART_PROMPTS, KIND_PROMPT } from './art-prompts';
 import { findCodex, generateImageWithCodex } from './lib/codex';
 import { processSprite } from './lib/sprite';
+import { rebuildMotifPattern } from './lib/motifPattern';
 
 /**
  * 이 스크립트가 만드는 그림. thumbnail(가구 · 동물 · 캐릭터 아이콘)은 3D 모델의 원본 그림으로
@@ -266,6 +267,9 @@ async function processImage(spec: GenSpec, generated: Buffer): Promise<void> {
   let output: Buffer;
   if (spec.kind === 'icon' || spec.kind === 'particle') {
     output = await processSprite(original, config.finalSize!);
+  } else if (spec.kind === 'texture' && ART_PATTERN[spec.key]) {
+    // 무늬가 흩어진 벽지 · 바닥은 무늬를 오려 다시 놓는다 (유령 무늬가 생기지 않게)
+    output = await rebuildMotifPattern(original, config.finalSize!, ART_PATTERN[spec.key]);
   } else if (spec.kind === 'texture') {
     output = await processTexture(original, config.finalSize!);
   } else {

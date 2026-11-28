@@ -1,5 +1,5 @@
 /**
- * 가구 가게. 칸은 집 안(가구 · 벽지 · 바닥재) · 마당 · 잡화(낚싯대, RodShelf), 칸 안에서는 종류별로 묶는다. (명세 52)
+ * 만물상. 칸은 집 안(가구 · 벽지 · 바닥재) · 마당 · 잡화(낚싯대, RodShelf), 칸 안에서는 종류별로 묶는다. (명세 52)
  * 구입할 때만 문제를 풀고, 배치는 자유롭게 한다. (명세 29)
  * 꾸미기 물건은 레벨 해금이 없다 — 레벨 1부터 다 살 수 있다 (config/decor).
  */
@@ -59,7 +59,7 @@ export function FurnitureShopOverlay(): React.ReactElement {
   };
 
   return (
-    <OverlayShell title="가구 가게" onClose={closeOverlay} wide footer={<MoneyTag amount={money} />}>
+    <OverlayShell title="만물상" onClose={closeOverlay} wide footer={<MoneyTag amount={money} />}>
       <div className="mb-4 flex flex-wrap justify-center gap-3">
         {(Object.keys(TAB_LABEL) as Tab[]).map((key) => (
           <GameButton key={key} tone={tab === key ? 'gold' : 'plain'} onClick={() => setTab(key)}>

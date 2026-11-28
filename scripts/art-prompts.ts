@@ -47,6 +47,20 @@ export const ART_ADJUST: Record<string, { saturation?: number; brightness?: numb
   [ASSETS.crops.tangerine]: { saturation: 1.3, brightness: 1.04 },
 };
 
+/**
+ * 무늬가 흩어진 벽지 · 바닥: 생성 그림에서 또렷한 무늬만 오려 이 개수(가로 × 줄)로 다시 놓는다 (scripts/lib/motifPattern).
+ * 보통 질감처럼 가장자리를 섞으면 흐린 유령 무늬가 생긴다. 숫자만 바꾸고 --reprocess 하면 촘촘함이 바뀐다.
+ */
+export const ART_PATTERN: Record<string, { cols: number; rows: number }> = {
+  [ASSETS.textures.wallStar]: { cols: 2, rows: 3 },
+  [ASSETS.textures.wallCloud]: { cols: 3, rows: 3 },
+  [ASSETS.textures.wallHeart]: { cols: 3, rows: 3 },
+  [ASSETS.textures.wallLeaf]: { cols: 3, rows: 3 },
+  [ASSETS.textures.wallStrawberry]: { cols: 3, rows: 3 },
+  // 별빛 바닥: 처음(촘촘)과 듬성듬성의 중간 (사용자 요청)
+  [ASSETS.textures.floorStar]: { cols: 4, rows: 4 },
+};
+
 /** 키별 "무엇" */
 export const ART_PROMPTS: Record<string, string> = {
   /* ---- 이름 목록 아바타: 동물 얼굴 ---- */
@@ -144,7 +158,7 @@ export const ART_PROMPTS: Record<string, string> = {
   [ASSETS.textures.soil]: 'tilled farm soil, warm brown (#a9764c) with soft furrows and tiny pebbles',
   [ASSETS.textures.path]: 'a packed sandy dirt path, pale beige (#e3cfa4) with a few small smooth pebbles',
   [ASSETS.textures.wall]: 'plain interior wallpaper, almost pure white (#f6f6f6) with an extremely faint paper grain',
-  [ASSETS.textures.wallStar]: 'interior wallpaper, almost pure white (#f6f6f6) background with a scattered pattern of small light-gray five-pointed stars',
+  [ASSETS.textures.wallStar]: 'interior wallpaper, almost pure white (#f6f6f6) background with a few small light-gray five-pointed stars. SPARSE pattern: only about 6 motifs in the whole image, spread far apart with lots of plain empty background between them, nothing crowded. Every motif is fully solid, bright and opaque, all the same strength: no faded, pale, ghostly or semi-transparent motifs',
   [ASSETS.textures.floor]: 'light wooden floor planks running horizontally, very pale near-white wood (#f2f2f2) with faint light-gray grain lines',
   [ASSETS.textures.floorCheck]: 'floor tiles in a checkerboard pattern of near-white (#f6f6f6) and light gray (#d8d8d8) squares, 4 by 4 squares',
   [ASSETS.textures.water]:
@@ -155,10 +169,10 @@ export const ART_PROMPTS: Record<string, string> = {
   [ASSETS.textures.wallStripe]: 'children room wallpaper with even vertical stripes, alternating soft cream (#fbf3e6) and pale coral pink (#f3c9c4), 6 stripes across',
   [ASSETS.textures.wallHeart]: 'a simple wallpaper pattern made ONLY of small plain pastel pink heart shapes (#f6b8c8) on a plain soft cream-white background (#fdf5f2). Nothing else at all: no animals, no buildings, no objects, no other shapes, only hearts. SPARSE pattern: only about 6 motifs in the whole image, spread far apart with lots of plain empty background between them, nothing crowded',
   [ASSETS.textures.wallLeaf]: 'children room wallpaper: a plain soft pale mint (#eef7ea) background with a few small simple green leaves (#9dcf8f) at different angles. SPARSE pattern: only about 6 motifs in the whole image, spread far apart with lots of plain empty background between them, nothing crowded',
-  [ASSETS.textures.wallStrawberry]: 'children room wallpaper: a plain soft cream-white (#fff8f2) background with a few small cute red strawberries (#ea6a6a) with green tops. SPARSE pattern: only about 6 motifs in the whole image, spread far apart with lots of plain empty background between them, nothing crowded',
+  [ASSETS.textures.wallStrawberry]: 'children room wallpaper: a plain soft cream-white (#fff8f2) background with a few small cute red strawberries (#ea6a6a) with green tops. SPARSE pattern: only about 6 motifs in the whole image, spread far apart with lots of plain empty background between them, nothing crowded. Every motif is fully solid, bright and opaque, all the same strength: no faded, pale, ghostly or semi-transparent motifs',
   [ASSETS.textures.floorMarble]: 'polished white marble floor tiles (#f4f4f2) with very soft pale gray veins and thin light-gray grout lines, 2 by 2 tiles',
   // 별빛 바닥 전용 (별빛 벽지와 따로): 별을 듬성듬성. 흰 바탕 × 바닥 색
-  [ASSETS.textures.floorStar]: 'floor surface: almost pure white (#f6f6f6) background with a few small light-gray five-pointed stars. SPARSE pattern: only about 6 motifs in the whole image, spread far apart with lots of plain empty background between them, nothing crowded',
+  [ASSETS.textures.floorStar]: 'floor surface: almost pure white (#f6f6f6) background with small light-gray five-pointed stars, a moderately spaced pattern: about 14 motifs in the whole image, evenly spread with comfortable empty space between them. Every motif is fully solid, bright and opaque, all the same strength: no faded, pale, ghostly or semi-transparent motifs',
 
   /* ---- 배경 ---- */
   [ASSETS.environment.title]:

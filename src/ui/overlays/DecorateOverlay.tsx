@@ -179,7 +179,7 @@ export function DecorateOverlay(): React.ReactElement {
               />
             </div>
           ) : ownedItems.length === 0 ? (
-            <EmptyNote>놓을 물건이 없어요. 시장의 가구 가게에서 사 올 수 있어요.</EmptyNote>
+            <EmptyNote>놓을 물건이 없어요. 시장의 만물상에서 사 올 수 있어요.</EmptyNote>
           ) : (
             <div className="flex flex-wrap gap-3">
               {ownedItems.map(({ def, count }) => (
