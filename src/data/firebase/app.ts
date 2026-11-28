@@ -47,6 +47,9 @@ export function initFirebase(): Promise<FirebaseHandles> {
     // 오프라인 캐시. 여러 탭을 열어도 안전하게 동작한다.
     const db = initializeFirestore(app, {
       localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() }),
+      // 저장 데이터에 빈 값(undefined)이 섞여도 거부하지 말고 그 칸만 빼고 저장한다.
+      // 거부(invalid-argument)되면 그 수업 내내 이 기기 저장으로 내려가 서버에 아무것도 안 올라간다 (2026-11 버그)
+      ignoreUndefinedProperties: true,
     });
 
     const auth = getAuth(app);

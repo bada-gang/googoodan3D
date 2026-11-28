@@ -83,7 +83,9 @@ export const createAnimalSlice: GameSlice<AnimalSlice> = (set, get) => ({
               ...a,
               produceReady: false,
               collects: rests ? 0 : collects,
-              restUntil: rests ? Date.now() + ANIMAL_REST.restMinutes * 60_000 : a.restUntil,
+              // 쉬지 않을 때는 restUntil 을 건드리지 않는다. 예전에는 `restUntil: a.restUntil` 로 빈 값(undefined)을 넣어
+              // 서버(Firestore)가 저장을 통째로 거부했고, 그 뒤로 그 수업 내내 이 기기에만 저장됐다 (2026-11 버그)
+              ...(rests ? { restUntil: Date.now() + ANIMAL_REST.restMinutes * 60_000 } : {}),
             }
           : a,
       ),
