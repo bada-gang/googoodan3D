@@ -24,6 +24,7 @@ import { useGameStore } from '@/state/gameStore';
 import type { PlacedItem, PlacementArea } from '@/types/game';
 import { audio } from '@/audio/sfx';
 import { GltfModel } from '../rendering/assets';
+import { DRAWN_RUGS, DrawnRug } from '../props/DrawnRug';
 import { NightGlow } from '../rendering/dayNight';
 import { burstStars } from '../effects/effects';
 import { toast } from './gameplay';
@@ -328,11 +329,16 @@ function PlacedFurniture({ item, wallY }: { item: PlacedItem; wallY: number | un
         if (tapPlaced(item)) event.stopPropagation();
       }}
     >
-      <GltfModel
-        modelKey={furnitureModelKey(item.itemId)}
-        fallback={<FallbackFurniture itemId={item.itemId} />}
-        castShadow={!size?.walkable}
-      />
+      {/* 카펫은 3D 모델 대신 코드로 그린다 (무늬가 뭉개져서, props/DrawnRug) */}
+      {DRAWN_RUGS[item.itemId] ? (
+        <DrawnRug itemId={item.itemId} />
+      ) : (
+        <GltfModel
+          modelKey={furnitureModelKey(item.itemId)}
+          fallback={<FallbackFurniture itemId={item.itemId} />}
+          castShadow={!size?.walkable}
+        />
+      )}
       {size?.glow && <NightGlow y={size.glow.y} size={size.glow.size} />}
     </group>
   );
@@ -379,13 +385,17 @@ function Ghost({ wallY }: { wallY: number | undefined }): React.ReactElement | n
   if (!ghost || !itemId) return null;
   return (
     <group position={[ghost.x, heightOf(itemId, wallY), ghost.z]} rotation-y={rotation * (Math.PI / 2)}>
-      <GltfModel
-        key={itemId}
-        modelKey={furnitureModelKey(itemId)}
-        castShadow={false}
-        onLoaded={onLoaded}
-        fallback={<FallbackFurniture itemId={itemId} ghost tint={tint} />}
-      />
+      {DRAWN_RUGS[itemId] ? (
+        <DrawnRug itemId={itemId} ghost tint={tint} />
+      ) : (
+        <GltfModel
+          key={itemId}
+          modelKey={furnitureModelKey(itemId)}
+          castShadow={false}
+          onLoaded={onLoaded}
+          fallback={<FallbackFurniture itemId={itemId} ghost tint={tint} />}
+        />
+      )}
       {/* 놓일 자리 표시 */}
       <mesh rotation-x={-Math.PI / 2} position-y={0.04}>
         <ringGeometry args={[FURNITURE_3D[itemId].radius * 0.85, FURNITURE_3D[itemId].radius, 32]} />
