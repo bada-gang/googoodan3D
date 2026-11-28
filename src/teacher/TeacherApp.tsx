@@ -225,6 +225,7 @@ export function TeacherApp(): React.ReactElement {
           onReset={state.resetStudent}
           onRemove={state.removeStudent}
           onSetMoney={state.setMoney}
+          onSetLevel={state.setLevel}
           classes={classes}
           counts={counts}
           onMove={state.moveStudent}

@@ -133,6 +133,7 @@ art-src/         생성 원본 (git 에 안 들어감 — 아래 "백업" 참고
 | 학생이 이름 · 캐릭터 바꾸기 (연습할 것 고르기 화면) | `src/ui/screens/TableSelectScreen.tsx` |
 | 학급 만들기 · 이름 · 비밀번호 바꾸기 · 지우기, 학생 반 옮기기 (선생님 화면) | `src/teacher/ClassBar.tsx`, `src/teacher/StudentDetail.tsx` |
 | 선생님 화면 데이터 읽기 (이름 목록은 전부, 진행도 · 통계는 고른 반만 · 읽은 학생은 기억 · [새로고침]) | `src/teacher/useClassData.ts` |
+| 선생님 화면에서 학생 레벨 · 돈 바꾸기 (칸 `src/teacher/ValueSetter.tsx`, 저장 `useClassData.ts` 의 `setLevel` · `setMoney`) | `src/teacher/StudentDetail.tsx` 의 관리 칸 |
 | 학생 이름 고르기에서 고른 반 학생만 서버에서 읽기 | `src/ui/screens/ProfileSelectScreen.tsx` → `player.listProfiles(classId)` (`src/data/firebase/FirebaseRepositories.ts`) |
 | 위쪽 HUD (돈 · 레벨) | `src/ui/hud/GameHUD.tsx` |
 | 조이스틱 · 행동 버튼 | `src/ui/hud/TouchControls.tsx` |

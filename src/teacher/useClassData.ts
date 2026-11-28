@@ -12,6 +12,7 @@
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { repositories, storageMode, type StorageMode } from '@/data';
+import { MAX_LEVEL } from '@/config/balance';
 import {
   MAX_CLASSES,
   MAX_STUDENTS_PER_CLASS,
@@ -65,6 +66,8 @@ export interface UseClassData {
   removeStudent: (playerId: string) => Promise<void>;
   /** 학생이 가진 돈을 바꾼다. 저장본이 없는(아직 시작 안 한) 학생은 바꿀 수 없다. */
   setMoney: (playerId: string, money: number) => Promise<void>;
+  /** 학생 레벨을 바꾼다 (경험치 0, 그 레벨까지 해금 — 낮추면 위 해금은 다시 잠근다). 저장본이 없으면 못 바꾼다 */
+  setLevel: (playerId: string, level: number) => Promise<void>;
 }
 
 /** 한 학생의 기록 (읽은 것) */
@@ -216,19 +219,34 @@ export function useClassData(enabled: boolean): UseClassData {
     [loadDetails],
   );
 
+  /**
+   * 저장본 한 곳을 고쳐 쓴다. 저장본이 없으면 만들지 않는다 — 빈 저장본을 새로 쓰면 학생이 처음 들어올 때
+   * 시작 아이템 없이 시작하게 된다. 방금 쓴 것을 그대로 화면에 (다시 읽지 않는다)
+   */
+  const patchSave = useCallback(async (playerId: string, change: (save: GameSaveData) => GameSaveData) => {
+    const repos = repositories();
+    const save = await repos.gameState.load(playerId);
+    if (!save) throw new Error('아직 게임을 시작하지 않은 학생이에요');
+    const next = change(save);
+    await repos.gameState.save(playerId, next);
+    setDetails((prev) => ({ ...prev, [playerId]: { ...(prev[playerId] ?? { stats: null, error: null }), save: next } }));
+  }, []);
+
   const setMoney = useCallback(
-    async (playerId: string, money: number) => {
-      const repos = repositories();
-      const save = await repos.gameState.load(playerId);
-      // 저장본이 없으면 만들지 않는다. 빈 저장본을 새로 쓰면 학생이 처음 들어올 때
-      // 시작 아이템 없이 시작하게 된다.
-      if (!save) throw new Error('아직 게임을 시작하지 않은 학생이에요');
-      const next = { ...save, money: Math.max(0, Math.round(money)) };
-      await repos.gameState.save(playerId, next);
-      // 방금 쓴 것을 그대로 화면에 (다시 읽지 않는다)
-      setDetails((prev) => ({ ...prev, [playerId]: { ...(prev[playerId] ?? { stats: null, error: null }), save: next } }));
-    },
-    [],
+    (playerId: string, money: number) => patchSave(playerId, (save) => ({ ...save, money: Math.max(0, Math.round(money)) })),
+    [patchSave],
+  );
+
+  const setLevel = useCallback(
+    (playerId: string, level: number) =>
+      patchSave(playerId, (save) => {
+        const next = Math.min(MAX_LEVEL, Math.max(1, Math.round(level)));
+        // 레벨 해금 표시(level_2 ~ level_N)를 새 레벨에 맞춘다. 다른 표시(벽지 · 낚싯대 등)는 그대로
+        const others = save.unlocked.filter((key) => !/^level_\d+$/.test(key));
+        const levels = Array.from({ length: next - 1 }, (_, i) => `level_${i + 2}`);
+        return { ...save, level: next, experience: 0, unlocked: [...others, ...levels] };
+      }),
+    [patchSave],
   );
 
   const createClass = useCallback(
@@ -298,5 +316,6 @@ export function useClassData(enabled: boolean): UseClassData {
     resetStudent,
     removeStudent,
     setMoney,
+    setLevel,
   };
 }

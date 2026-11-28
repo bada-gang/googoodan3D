@@ -11,6 +11,8 @@ import { CURRENCY, avatarName, formatMoney } from '@/config/strings';
 import { MAX_STUDENTS_PER_CLASS, type ClassRoom } from '@/types/game';
 import { formatAccuracy, formatLastPlayed, type StudentRow } from './summary';
 import { AccuracyBar, Button, EmptyNote } from './ui';
+import { ValueSetter } from './ValueSetter';
+import { MAX_LEVEL } from '@/config/balance';
 
 type Pending = 'reset' | 'remove' | null;
 
@@ -20,6 +22,7 @@ export function StudentDetail({
   onReset,
   onRemove,
   onSetMoney,
+  onSetLevel,
   classes,
   counts,
   onMove,
@@ -34,21 +37,16 @@ export function StudentDetail({
   onReset: (playerId: string) => Promise<void>;
   onRemove: (playerId: string) => Promise<void>;
   onSetMoney: (playerId: string, money: number) => Promise<void>;
+  onSetLevel: (playerId: string, level: number) => Promise<void>;
 }): React.ReactElement {
   const [pending, setPending] = useState<Pending>(null);
   const [busy, setBusy] = useState(false);
   const [failed, setFailed] = useState<string | null>(null);
-  const [moneyInput, setMoneyInput] = useState('');
-  const [moneySaved, setMoneySaved] = useState(false);
 
-  // 다른 학생을 고르면 물어보던 것과 입력하던 값을 없던 일로 한다.
-  // row.money 는 일부러 의존성에 넣지 않는다 — 금액을 바꾸면 목록이 갱신되면서
-  // 이 효과가 다시 돌아 "바꿨어요" 표시가 곧바로 사라진다.
+  // 다른 학생을 고르면 물어보던 것을 없던 일로 한다 (입력칸은 ValueSetter 가 스스로 되돌린다)
   useEffect(() => {
     setPending(null);
     setFailed(null);
-    setMoneySaved(false);
-    setMoneyInput(row.money === null ? '' : String(row.money));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [row.profile.id]);
 
@@ -61,18 +59,25 @@ export function StudentDetail({
   }, [onClose]);
 
   /** closeOnDone: 지우기·초기화는 끝나면 패널을 닫고, 금액 바꾸기는 열어 둔다. */
-  const run = async (action: () => Promise<void>, closeOnDone = true) => {
+  /** 처리하고 성공했는지 돌려준다. 실패하면 "처리하지 못했어요"를 띄운다 */
+  const run = async (action: () => Promise<void>, closeOnDone = true): Promise<boolean> => {
     setBusy(true);
     setFailed(null);
     try {
       await action();
       if (closeOnDone) onClose();
       else setBusy(false);
+      return true;
     } catch (error) {
       const e = error as { code?: string; message?: string };
       setFailed(e?.code ?? e?.message ?? String(error));
       setBusy(false);
+      return false;
     }
+  };
+  /** 값 바꾸기 칸(ValueSetter)용: 실패하면 "바꿨어요"를 띄우지 않게 오류로 알린다 */
+  const runOrThrow = async (action: () => Promise<void>): Promise<void> => {
+    if (!(await run(action, false))) throw new Error('failed');
   };
 
   return (
@@ -198,54 +203,30 @@ export function StudentDetail({
               </div>
             )}
 
-            <div className="mt-3 border-b border-ink/10 pb-4">
-              <p className="text-[0.95rem] text-ink">
-                가진 돈{' '}
-                <strong className="tabular-nums">
-                  {row.money === null ? '–' : formatMoney(row.money)}
-                </strong>
-              </p>
-
-              {row.money === null ? (
-                <p className="mt-1 text-[0.85rem] text-ink-soft">
-                  아직 게임을 시작하지 않아 바꿀 수 없어요.
-                </p>
-              ) : (
-                <>
-                  <div className="mt-2 flex flex-wrap items-center gap-2">
-                    <input
-                      type="number"
-                      min={0}
-                      value={moneyInput}
-                      onChange={(event) => {
-                        setMoneyInput(event.target.value);
-                        setMoneySaved(false);
-                      }}
-                      aria-label="바꿀 금액"
-                      className="font-body w-32 rounded-lg border border-ink/25 px-3 py-2 text-right text-[1rem] tabular-nums outline-none focus:border-leaf focus:ring-2 focus:ring-leaf/40"
-                    />
-                    <span className="text-[0.95rem] text-ink-soft">{CURRENCY}</span>
-                    <Button
-                      tone="primary"
-                      disabled={busy || moneyInput.trim() === ''}
-                      onClick={() =>
-                        void run(async () => {
-                          await onSetMoney(row.profile.id, Number(moneyInput));
-                          setMoneySaved(true);
-                        }, false)
-                      }
-                    >
-                      바꾸기
-                    </Button>
-                    {moneySaved && <span className="text-[0.9rem] text-leaf-dark">바꿨어요</span>}
-                  </div>
-                  <p className="mt-2 text-[0.85rem] text-ink-soft">
-                    학생이 지금 게임 중이면 잠시 뒤 학생 쪽 값으로 덮어써질 수 있어요. 쉬는 시간에
-                    바꾸는 게 안전합니다.
-                  </p>
-                </>
-              )}
-            </div>
+            {/* 레벨 · 돈 바꾸기 (ValueSetter). 실패하면 위에 "처리하지 못했어요" */}
+            <ValueSetter
+              studentId={row.profile.id}
+              label="레벨"
+              current={row.level}
+              format={(level) => `${level}레벨`}
+              unit="레벨"
+              min={1}
+              max={MAX_LEVEL}
+              busy={busy}
+              note={`1 ~ ${MAX_LEVEL}레벨. 바꾸면 경험치는 0 부터 다시 모으고, 그 레벨까지의 나무 · 동물이 열린다(낮추면 다시 잠긴다, 이미 가진 것은 그대로).`}
+              onSave={(level) => runOrThrow(() => onSetLevel(row.profile.id, level))}
+            />
+            <ValueSetter
+              studentId={row.profile.id}
+              label="가진 돈"
+              current={row.money}
+              format={formatMoney}
+              unit={CURRENCY}
+              min={0}
+              busy={busy}
+              note="학생이 지금 게임 중이면 잠시 뒤 학생 쪽 값으로 덮어써질 수 있어요. 쉬는 시간에 바꾸는 게 안전합니다."
+              onSave={(money) => runOrThrow(() => onSetMoney(row.profile.id, money))}
+            />
 
             {pending === null && (
               <div className="mt-3 flex flex-wrap gap-2">
