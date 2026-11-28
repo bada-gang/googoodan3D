@@ -1,5 +1,5 @@
 /**
- * 만물상. 칸은 집 안(가구 · 벽지 · 바닥재) · 마당 · 잡화(낚싯대, RodShelf), 칸 안에서는 종류별로 묶는다. (명세 52)
+ * 만물상. 칸은 집 안(가구 · 벽지 · 바닥재) · 마당 · 잡화(낚시 티켓 FishingTicketShelf · 낚싯대 RodShelf), 칸 안에서는 종류별로 묶는다. (명세 52)
  * 구입할 때만 문제를 풀고, 배치는 자유롭게 한다. (명세 29)
  * 꾸미기 물건은 레벨 해금이 없다 — 레벨 1부터 다 살 수 있다 (config/decor).
  */
@@ -13,6 +13,7 @@ import { furnitureIcon, surfaceStyle } from '../common/icons';
 import { GameButton, ItemCard, MoneyTag, OverlayShell } from '../common/ui';
 import { askMath, awardCorrect } from '../mathFlow';
 import { RodShelf } from './RodShelf';
+import { FishingTicketShelf } from './FishingTicketShelf';
 import { audio } from '@/audio/sfx';
 
 type Tab = 'home' | 'yard' | 'goods';
@@ -69,7 +70,12 @@ export function FurnitureShopOverlay(): React.ReactElement {
       </div>
 
       {/* 잡화: 낚싯대 (RodShelf) */}
-      {tab === 'goods' && <RodShelf />}
+      {tab === 'goods' && (
+        <>
+          <FishingTicketShelf />
+          <RodShelf />
+        </>
+      )}
 
       {tab !== 'goods' && furnitureByCategory(tab).map(({ category, items }) => (
         <Section key={category} title={CATEGORY_NAME[category]}>

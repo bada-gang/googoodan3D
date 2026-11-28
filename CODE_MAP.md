@@ -137,7 +137,7 @@ art-src/         생성 원본 (git 에 안 들어감 — 아래 "백업" 참고
 | 조이스틱 · 행동 버튼 | `src/ui/hud/TouchControls.tsx` |
 | 문제 팝업 | `src/ui/overlays/MathQuestionOverlay.tsx` |
 | 농장 가게 · 만물상(`FurnitureShopOverlay.tsx`) · 가방 · 꾸미기 · 설정 창 | `src/ui/overlays/` 의 같은 이름 파일 |
-| 만물상의 잡화 칸 (낚싯대 사기 · 고르기) | `src/ui/overlays/RodShelf.tsx` |
+| 만물상의 잡화 칸: 낚싯대 사기 · 고르기 / 낚시 티켓(하루 한 번, 값 · 횟수는 `config/fishing` 의 `FISHING.ticket`) | `src/ui/overlays/RodShelf.tsx` / `FishingTicketShelf.tsx` |
 | 낚시 창 (막대 멈추기 · 잡은 물고기 카드) · 물고기 도감(가방 안) | `src/ui/overlays/FishingOverlay.tsx` · `InventoryOverlay.tsx` |
 | 알림(토스트) | `src/ui/overlays/ToastLayer.tsx` |
 | 공통 버튼 · 창 틀 | `src/ui/common/ui.tsx` |

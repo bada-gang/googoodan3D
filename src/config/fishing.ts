@@ -149,6 +149,11 @@ export function caughtMessage(id: FishId): string {
 export const FISHING = {
   /** 하루에 던질 수 있는 횟수 */
   castsPerDay: 20,
+  /**
+   * 만물상 잡화의 낚시 티켓: 하루에 한 번 살 수 있고, 그날 던질 횟수를 늘린다.
+   * 값은 낚시로 버는 돈(10번에 평균 약 87원)보다 비싸게 — 낚시가 돈벌이가 되지 않게
+   */
+  ticket: { price: 300, casts: 10 },
   /** 찌를 던지는 동작 (초) */
   castSeconds: 0.8,
   /** 찌가 물에 떨어진 뒤 입질까지 (초) */

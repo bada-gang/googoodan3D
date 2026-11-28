@@ -14,6 +14,10 @@ export interface FishingSlice {
   fishingCastsLeft: () => number;
   /** 한 번 던진다 (오늘 횟수를 쓴다). 다 썼으면 false */
   spendFishingCast: () => boolean;
+  /** 오늘 낚시 티켓을 이미 샀는지 */
+  boughtFishingTicket: () => boolean;
+  /** 낚시 티켓을 산다 (돈을 낸다, 하루 한 번). 오늘 던질 횟수가 FISHING.ticket.casts 만큼 늘어난다 */
+  buyFishingTicket: () => boolean;
   /** 잡은 물고기를 가방에 넣고 도감에 올린다. 처음 잡은 물고기면 true */
   catchFish: (fish: FishId) => boolean;
   /** 잡화 낚싯대를 산다 (돈을 낸다). 이미 있으면 true */
@@ -29,16 +33,39 @@ export const createFishingSlice: GameSlice<FishingSlice> = (set, get) => ({
   equippedRod: null,
 
   fishingCastsLeft: () => {
-    const { date, casts } = get().fishingDay;
-    const used = date === todayKey() ? casts : 0;
-    return Math.max(0, FISHING.castsPerDay - used);
+    const { date, casts, extra } = get().fishingDay;
+    const today = date === todayKey();
+    return Math.max(0, FISHING.castsPerDay + (today ? (extra ?? 0) : 0) - (today ? casts : 0));
+  },
+
+  boughtFishingTicket: () => {
+    const { date, extra } = get().fishingDay;
+    return date === todayKey() && (extra ?? 0) > 0;
+  },
+
+  buyFishingTicket: () => {
+    if (get().boughtFishingTicket()) return false;
+    if (!get().spendMoney(FISHING.ticket.price)) return false;
+    const today = todayKey();
+    set((s) => ({
+      fishingDay: {
+        date: today,
+        casts: s.fishingDay.date === today ? s.fishingDay.casts : 0,
+        extra: FISHING.ticket.casts,
+      },
+    }));
+    return true;
   },
 
   spendFishingCast: () => {
     if (get().fishingCastsLeft() <= 0) return false;
     const today = todayKey();
     set((s) => ({
-      fishingDay: { date: today, casts: (s.fishingDay.date === today ? s.fishingDay.casts : 0) + 1 },
+      fishingDay:
+        s.fishingDay.date === today
+          ? { ...s.fishingDay, casts: s.fishingDay.casts + 1 }
+          : // 새 날: 어제 산 티켓 횟수는 넘어오지 않는다
+            { date: today, casts: 1 },
     }));
     return true;
   },

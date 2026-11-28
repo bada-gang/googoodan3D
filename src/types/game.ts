@@ -238,6 +238,8 @@ export interface FishingDay {
   /** YYYY-MM-DD. 한 번도 안 던졌으면 null */
   date: string | null;
   casts: number;
+  /** 그날 낚시 티켓으로 늘린 횟수 (만물상, config/fishing FISHING.ticket). 옛 저장에는 없다 */
+  extra?: number;
 }
 
 /* -------------------------------- 저장 데이터 ------------------------------- */

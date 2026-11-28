@@ -146,7 +146,12 @@ export function FishingSpot(): React.ReactElement {
           label: '낚시하기',
           enabled: left > 0,
           highlight: left > 0,
-          hint: left > 0 ? `오늘 ${left}번 남았어요` : '오늘 낚시는 다 했어요. 내일 또 와요',
+          hint:
+            left > 0
+              ? `오늘 ${left}번 남았어요`
+              : useGameStore.getState().boughtFishingTicket()
+                ? '오늘 낚시는 다 했어요. 내일 또 와요'
+                : '오늘 낚시는 다 했어요. 만물상에서 낚시 티켓을 살 수 있어요',
         },
       ];
     },
