@@ -94,7 +94,7 @@ art-src/         생성 원본 (git 에 안 들어감 — 아래 "백업" 참고
 | 양봉 통 자리 (우리 안 왼쪽 울타리 앞 세로로, 동물 · 꾸미기 금지) · 통마다 꿀벌 수 | `src/world/scenes/yard/apiary/apiaryLayout.ts` |
 | 양봉 통 (돌보기 · 벌꿀 받기는 다른 가축과 같은 `pen/animalActions`) | `src/world/scenes/yard/apiary/Apiary.tsx` |
 | 통 둘레를 나는 꿀벌 (코드로 만든 모양 · 인스턴싱) | `src/world/scenes/yard/apiary/BeeSwarm.tsx` |
-| 집 안 (방 크기 · 벽 · 문) | `src/world/scenes/home/HomeWorld.tsx` |
+| 집 안: 숫자(방 크기 · 문 · 창 · 카메라 `HOME_VIEW` · 그림자 색) / 방 모양(바닥 · 벽 · 창 · 문 · 굽도리, 합쳐 그림) / 장면(걷기 · 꾸미기 · 문) | `src/world/scenes/home/homeLayout.ts` / `HomeStructure.tsx` / `HomeWorld.tsx` |
 | 마굿간 안: 크기 · 카메라 · 물건 자리 · 부딪힘 · 색 (숫자는 여기만) | `src/world/scenes/barn/barnLayout.ts` |
 | 마굿간 안: 들어오기 · 나가기, 무엇을 그리는지 | `src/world/scenes/barn/BarnWorld.tsx` |
 | 마굿간 안: 바닥 · 벽 · 기둥 · 입구 문짝 · 칸막이 · 다락 · 사다리 | `src/world/scenes/barn/BarnStructure.tsx` |
@@ -104,18 +104,18 @@ art-src/         생성 원본 (git 에 안 들어감 — 아래 "백업" 참고
 | 시장 낚시터 (연못 · 데크 · 낚싯대 · 찌) | `src/world/scenes/town/FishingSpot.tsx` (자리: `config/layout.ts` 의 `TOWN.pond`) |
 | 땅 · 흙길 | `src/world/props/Ground.tsx` |
 | 카펫 (3D 모델 대신 코드로 그린 무늬: 포근한 · 알록달록) | `src/world/props/DrawnRug.tsx` |
-| 정글짐 · 그네 (3D 모델 대신 코드로 만든 막대, 물건 하나가 그리기 호출 1번) | `src/world/props/CodeFurniture.tsx` |
+| 정글짐 · 그네 (3D 모델 대신 코드로 만든 막대, 물건 하나가 그리기 호출 1번) | `src/world/props/CodeFurniture.tsx` (색 다른 부품 합치기: `props/coloredParts.ts`) |
 | 놓은 가구 모양 고르기 (카펫 / 코드 가구 / 3D 모델) | `src/world/gameplay/decorate.tsx` 의 `FurnitureBody` |
 | 맵을 둘러싼 숲 벽 (앞줄 3D 나무 · 뒷줄 침엽수 모델, 12m 토막으로 화면 밖 안 그림 · 어두워지는 잔디 숲 바닥, 길 틈) | `src/world/props/ForestWall.tsx` |
 | 표지판 | `src/world/props/SignBoard.tsx` |
 | 내 캐릭터 (걷는 동작 · 밭 위 높이) | `src/world/player/Player.tsx` |
 | 걷는 빠르기 · 부딪힘 | `src/world/systems/movement.ts` |
-| 카메라 거리 · 각도 | `src/world/systems/CameraRig.tsx` (고정 카메라: 집 안 `HomeWorld.tsx` 의 `HOME_VIEW`, 마굿간 `barnLayout.ts` 의 `BARN_VIEW`) |
+| 카메라 거리 · 각도 | `src/world/systems/CameraRig.tsx` (고정 카메라: 집 안 `homeLayout.ts` 의 `HOME_VIEW`, 마굿간 `barnLayout.ts` 의 `BARN_VIEW`) |
 | 가까이 가면 뜨는 버튼의 거리 | `src/world/systems/interaction.tsx` |
 | 별 터지기 · 물방울 개수 | `src/world/effects/particles.tsx` |
 | 떠오르는 글자 · 느낌표 | `src/world/effects/effects.tsx` |
 | 해 · 그림자 범위 · 환경맵 | `src/world/rendering/lighting.tsx` |
-| 미리 그린 그림자 (건물 · 울타리 · 덤불 · 꾸미기로 놓은 가구) | `src/world/rendering/bakedShadows.tsx`, `groundShadow.ts`. 가구는 `DecorateRules.bakeShadows` (집 안 · 마당 켜짐, 집 안 그림자 색은 `HomeWorld.tsx` 의 `HOME_SHADOW`) |
+| 미리 그린 그림자 (건물 · 울타리 · 덤불 · 꾸미기로 놓은 가구 · 밭 나무 · 집 안 창틀/문) | `src/world/rendering/bakedShadows.tsx`, `groundShadow.ts`. 가구는 `DecorateRules.bakeShadows` (집 안 · 마당 켜짐, 집 안 그림자 색은 `homeLayout.ts` 의 `HOME_SHADOW`), 밭 나무는 `farm/FarmPlot.tsx` (흙도 받는다: `PlotBeds.tsx`) |
 | 그림자용 저해상도 사본 | `src/world/rendering/shadowProxies.ts` (만드는 쪽: `scripts/lib/shadowProxy.ts`) |
 | 밤낮 색 · 별 · 밤 불빛 | `src/world/rendering/dayNight.tsx` |
 | 모델 · 질감 불러오기 | `src/world/rendering/assets.tsx` |

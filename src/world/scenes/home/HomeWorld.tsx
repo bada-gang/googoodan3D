@@ -4,65 +4,34 @@
  * 앞(카메라 쪽) 벽은 없다 — 인형의 집처럼 들여다본다.
  * 카메라는 방 가운데에 고정한다 (HOME_VIEW). 방 밖이 보이지 않게 벽은 높게, 바닥 · 옆벽은 카메라 쪽으로 더 늘렸다 —
  * 늘린 부분은 보이기만 하고, 걷거나 가구를 놓는 범위(ROOM)는 그대로다.
- * 벽지 · 바닥은 흰 바탕 무늬 질감에 고른 색을 곱해 칠한다 (상점 미리보기와 같은 계산 — icons.ts surfaceStyle).
+ * 숫자는 homeLayout, 방 모양(바닥 · 벽 · 창 · 문)은 HomeStructure.
  */
-import { useEffect, useMemo, useRef } from 'react';
-import { useFrame, type ThreeEvent } from '@react-three/fiber';
-import { Color, type Material, type MeshStandardMaterial } from 'three';
-import { PALETTE } from '@/config/artTokens';
+import { useEffect } from 'react';
+import type { ThreeEvent } from '@react-three/fiber';
 import { surfaceTextureKey } from '@/config/assets';
 import { SURFACE_BY_ID } from '@/config/catalog';
 import { YARD } from '@/config/layout';
 import { useGameStore } from '@/state/gameStore';
-import { ArtTexture } from '../../rendering/assets';
-import { daylight } from '../../rendering/dayNight';
-import { BakedShadows } from '../../rendering/bakedShadows';
-import { applyGroundShadow } from '../../rendering/groundShadow';
+import { BakedShadows, StaticShadow } from '../../rendering/bakedShadows';
 import { DecorateSystem, PlacedFurnitureLayer, decorateFloorHover, decorateFloorTap, type DecorateRules } from '../../gameplay/decorate';
 import { useInteractable } from '../../systems/interaction';
 import { placePlayer } from '../../systems/movement';
 import { input, walkBounds } from '../../state/runtime';
 import { goToScene, useWorldScene } from '../../state/scenes';
+import { Floor, Walls, WindowGlass, Woodwork } from './HomeStructure';
+import {
+  BACK_Z,
+  DOOR,
+  HALF_W,
+  HOME_SHADOW,
+  HOME_SHADOW_BOUNDS,
+  PLACE_BOUNDS,
+  SPAWN,
+  USABLE_FRONT_Z,
+  WALL_THICKNESS,
+} from './homeLayout';
 
-/** 방 크기 (m). 가로 10, 깊이 7, 벽 높이 3 */
-export const ROOM = { width: 10, depth: 7, wallHeight: 3 } as const;
-const HALF_W = ROOM.width / 2;
-const HALF_D = ROOM.depth / 2;
-const BACK_Z = -HALF_D;
-const WALL_THICKNESS = 0.2;
-/** 보이는 벽 높이. 방(ROOM.wallHeight)보다 높여 벽 위로 바깥이 보이지 않게 한다 */
-const VISIBLE_WALL_HEIGHT = 6.5;
-/** 바닥 · 옆벽을 카메라 쪽으로 더 늘리는 길이 (화면 아래 끝까지 바닥이 차게) */
-const FRONT_EXTENSION = 2.5;
-/**
- * 고정 카메라: 방 가운데 앞쪽 위에서 비스듬히 내려다본다.
- * 2026-11 낮추고 가까이 (사용자 요청: 너무 높다) — 방이 화면을 더 크게 채운다. 가구를 놓는 바닥(앞쪽 끝 · 귀퉁이 포함)은 다 보이게 둔다
- */
-export const HOME_VIEW = { position: [0, 6.6, 9.0], target: [0, 0.1, 0.3] } as {
-  position: [number, number, number];
-  target: [number, number, number];
-};
-
-/** 나가는 문 (왼쪽 벽 앞쪽) */
-const DOOR = { z: 1.6, width: 1.3, height: 2.2 };
-/** 처음 서는 자리: 문 안쪽 */
-const SPAWN = { x: -HALF_W + 1.2, z: DOOR.z, facing: Math.PI / 2 };
-/** 창문 (뒷벽) */
-const WINDOW = { x: 1.8, y: 1.75, width: 2, height: 1.3 };
-const GLASS_DAY = new Color(PALETTE.windowLight);
-const GLASS_GLOW = new Color(PALETTE.window);
-
-/**
- * 걷고 가구를 놓는 앞쪽 끝. 앞벽이 없어 바닥이 화면 아래까지 이어지므로, 보이는 마루(화면 아래 끝 근처)까지 쓸 수 있게 한다.
- * (예전에는 방 깊이 끝 3.5m 까지만이라 화면 아래쪽 마루에 아무것도 못 놓았다. 넓히기만 해서 이미 놓은 가구는 그대로다)
- */
-const USABLE_FRONT_Z = HALF_D + 0.9;
-/** 가구 그림자를 굽는 바닥 범위와 색 (나무 바닥 위 따뜻한 갈색) */
-const HOME_SHADOW_BOUNDS = { minX: -HALF_W - 1, maxX: HALF_W + 1, minZ: BACK_Z - 1, maxZ: HALF_D + FRONT_EXTENSION + 1 };
-const HOME_SHADOW = { color: new Color('#2a1a10'), opacity: 0.42 };
-
-/** 가구를 놓을 수 있는 바닥 (벽에서 조금 띄운다) */
-const PLACE_BOUNDS = { minX: -HALF_W + 0.25, maxX: HALF_W - 0.25, minZ: BACK_Z + 0.25, maxZ: USABLE_FRONT_Z };
+export { HOME_VIEW, ROOM } from './homeLayout';
 
 const RULES: DecorateRules = {
   area: 'home',
@@ -122,170 +91,20 @@ export function HomeWorld(): React.ReactElement {
   return (
     <group>
       <DecorateSystem rules={RULES} />
-
-      {/* 바닥 */}
-      <mesh position-z={FRONT_EXTENSION / 2} rotation-x={-Math.PI / 2} receiveShadow onClick={onTap} onPointerMove={onHover}>
-        <planeGeometry args={[ROOM.width, ROOM.depth + FRONT_EXTENSION]} />
-        <SurfaceMaterial
-          textureKey={surfaceTextureKey(floor, 'floor')}
-          color={floor.color}
-          repeat={[ROOM.width / 2, (ROOM.depth + FRONT_EXTENSION) / 2]}
-          bakedShadow
-        />
-      </mesh>
+      <Floor textureKey={surfaceTextureKey(floor, 'floor')} color={floor.color} onClick={onTap} onPointerMove={onHover} />
       <BakedShadows bounds={HOME_SHADOW_BOUNDS} color={HOME_SHADOW.color} opacity={HOME_SHADOW.opacity} />
-
-      {/* 벽: 뒤 · 왼쪽 · 오른쪽 */}
-      <Wall
-        position={[0, VISIBLE_WALL_HEIGHT / 2, BACK_Z]}
-        length={ROOM.width + WALL_THICKNESS}
-        color={wallpaper.color}
+      <Walls
         textureKey={surfaceTextureKey(wallpaper, 'wall')}
-        onClick={onWallTap}
-        onPointerMove={onWallHover}
+        color={wallpaper.color}
+        onBackWallClick={onWallTap}
+        onBackWallMove={onWallHover}
       />
-      <Wall position={[-HALF_W, VISIBLE_WALL_HEIGHT / 2, FRONT_EXTENSION / 2]} length={ROOM.depth + FRONT_EXTENSION} rotation={Math.PI / 2} color={wallpaper.color} textureKey={surfaceTextureKey(wallpaper, 'wall')} />
-      <Wall position={[HALF_W, VISIBLE_WALL_HEIGHT / 2, FRONT_EXTENSION / 2]} length={ROOM.depth + FRONT_EXTENSION} rotation={-Math.PI / 2} color={wallpaper.color} textureKey={surfaceTextureKey(wallpaper, 'wall')} />
-      <Baseboards />
-
-      <Window />
-      <Door />
-
+      <WindowGlass />
+      {/* 창틀 · 문 · 굽도리: 그림자는 바닥에 한 번만 굽는다 */}
+      <StaticShadow>
+        <Woodwork />
+      </StaticShadow>
       <PlacedFurnitureLayer rules={RULES} />
-    </group>
-  );
-}
-
-/* --------------------------------- 벽 · 바닥 --------------------------------- */
-
-/** 흰 바탕 무늬 질감 × 고른 색 */
-function SurfaceMaterial({
-  textureKey,
-  color,
-  repeat,
-  bakedShadow = false,
-}: {
-  textureKey: string;
-  color: string;
-  repeat: [number, number];
-  /** 바닥: 미리 그린 가구 그림자를 칠한다 (rendering/groundShadow) */
-  bakedShadow?: boolean;
-}): React.ReactElement {
-  return (
-    <ArtTexture assetKey={textureKey} repeat={repeat}>
-      {(map) => (
-        <meshStandardMaterial
-          ref={bakedShadow ? (material: Material | null) => material && applyGroundShadow(material) : undefined}
-          map={map}
-          color={color}
-          roughness={0.95}
-        />
-      )}
-    </ArtTexture>
-  );
-}
-
-function Wall({
-  position,
-  length,
-  rotation = 0,
-  color,
-  textureKey,
-  onClick,
-  onPointerMove,
-}: {
-  position: [number, number, number];
-  length: number;
-  rotation?: number;
-  color: string;
-  textureKey: string;
-  onClick?: (event: ThreeEvent<MouseEvent>) => void;
-  onPointerMove?: (event: ThreeEvent<PointerEvent>) => void;
-}): React.ReactElement {
-  return (
-    // 벽은 그림자를 드리우지 않는다. 해가 왼쪽 위에 있어 왼쪽 벽 그림자가 바닥을 반이나 덮는다
-    <mesh position={position} rotation-y={rotation} receiveShadow onClick={onClick} onPointerMove={onPointerMove}>
-      <boxGeometry args={[length, VISIBLE_WALL_HEIGHT, WALL_THICKNESS]} />
-      <SurfaceMaterial textureKey={textureKey} color={color} repeat={[length / 2, VISIBLE_WALL_HEIGHT / 2]} />
-    </mesh>
-  );
-}
-
-/** 벽 아래 나무 굽도리 */
-function Baseboards(): React.ReactElement {
-  const pieces = useMemo(
-    () =>
-      [
-        { position: [0, 0.08, BACK_Z + WALL_THICKNESS / 2 + 0.02], size: [ROOM.width, 0.16, 0.04] },
-        { position: [-HALF_W + WALL_THICKNESS / 2 + 0.02, 0.08, FRONT_EXTENSION / 2], size: [0.04, 0.16, ROOM.depth + FRONT_EXTENSION] },
-        { position: [HALF_W - WALL_THICKNESS / 2 - 0.02, 0.08, FRONT_EXTENSION / 2], size: [0.04, 0.16, ROOM.depth + FRONT_EXTENSION] },
-      ] as { position: [number, number, number]; size: [number, number, number] }[],
-    [],
-  );
-  return (
-    <group>
-      {pieces.map((piece, i) => (
-        <mesh key={i} position={piece.position}>
-          <boxGeometry args={piece.size} />
-          <meshStandardMaterial color={PALETTE.woodDark} roughness={0.9} />
-        </mesh>
-      ))}
-    </group>
-  );
-}
-
-/** 뒷벽 창문: 나무 틀 + 밝은 하늘색 유리 (빛이 들어오는 느낌). 유리는 바깥 하늘색을 따라 노을 · 밤이 된다 */
-function Window(): React.ReactElement {
-  const z = BACK_Z + WALL_THICKNESS / 2 + 0.01;
-  const glass = useRef<MeshStandardMaterial>(null);
-  useFrame(() => {
-    if (!glass.current) return;
-    const k = Math.min(1, daylight.darkness * 1.2);
-    glass.current.color.copy(GLASS_DAY).lerp(daylight.sky, k);
-    glass.current.emissive.copy(GLASS_GLOW).lerp(daylight.sky, k);
-  });
-  return (
-    <group position={[WINDOW.x, WINDOW.y, z]}>
-      <mesh position-z={0.02}>
-        <planeGeometry args={[WINDOW.width, WINDOW.height]} />
-        <meshStandardMaterial ref={glass} color={PALETTE.windowLight} emissive={PALETTE.window} emissiveIntensity={0.35} roughness={0.4} />
-      </mesh>
-      {/* 틀 */}
-      {[
-        [0, WINDOW.height / 2, WINDOW.width + 0.16, 0.12],
-        [0, -WINDOW.height / 2, WINDOW.width + 0.16, 0.12],
-        [-WINDOW.width / 2, 0, 0.12, WINDOW.height],
-        [WINDOW.width / 2, 0, 0.12, WINDOW.height],
-        [0, 0, 0.08, WINDOW.height],
-        [0, 0, WINDOW.width, 0.08],
-      ].map(([x, y, w, h], i) => (
-        <mesh key={i} position={[x, y, 0.05]} castShadow>
-          <boxGeometry args={[w, h, 0.08]} />
-          <meshStandardMaterial color={PALETTE.wood} roughness={0.85} />
-        </mesh>
-      ))}
-    </group>
-  );
-}
-
-/** 왼쪽 벽의 나가는 문 */
-function Door(): React.ReactElement {
-  const x = -HALF_W + WALL_THICKNESS / 2 + 0.02;
-  return (
-    <group position={[x, DOOR.height / 2, DOOR.z]} rotation-y={Math.PI / 2}>
-      <mesh>
-        <boxGeometry args={[DOOR.width, DOOR.height, 0.06]} />
-        <meshStandardMaterial color={PALETTE.woodDark} roughness={0.85} />
-      </mesh>
-      <mesh position={[DOOR.width * 0.32, 0, 0.06]}>
-        <sphereGeometry args={[0.06, 12, 8]} />
-        <meshStandardMaterial color={PALETTE.gold} roughness={0.4} metalness={0.3} />
-      </mesh>
-      {/* 문틀 */}
-      <mesh position-z={-0.02}>
-        <boxGeometry args={[DOOR.width + 0.2, DOOR.height + 0.12, 0.04]} />
-        <meshStandardMaterial color={PALETTE.wood} roughness={0.85} />
-      </mesh>
     </group>
   );
 }

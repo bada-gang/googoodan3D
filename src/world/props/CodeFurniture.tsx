@@ -1,71 +1,12 @@
 /**
  * 코드로 만드는 가구: 정글짐 · 그네 (config/decor 의 codeBuilt).
  * 가는 막대가 많아 3D 변환(Hunyuan)으로 만들면 막대가 부러지고 면이 많아진다.
- * 막대 · 판을 모두 한 모양으로 합치고 색은 꼭짓점 색으로 넣어, 물건 하나가 그리기 호출 1번(+그림자 1번)이다.
+ * 막대 · 판을 모두 한 모양으로 합치고 색은 꼭짓점 색으로 넣어(props/coloredParts), 물건 하나가 그리기 호출 1번(+그림자 1번)이다.
  * 모양은 물건마다 한 번만 만들어 같은 물건끼리 나눠 쓴다.
  */
 import { useMemo } from 'react';
-import {
-  BoxGeometry,
-  type BufferGeometry,
-  Color,
-  CylinderGeometry,
-  Float32BufferAttribute,
-  Quaternion,
-  Vector3,
-  Matrix4,
-} from 'three';
-import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
-
-/** 막대: from 에서 to 까지 (m) */
-interface Bar {
-  from: [number, number, number];
-  to: [number, number, number];
-  radius: number;
-  color: string;
-}
-
-/** 상자: 가운데 · 크기 (m) */
-interface Block {
-  at: [number, number, number];
-  size: [number, number, number];
-  color: string;
-}
-
-type Part = Bar | Block;
-
-const UP = new Vector3(0, 1, 0);
-
-function partGeometry(part: Part): BufferGeometry {
-  let geometry: BufferGeometry;
-  if ('from' in part) {
-    const from = new Vector3(...part.from);
-    const to = new Vector3(...part.to);
-    const length = from.distanceTo(to);
-    // 막대는 면 8개면 둥글어 보인다 (태블릿용으로 적게)
-    geometry = new CylinderGeometry(part.radius, part.radius, length, 8, 1, false);
-    const rotation = new Quaternion().setFromUnitVectors(UP, to.clone().sub(from).normalize());
-    geometry.applyMatrix4(new Matrix4().compose(from.clone().add(to).multiplyScalar(0.5), rotation, new Vector3(1, 1, 1)));
-  } else {
-    geometry = new BoxGeometry(...part.size);
-    geometry.translate(...part.at);
-  }
-  // 합치려면 속성이 같아야 한다: 꼭짓점 색을 넣고 uv 는 뺀다
-  geometry.deleteAttribute('uv');
-  const color = new Color(part.color);
-  const count = geometry.getAttribute('position').count;
-  const colors = new Float32Array(count * 3);
-  for (let i = 0; i < count; i++) colors.set([color.r, color.g, color.b], i * 3);
-  geometry.setAttribute('color', new Float32BufferAttribute(colors, 3));
-  return geometry.index ? geometry.toNonIndexed() : geometry;
-}
-
-function build(parts: Part[]): BufferGeometry {
-  const pieces = parts.map(partGeometry);
-  const merged = mergeGeometries(pieces, false);
-  for (const piece of pieces) piece.dispose();
-  return merged;
-}
+import type { BufferGeometry } from 'three';
+import { coloredPartsGeometry as build, type Part } from './coloredParts';
 
 /* ------------------------------- 정글짐 ------------------------------- */
 

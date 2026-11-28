@@ -3,11 +3,13 @@
  * 움직이지 않아 그림자를 미리 그려 두고(rendering/bakedShadows), 나무 그림자는 흙 위에 지도록 그림자를 받는다.
  */
 import { useEffect, useMemo } from 'react';
+import type { Material } from 'three';
 import { ASSETS } from '@/config/assets';
 import { PALETTE } from '@/config/artTokens';
 import { PLOT_COUNT, YARD, plotPosition } from '@/config/layout';
 import { ArtTexture } from '../../../rendering/assets';
 import { StaticShadow } from '../../../rendering/bakedShadows';
+import { applyGroundShadow } from '../../../rendering/groundShadow';
 import { mergedBoxGeometry, type BoxSpec } from '../../../props/mergedBoxes';
 import { PLOT_HEIGHT } from './farmShared';
 
@@ -42,7 +44,15 @@ export function PlotBeds(): React.ReactElement {
     <StaticShadow receive>
       <mesh geometry={soil} receiveShadow castShadow>
         <ArtTexture assetKey={ASSETS.textures.soil} repeat={[1, 1]}>
-          {(map) => <meshStandardMaterial map={map} color={map ? '#ffffff' : PALETTE.soil} roughness={1} />}
+          {/* 흙에도 미리 그린 나무 그림자를 칠한다 (나무 그림자는 굽는다, FarmPlot) */}
+          {(map) => (
+            <meshStandardMaterial
+              ref={(material: Material | null) => material && applyGroundShadow(material)}
+              map={map}
+              color={map ? '#ffffff' : PALETTE.soil}
+              roughness={1}
+            />
+          )}
         </ArtTexture>
       </mesh>
       <mesh geometry={border} castShadow receiveShadow>

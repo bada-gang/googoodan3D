@@ -8,6 +8,7 @@ import { useGameStore } from '@/state/gameStore';
 import type { TreeSpeciesId } from '@/types/game';
 import { useInteractable } from '../../../systems/interaction';
 import { obstacles, raisedAreas } from '../../../state/runtime';
+import { StaticShadow } from '../../../rendering/bakedShadows';
 import { PLOT_HEIGHT, TREE_RADIUS } from './farmShared';
 import { handlePlotAction, plotPrompts } from './farmActions';
 import { FALLBACK_CROWN, FLY_SECONDS, FlyingFruits } from './Fruits';
@@ -71,7 +72,12 @@ export function FarmPlot({ index }: { index: number }): React.ReactElement {
     <>
       <group position={[x, 0, z]}>
         {/* 흙과 나무 테두리는 모든 밭 칸을 한 번에 그린다 (PlotBeds) */}
-        {plot?.species && <Tree species={plot.species} stage={plot.stage} onCrown={onCrown} />}
+        {/* 나무 그림자는 땅에 미리 굽는다 (태블릿 그리기 절약). 자라거나 수확해 모델이 바뀔 때만 다시 굽는다 */}
+        {plot?.species && (
+          <StaticShadow>
+            <Tree species={plot.species} stage={plot.stage} onCrown={onCrown} />
+          </StaticShadow>
+        )}
         {flying && (
           <FlyingFruits
             key={flying.startedAt}

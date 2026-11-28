@@ -78,12 +78,13 @@ export function StaticShadow({ children, receive = false }: { children: ReactNod
 /**
  * 정적 물체를 표시하고(그림자 레이어, 실시간 그림자 끔) 그 목록을 글로 돌려준다.
  * 자리 · 방향도 넣는다 — 꾸미기로 놓은 마당 물건은 돌리면 같은 물체가 방향만 바뀐다.
+ * 0.1m 단위로 본다: 바람에 살랑이는 밭 나무가 흔들릴 때마다 다시 굽지 않게 (가구는 0.25m 칸으로 옮긴다).
  */
 function markStaticCasters(): string {
   const ids: string[] = [];
   const key = (mesh: Mesh) => {
     const e = mesh.matrixWorld.elements;
-    return `${mesh.id}@${e[12].toFixed(2)},${e[14].toFixed(2)},${e[0].toFixed(2)}`;
+    return `${mesh.id}@${e[12].toFixed(1)},${e[14].toFixed(1)},${e[0].toFixed(1)}`;
   };
   for (const [root, { receive }] of staticRoots) {
     root.traverse((node) => {
