@@ -1,5 +1,5 @@
 /**
- * 동물 돌보기 규칙과 동물 위치 공유.
+ * 동물 돌보기 규칙 (먹이 주기 · 생산물 받기). 걸어 다니기는 animalWander.ts.
  * 먹이 주기 · 생산물 받기마다 문제를 하나 푼다 — 2D 판 YardScene 과 같다. (명세 78)
  */
 import { josa } from '@/config/josa';
@@ -13,98 +13,8 @@ import type { AnimalInstance } from '@/types/game';
 import { audio } from '@/audio/sfx';
 import { burstStars, floatText } from '../../../effects/effects';
 import { askMath, awardExperience, toast } from '../../../gameplay/gameplay';
-import { ANIMAL_BODY, PEN_MIN_X, PEN_MIN_Z, TROUGH, WATER_TROUGH, pen } from './penLayout';
-import { APIARY_AREA } from '../apiary/apiaryLayout';
-
-/* ------------------------------- 움직임 상태 ------------------------------- */
-
-export interface AnimalMotion {
-  x: number;
-  z: number;
-  facing: number;
-  target: { x: number; z: number } | null;
-  /** 다음 걸음을 시작할 시각 (초) */
-  restUntil: number;
-  /** 몸짓 */
-  emote: { kind: 'eat' | 'happy'; startedAt: number } | null;
-  walkPhase: number;
-  moving: boolean;
-}
-
-/** 동물 위치. 상호작용 거리 · 느낌표 · 서로 피하기에 쓴다 */
-export const motions = new Map<string, AnimalMotion>();
-
-/**
- * 동물이 다니는 범위: 울타리 안 구석구석까지. 몸(반지름)에 이만큼만 더 띄워 울타리에 붙지 않게 한다.
- * 예전에는 울타리에서 0.8m 안쪽만 다녀서 가장자리 · 구석이 늘 비어 있었다.
- */
-const WALL_GAP = 0.15;
-/** 여물통 · 물통 · 양봉 구석 자리 (가운데 기준 반 너비 · 반 길이). 동물이 들어가지 않는다 */
-const TROUGHS = [
-  ...[TROUGH, WATER_TROUGH].map((t) => ({ x: t.x, z: t.z, halfX: 0.35, halfZ: t.length / 2 })),
-  // 양봉 통 구석 (yard/apiary). 통이 없어도 비워 둔다
-  {
-    x: (APIARY_AREA.minX + APIARY_AREA.maxX) / 2,
-    z: (APIARY_AREA.minZ + APIARY_AREA.maxZ) / 2,
-    halfX: (APIARY_AREA.maxX - APIARY_AREA.minX) / 2,
-    halfZ: (APIARY_AREA.maxZ - APIARY_AREA.minZ) / 2,
-  },
-];
-
-/** 이 자리에 몸이 통에 닿는지 */
-function hitsTrough(x: number, z: number, radius: number): boolean {
-  const pad = radius + 0.1;
-  return TROUGHS.some((t) => Math.abs(x - t.x) < t.halfX + pad && Math.abs(z - t.z) < t.halfZ + pad);
-}
-
-/** 곧장 걸어가는 길이 통을 지나는지 (동물은 장애물을 돌아가지 않는다) */
-function pathHitsTrough(from: { x: number; z: number }, to: { x: number; z: number }, radius: number): boolean {
-  for (let i = 1; i <= 8; i += 1) {
-    const k = i / 8;
-    if (hitsTrough(from.x + (to.x - from.x) * k, from.z + (to.z - from.z) * k, radius)) return true;
-  }
-  return false;
-}
-
-function spotAt(u: number, v: number, radius: number): { x: number; z: number } {
-  const m = radius + WALL_GAP;
-  return { x: PEN_MIN_X + m + u * (pen.width - m * 2), z: PEN_MIN_Z + m + v * (pen.depth - m * 2) };
-}
-
-/**
- * 쉬기 시작한 동물이 한 번 걸어가는 곳: 건초통 · 물통(우리 오른쪽에 ㅣ자) 바로 앞 띠. 도착한 뒤에는 원래대로 돌아다닌다.
- */
-const REST_AREA = {
-  maxX: Math.min(TROUGH.x, WATER_TROUGH.x) - 0.35 - 0.25,
-  width: 1.4,
-  minZ: Math.min(TROUGH.z - TROUGH.length / 2, WATER_TROUGH.z - WATER_TROUGH.length / 2) + 0.2,
-  maxZ: Math.max(TROUGH.z + TROUGH.length / 2, WATER_TROUGH.z + WATER_TROUGH.length / 2) - 0.2,
-};
-
-/** 쉬는 동안 걸어갈 곳: 통 앞 띠 안 아무 곳이나 (몸이 통에 닿지 않게 반지름만큼 더 띄운다) */
-export function restSpot(radius: number): { x: number; z: number } {
-  const maxX = REST_AREA.maxX - radius;
-  return {
-    x: maxX - Math.random() * REST_AREA.width,
-    z: REST_AREA.minZ + Math.random() * (REST_AREA.maxZ - REST_AREA.minZ),
-  };
-}
-
-/** 다음에 걸어갈 곳. 우리 안 아무 곳이나 (통 자리와 통을 지나는 길은 빼고) */
-export function randomSpot(from: { x: number; z: number }, radius: number): { x: number; z: number } {
-  for (let tries = 0; tries < 12; tries += 1) {
-    const spot = spotAt(Math.random(), Math.random(), radius);
-    if (!hitsTrough(spot.x, spot.z, radius) && !pathHitsTrough(from, spot, radius)) return spot;
-  }
-  return { x: pen.center.x, z: pen.center.z };
-}
-
-/** 처음 자리는 저장된 spot(0~1)으로 정한다. 다시 들어와도 비슷한 곳에 있다 */
-export function startSpot(animal: AnimalInstance, index: number, radius: number): { x: number; z: number } {
-  const spot = spotAt((animal.spot + index * 0.37) % 1, (index * 0.53 + 0.2) % 1, radius);
-  // 통 자리에 걸리면 가운데 쪽으로 옮긴다
-  return hitsTrough(spot.x, spot.z, radius) ? { x: pen.center.x + (index - 1.5) * 0.9, z: spot.z } : spot;
-}
+import { ANIMAL_BODY, pen } from './penLayout';
+import { motions } from './animalWander';
 
 /* ------------------------------- 행동 규칙 ------------------------------- */
 

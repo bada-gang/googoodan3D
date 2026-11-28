@@ -16,7 +16,8 @@ import { StaticShadow } from '../../../rendering/bakedShadows';
 import { Marker } from '../../../effects/effects';
 import { useInteractable } from '../../../systems/interaction';
 import { obstacles } from '../../../state/runtime';
-import { type AnimalMotion, animalPrompts, handleAnimalAction, motions } from '../pen/animalActions';
+import { animalPrompts, handleAnimalAction } from '../pen/animalActions';
+import { type AnimalMotion, motions } from '../pen/animalWander';
 import { ANIMAL_BODY } from '../pen/penLayout';
 import { useAnimalResting } from '../pen/animalRest';
 import { HIVE_RADIUS, HIVE_RANGE, HIVE_SLOTS } from './apiaryLayout';
@@ -45,7 +46,7 @@ function Hive({ bee, slot }: { bee: AnimalInstance; slot: number }): React.React
 
   // 통 자리를 동물 위치로 올린다 (돌보기 · 받기 연출이 이 자리에 뜬다). 걷지 않으니 처음 한 번만
   const motion = useMemo<AnimalMotion>(
-    () => ({ x: at.x, z: at.z, facing: at.rot, target: null, restUntil: 0, emote: null, walkPhase: 0, moving: false }),
+    () => ({ x: at.x, z: at.z, facing: at.rot, target: null, restUntil: 0, emote: null, walkPhase: 0, moving: false, visit: null, faceTo: null }),
     [at],
   );
   useEffect(() => {

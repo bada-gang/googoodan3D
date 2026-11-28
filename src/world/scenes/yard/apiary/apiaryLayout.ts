@@ -1,7 +1,7 @@
 /**
  * 양봉장(꿀벌) 배치: 동물 우리 안 왼쪽 울타리에 붙여 세로로 양봉 통 자리 두 개 (예전 건초통 자리).
  * 꿀벌은 우리 안을 걷지 않고, 산 순서대로 이 자리에 통이 놓인다. 숫자는 이 파일만 고친다.
- * 우리 동물들은 이 구석을 피해 다닌다 (pen/animalActions 의 APIARY_AREA).
+ * 우리 동물들은 통이 놓인 자리만 피해 다닌다 (pen/animalWander). APIARY_AREA 는 마당 꾸미기로 물건을 못 놓는 구석이다.
  */
 import { PEN_MIN_X, pen } from '../pen/penLayout';
 

@@ -19,7 +19,8 @@ import { useInteractable } from '../../../systems/interaction';
 import { obstacles, type Obstacle } from '../../../state/runtime';
 import { ANIMAL_BODY } from './penLayout';
 import { useAnimalResting } from './animalRest';
-import { type AnimalMotion, animalPrompts, handleAnimalAction, motions, randomSpot, restSpot, startSpot } from './animalActions';
+import { animalPrompts, handleAnimalAction } from './animalActions';
+import { type AnimalMotion, VISIT_EAT_MS, keepWaiting, motions, randomSpot, startSpot, troughVisit } from './animalWander';
 
 /* ---------------------------------- 동물 ---------------------------------- */
 
@@ -49,6 +50,8 @@ export function Animal({ animal, index }: { animal: AnimalInstance; index: numbe
       emote: null,
       walkPhase: 0,
       moving: false,
+      visit: null,
+      faceTo: null,
     };
     // 처음 한 번만 정한다
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -79,12 +82,13 @@ export function Animal({ animal, index }: { animal: AnimalInstance; index: numbe
   useFrame((_, rawDelta) => {
     const dt = Math.min(rawDelta, 1 / 20);
     const now = performance.now() / 1000;
-    const busy = motion.emote && performance.now() - motion.emote.startedAt < 1200;
+    const busy = motion.emote && performance.now() - motion.emote.startedAt < (motion.emote.duration ?? 1200);
 
-    // 쉬기 시작했다: 걷던 길을 버리고 건초통 · 물통 앞으로 (한 번만)
+    // 쉬기 시작했다: 걷던 길을 버리고 건초통이나 물통 앞으로 (도착할 때까지, animalWander)
     if (goToTrough.current) {
       goToTrough.current = false;
-      motion.target = restSpot(size.radius);
+      motion.visit = troughVisit(size.radius);
+      motion.target = motion.visit.spot;
     }
     // 돌아다니기: 쉬다가 → 우리 안 아무 곳으로 걸어가기
     if (!motion.target && !busy && now > motion.restUntil) motion.target = randomSpot(motion, size.radius);
@@ -94,16 +98,28 @@ export function Animal({ animal, index }: { animal: AnimalInstance; index: numbe
       const dz = motion.target.z - motion.z;
       const distance = Math.hypot(dx, dz);
       // 다른 동물과 너무 가까우면 멈추고 다른 곳을 고른다
-      let crowded = false;
+      let blocker: AnimalMotion | null = null;
       for (const [id, other] of motions) {
         if (id === animal.id) continue;
         const ahead = Math.hypot(other.x - (motion.x + (dx / distance) * 0.4), other.z - (motion.z + (dz / distance) * 0.4));
-        if (ahead < size.radius + 0.5) crowded = true;
+        if (ahead < size.radius + 0.5) blocker = other;
       }
-      if (distance < 0.1 || crowded) {
+      const crowded = blocker !== null;
+      if (distance < 0.1 && motion.visit) {
+        // 통에 닿았다: 통을 보고 먹기 · 마시기를 한 번 한 뒤 다시 자유롭게
+        motion.faceTo = motion.visit.face;
+        motion.visit = null;
+        motion.target = null;
+        motion.emote = { kind: 'eat', startedAt: performance.now(), duration: VISIT_EAT_MS };
+        motion.restUntil = now + VISIT_EAT_MS / 1000 + 0.8;
+      } else if (blocker && motion.visit && keepWaiting(motion, blocker, now)) {
+        // 쉬러 가는 길에 막혔다: 포기하지 않는다. 막은 동물이 서 있으면 비켜 주고, 오래 막히면 비집고 지나간다
+      } else if (distance < 0.1 || (crowded && !motion.visit)) {
         motion.target = null;
         motion.restUntil = now + 1.6 + Math.random() * 3.4;
       } else {
+        // 길이 트였을 때만 기다린 시간을 지운다 (비집고 지나가는 중에는 그대로)
+        if (motion.visit && !crowded) motion.visit.waitingSince = null;
         const step = Math.min(distance, size.speed * dt);
         motion.x += (dx / distance) * step;
         motion.z += (dz / distance) * step;
@@ -112,6 +128,13 @@ export function Animal({ animal, index }: { animal: AnimalInstance; index: numbe
         motion.facing += diff * Math.min(1, dt * 5);
         motion.moving = true;
       }
+    }
+    // 통 앞에서 먹는 동안 통 쪽으로 천천히 돈다
+    if (motion.faceTo !== null) {
+      let turnTo = motion.faceTo - motion.facing;
+      turnTo = Math.atan2(Math.sin(turnTo), Math.cos(turnTo));
+      motion.facing += turnTo * Math.min(1, dt * 4);
+      if (!busy) motion.faceTo = null;
     }
     obstacle.x = motion.x;
     obstacle.z = motion.z;
@@ -139,7 +162,7 @@ export function Animal({ animal, index }: { animal: AnimalInstance; index: numbe
     }
     if (motion.emote) {
       const age = (performance.now() - motion.emote.startedAt) / 1000;
-      if (motion.emote.kind === 'eat' && age < 1.2) {
+      if (motion.emote.kind === 'eat' && age < (motion.emote.duration ?? 1200) / 1000) {
         lean = Math.abs(Math.sin(age * Math.PI * 2.5)) * 0.45;
       } else if (motion.emote.kind === 'happy' && age < 0.6) {
         bob += Math.sin((age / 0.6) * Math.PI) * 0.35;
