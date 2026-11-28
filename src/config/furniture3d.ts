@@ -31,24 +31,26 @@ export interface Furniture3D {
   stretch?: number;
 }
 
+// 2026-11 태블릿 점검: 모양이 단순해 줄여도 티가 안 나는 예전 가구는 small (비교해서 고름).
+// 책장 · 분수 · 액자 · 화분 · 토끼 인형 · 꽃밭은 줄이면 모양이 뭉개져 그대로 둔다
 export const FURNITURE_3D: Record<string, Furniture3D> = {
   // --- 집 ---
-  bed_basic: { height: 1.0, radius: 1.0 },
-  desk_basic: { height: 0.9, radius: 0.7 },
-  chair_basic: { height: 1.0, radius: 0.4 },
-  table_basic: { height: 0.75, radius: 0.65 },
-  drawer_basic: { height: 1.05, radius: 0.55 },
-  sofa_cozy: { height: 1.0, radius: 1.0 },
-  cushion_cozy: { height: 0.35, radius: 0.35, walkable: true },
+  bed_basic: { height: 1.0, radius: 1.0, budget: 'small' },
+  desk_basic: { height: 0.9, radius: 0.7, budget: 'small' },
+  chair_basic: { height: 1.0, radius: 0.4, budget: 'small' },
+  table_basic: { height: 0.75, radius: 0.65, budget: 'small' },
+  drawer_basic: { height: 1.05, radius: 0.55, budget: 'small' },
+  sofa_cozy: { height: 1.0, radius: 1.0, budget: 'small' },
+  cushion_cozy: { height: 0.35, radius: 0.35, walkable: true, budget: 'small' },
   carpet_cozy: { width: 2.2, radius: 1.1, walkable: true },
-  lamp_cozy: { height: 1.6, radius: 0.35, glow: { y: 1.38, size: 1.3 } },
+  lamp_cozy: { height: 1.6, radius: 0.35, glow: { y: 1.38, size: 1.3 }, budget: 'small' },
   bookshelf_nature: { height: 1.8, radius: 0.7 },
   plant_nature: { height: 1.3, radius: 0.4 },
   frame_nature: { height: 0.8, radius: 0.5, wall: true },
   doll_colorful: { height: 0.7, radius: 0.35 },
-  clock_colorful: { height: 0.7, radius: 0.4, wall: true },
+  clock_colorful: { height: 0.7, radius: 0.4, wall: true, budget: 'small' },
   carpet_colorful: { width: 2.2, radius: 1.1, walkable: true },
-  bed_starlight: { height: 1.05, radius: 1.0 },
+  bed_starlight: { height: 1.05, radius: 1.0, budget: 'small' },
   lamp_starlight: { height: 1.6, radius: 0.35, glow: { y: 1.4, size: 1.2 } },
   // 2026-11 추가 (small 예산)
   beanbag: { height: 0.8, radius: 0.6, budget: 'small' },
@@ -61,12 +63,12 @@ export const FURNITURE_3D: Record<string, Furniture3D> = {
   chalkboard: { height: 0.9, radius: 0.7, wall: true, budget: 'small' },
 
   // --- 마당 ---
-  fence_wood: { height: 0.9, radius: 0.7 },
+  fence_wood: { height: 0.9, radius: 0.7, budget: 'small' },
   flower_bed: { width: 1.2, radius: 0.6, walkable: true },
   // 가로로 긴 꽃밭. 모델은 2.2m 로 맞추고 가로로만 1.25배 늘린다 (2.75m, 사용자 요청).
   // 놓을 때 막는 범위는 원이라, 길이의 반쯤으로 잡는다
   flower_bed_long: { width: 2.2, stretch: 1.25, radius: 1.1, walkable: true },
-  bench_wood: { height: 0.95, radius: 0.85 },
+  bench_wood: { height: 0.95, radius: 0.85, budget: 'small' },
   stonepath: { width: 1.3, radius: 0.65, walkable: true },
   streetlamp: { height: 2.4, radius: 0.3, glow: { y: 2.08, size: 1.8 } },
   fountain: { height: 1.4, radius: 1.0 },
