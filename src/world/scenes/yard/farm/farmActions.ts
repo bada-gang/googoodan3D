@@ -69,7 +69,8 @@ export function plotPrompts(plotId: string): InteractionPrompt[] {
       id: 'grow',
       label: `${TREE_SPECIES[plot.species].name} 물 주기`,
       enabled: water > 0,
-      hint: water > 0 ? `${STAGE_LABEL[plot.stage]} · 물 ${water}개` : '물이 없어요. 농장 가게에서 사 오세요',
+      // 나무 단계 · 남은 물 개수는 띄우지 않는다 (사용자 요청). 물이 없을 때만 알려 준다
+      hint: water > 0 ? undefined : '물이 없어요. 농장 가게에서 사 오세요',
     },
   ];
 }
