@@ -12,7 +12,7 @@ import { surfaceTextureKey } from '@/config/assets';
 import { SURFACE_BY_ID } from '@/config/catalog';
 import { YARD } from '@/config/layout';
 import { useGameStore } from '@/state/gameStore';
-import { BakedShadows, StaticShadow } from '../../rendering/bakedShadows';
+import { BakedShadows } from '../../rendering/bakedShadows';
 import { DecorateSystem, PlacedFurnitureLayer, decorateFloorHover, decorateFloorTap, type DecorateRules } from '../../gameplay/decorate';
 import { useInteractable } from '../../systems/interaction';
 import { placePlayer } from '../../systems/movement';
@@ -100,10 +100,8 @@ export function HomeWorld(): React.ReactElement {
         onBackWallMove={onWallHover}
       />
       <WindowGlass />
-      {/* 창틀 · 문 · 굽도리: 그림자는 바닥에 한 번만 굽는다 */}
-      <StaticShadow>
-        <Woodwork />
-      </StaticShadow>
+      {/* 창틀 · 문 · 굽도리 (그림자 없음) */}
+      <Woodwork />
       <PlacedFurnitureLayer rules={RULES} />
     </group>
   );

@@ -4,7 +4,7 @@
  * 태블릿 그리기 호출을 줄이려고 합쳐 그린다 (2026-11 점검: 집 안 54번 → 약 35번):
  *  - 벽 세 장은 모양 하나 (벽지 질감은 벽마다 같은 크기로 깔리게 uv 를 늘린다, props/mergedBoxes)
  *  - 나무 부품(창틀 6 · 문 · 문틀 · 손잡이 · 굽도리 3)은 꼭짓점 색으로 모양 하나 (props/coloredParts)
- *  - 창틀 그림자는 실시간이 아니라 바닥에 미리 굽는다 (HomeWorld 의 StaticShadow)
+ *  - 나무 부품은 그림자를 드리우지 않는다 (문 그림자는 필요 없다, 창틀 그림자는 벽에 져서 안 보였다)
  * 벽지 · 바닥은 흰 바탕 무늬 질감에 고른 색을 곱해 칠한다 (상점 미리보기와 같은 계산 — icons.ts surfaceStyle).
  */
 import { useEffect, useMemo, useRef } from 'react';
@@ -151,12 +151,15 @@ function woodworkParts(): Part[] {
   return parts;
 }
 
-/** 나무 부품 한 덩어리. 그림자는 HomeWorld 의 StaticShadow 가 바닥에 굽는다 (castShadow 는 굽기 표시용) */
+/**
+ * 나무 부품 한 덩어리. 그림자는 드리우지 않는다 (사용자 요청: 문 그림자는 필요 없다).
+ * 창틀 그림자는 원래 뒷벽 위에 져서 바닥에는 문 그림자만 보였다.
+ */
 export function Woodwork(): React.ReactElement {
   const geometry = useMemo(() => coloredPartsGeometry(woodworkParts()), []);
   useEffect(() => () => geometry.dispose(), [geometry]);
   return (
-    <mesh geometry={geometry} castShadow>
+    <mesh geometry={geometry}>
       <meshStandardMaterial vertexColors roughness={0.85} />
     </mesh>
   );
