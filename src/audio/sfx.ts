@@ -21,6 +21,8 @@ export type SfxName =
   | 'animal'
   | 'levelUp'
   | 'fanfare'
+  /** 낚시 막대를 초록 칸에서 멈췄을 때 손맛: 묵직한 '쿵' + 밝은 '팅' (합성음) */
+  | 'reel'
   | 'tap';
 
 /**
@@ -230,6 +232,13 @@ class AudioEngine {
         [67, 72, 76, 79, 84].forEach((note, i) =>
           this.tone({ freq: midiToFreq(note), start: now + i * 0.085, duration: 0.3, gain: 0.6 }),
         );
+        break;
+      case 'reel':
+        // 낚싯대 끝이 확 당겨지는 묵직한 '쿵' (낮은 음이 더 낮게 미끄러진다)
+        this.tone({ freq: 150, start: now, duration: 0.2, gain: 0.95, type: 'sine', glideTo: 55 });
+        // 걸렸다! 밝은 두 음 '팅-팅'
+        this.tone({ freq: midiToFreq(84), start: now + 0.05, duration: 0.12, gain: 0.45 });
+        this.tone({ freq: midiToFreq(91), start: now + 0.12, duration: 0.2, gain: 0.4 });
         break;
       case 'step':
         this.tone({ freq: 140 + Math.random() * 30, start: now, duration: 0.05, gain: 0.18, type: 'sine' });

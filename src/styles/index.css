@@ -411,3 +411,25 @@ button {
     animation: none;
   }
 }
+
+/* 낚시: 초록 칸에서 멈췄을 때 손맛 (ui/overlays/FishingOverlay). 막대 · 버튼이 짧게 흔들리고 표시가 튀어 오른다 */
+@keyframes fish-hit-shake {
+  0% { transform: translate(0, 0); }
+  15% { transform: translate(-8px, 2px); }
+  30% { transform: translate(7px, -2px); }
+  45% { transform: translate(-5px, 1px); }
+  60% { transform: translate(4px, 0); }
+  80% { transform: translate(-2px, 0); }
+  100% { transform: translate(0, 0); }
+}
+.fish-hit-shake {
+  animation: fish-hit-shake 0.36s ease-out;
+}
+@keyframes fish-hit-pop {
+  0% { transform: scale(1); }
+  35% { transform: scale(1.6, 1.25); }
+  100% { transform: scale(1); }
+}
+.fish-hit-pop {
+  animation: fish-hit-pop 0.3s ease-out;
+}

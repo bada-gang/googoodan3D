@@ -14,6 +14,7 @@ import { CURRENCY } from '@/config/strings';
 import { useFishing } from '@/state/fishingStore';
 import { useGameStore } from '@/state/gameStore';
 import { rodAbility } from '@/config/rods';
+import { audio } from '@/audio/sfx';
 import { cropIcon } from '../common/icons';
 import { GameButton, Icon } from '../common/ui';
 import { RareIcon } from '../common/RareIcon';
@@ -94,6 +95,8 @@ function BiteGame(): React.ReactElement {
     const at = position.current;
     const hit = Math.abs(at - zoneCenter) <= zone / 2;
     setStopped({ at, hit });
+    // 잡았을 때 손맛: '쿵-팅' 소리 + 막대 흔들림 · 표시 튀어 오름 (styles/index.css 의 fish-hit-*)
+    if (hit) audio.play('reel');
     window.setTimeout(() => reel(hit), STOP_SHOW_MS);
   };
 
@@ -105,6 +108,7 @@ function BiteGame(): React.ReactElement {
           {def ? BITE_MESSAGE[def.size] : ''}
         </p>
         <p className="font-game text-ink-soft -mt-1 text-[1.1rem]">움직이는 표시가 초록 칸에 왔을 때 멈추세요</p>
+        <div className={['flex w-full flex-col items-center gap-3', stopped?.hit ? 'fish-hit-shake' : ''].join(' ')}>
         <div className="relative my-1 h-[46px] w-full rounded-full border-4 border-[var(--color-ink)] bg-[#e9dcc0]">
           <div
             className={['absolute top-0 bottom-0 rounded-full', stopped && !stopped.hit ? 'bg-[#a8cf8f]' : 'bg-[#6fbf6a]'].join(' ')}
@@ -114,7 +118,7 @@ function BiteGame(): React.ReactElement {
             ref={marker}
             className={[
               'absolute -top-[14px] h-[66px] w-[14px] -translate-x-1/2 rounded-full border-4 border-[var(--color-ink)]',
-              stopped ? (stopped.hit ? 'bg-[var(--color-gold)]' : 'bg-[var(--color-berry)]') : 'bg-white',
+              stopped ? (stopped.hit ? 'fish-hit-pop bg-[var(--color-gold)]' : 'bg-[var(--color-berry)]') : 'bg-white',
             ].join(' ')}
             style={{ left: stopped ? `${stopped.at * 100}%` : '0%' }}
           />
@@ -123,6 +127,7 @@ function BiteGame(): React.ReactElement {
         <GameButton tone="gold" big glow={!stopped} className="min-w-[220px]">
           {stopped ? (stopped.hit ? '잡았다!' : '앗!') : '멈추기!'}
         </GameButton>
+        </div>
       </BottomPanel>
     </div>
   );
