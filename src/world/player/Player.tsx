@@ -20,7 +20,8 @@ import { audio } from '@/audio/sfx';
 import { GltfModel } from '../rendering/assets';
 import { stepMovement } from '../systems/movement';
 import { groundHeight, player } from '../state/runtime';
-import { useWorldScene } from '../state/sceneStore';
+import { isIndoorScene, useWorldScene } from '../state/sceneStore';
+import { BlobShadow } from './BlobShadow';
 
 /** 발소리 간격 (초) */
 const STEP_INTERVAL = 0.32;
@@ -64,6 +65,8 @@ function ease(bone: Bone | undefined, x: number, z: number, k: number): void {
 
 export function Player(): React.ReactElement {
   const characterId = useGameStore((s) => characterOf(s.profile));
+  // 실내(집 안 · 마굿간)는 발밑 동그란 그림자 (BlobShadow)
+  const indoor = useWorldScene((s) => isIndoorScene(s.scene));
   const root = useRef<Group>(null);
   const body = useRef<Group>(null);
   const walkPhase = useRef(0);
@@ -189,6 +192,8 @@ export function Player(): React.ReactElement {
 
   return (
     <group ref={root}>
+      {/* 실내에서는 실시간 그림자 대신 발밑 동그란 그림자 */}
+      {indoor && <BlobShadow />}
       <group ref={body}>
         <GltfModel
           modelKey={MODELS.characters[characterId]}

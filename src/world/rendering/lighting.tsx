@@ -92,12 +92,14 @@ export function Sun(): React.ReactElement {
   return (
     <>
       {/* 그림자 사본을 켜는 물체. 장면에서 가장 먼저 그림자를 그리도록 맨 앞에 둔다 */}
-      <primitive object={gate} />
+      {/* 실내(집 안 · 마굿간)는 실시간 그림자가 없어 이 물체도 필요 없다 */}
+      <primitive object={gate} visible={!indoor} />
       <hemisphereLight ref={sky} args={[PALETTE.skyTop, PALETTE.grassShade, SKY_INTENSITY]} />
       <directionalLight
         ref={light}
         intensity={SUN_INTENSITY}
-        castShadow={!TEST_FLAGS.noShadow}
+        // 실내는 실시간 그림자를 끈다: 캐릭터는 발밑 동그란 그림자(player/BlobShadow), 물건은 미리 구운 그림자
+        castShadow={!TEST_FLAGS.noShadow && !indoor}
         shadow-mapSize={[512, 512]}
         shadow-camera-left={-SHADOW_RANGE}
         shadow-camera-right={SHADOW_RANGE}

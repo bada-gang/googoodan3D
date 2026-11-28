@@ -110,6 +110,7 @@ art-src/         생성 원본 (git 에 안 들어감 — 아래 "백업" 참고
 | 맵을 둘러싼 숲 벽 (앞줄 3D 나무 · 뒷줄 침엽수 모델, 12m 토막으로 화면 밖 안 그림 · 어두워지는 잔디 숲 바닥, 길 틈) | `src/world/props/ForestWall.tsx` |
 | 표지판 | `src/world/props/SignBoard.tsx` |
 | 내 캐릭터 (걷는 동작 · 밭 위 높이) | `src/world/player/Player.tsx` |
+| 실내(집 안 · 마굿간) 캐릭터 발밑 동그란 그림자 (실내는 해의 실시간 그림자를 끔: `rendering/lighting.tsx` 의 `Sun`) | `src/world/player/BlobShadow.tsx` |
 | 걷는 빠르기 · 부딪힘 | `src/world/systems/movement.ts` |
 | 카메라 거리 · 각도 | `src/world/systems/CameraRig.tsx` (고정 카메라: 집 안 `homeLayout.ts` 의 `HOME_VIEW`, 마굿간 `barnLayout.ts` 의 `BARN_VIEW`) |
 | 가까이 가면 뜨는 버튼의 거리 | `src/world/systems/interaction.tsx` |
