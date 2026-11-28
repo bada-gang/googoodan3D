@@ -17,16 +17,21 @@ import type {
   RepositoryBundle,
 } from './repositories';
 
-/**
- * 기다린다고 나아지지 않는 오류들. 규칙·인증·설정 문제다.
- * invalid-argument(저장 내용이 잘못됨, 예: 빈 값)는 넣지 않는다 — 이 기기 저장으로 내려가면 그 수업 내내
- * 서버에 아무것도 안 올라간다 (2026-11 버그). 그 한 번만 실패하고, 다음 저장 때 서버에 다시 시도한다.
- */
+/** 기다린다고 나아지지 않는 오류들. 규칙·인증·설정 문제다. 한 번 나면 바로 이 기기 저장으로 내려간다 */
 const FATAL_CODES = new Set(['permission-denied', 'unauthenticated', 'failed-precondition', 'unimplemented']);
 
-function isFatal(error: unknown): boolean {
+/**
+ * 저장 내용이 잘못됐다는 오류 (예: 빈 값, 너무 큰 문서). 한 번은 넘기고 다음 저장(20초 뒤, state/persistence)에 서버에 다시 시도한다.
+ * 2026-11 버그 때는 첫 번째에 바로 내려가서 그 수업 내내 서버에 아무것도 안 올라갔다.
+ * 하지만 DATA_ERRORS_BEFORE_DOWNGRADE 번 연달아 나면(약 1분) 고쳐지지 않는 문제로 보고 이 기기 저장으로 내려간다 (사용자 요청).
+ * 그 사이에 서버 저장이 한 번이라도 되면 다시 0부터 센다.
+ */
+const DATA_ERROR_CODE = 'invalid-argument';
+const DATA_ERRORS_BEFORE_DOWNGRADE = 3;
+
+function codeOf(error: unknown): string | null {
   const code = (error as { code?: unknown })?.code;
-  return typeof code === 'string' && FATAL_CODES.has(code);
+  return typeof code === 'string' ? code : null;
 }
 
 /**
@@ -39,13 +44,27 @@ export function createResilientBundle(
   onDowngrade: (error: unknown) => void,
 ): RepositoryBundle {
   let fallback: RepositoryBundle | null = null;
+  /**
+   * 저장 내용 오류가 연달아 난 횟수. 호출 종류(key)마다 따로 센다 — 한 번 저장할 때 진행도와 학습 통계를 같이 쓰는데,
+   * 진행도만 계속 실패해도 통계가 성공해서 횟수가 0으로 돌아가면 안 된다.
+   */
+  const dataErrors = new Map<string, number>();
 
-  async function run<T>(pick: (bundle: RepositoryBundle) => Promise<T>): Promise<T> {
+  async function run<T>(pick: (bundle: RepositoryBundle) => Promise<T>, key = 'other'): Promise<T> {
     if (fallback) return pick(fallback);
     try {
-      return await pick(primary);
+      const result = await pick(primary);
+      dataErrors.delete(key);
+      return result;
     } catch (error) {
-      if (!isFatal(error)) throw error;
+      const code = codeOf(error);
+      if (code === DATA_ERROR_CODE) {
+        const count = (dataErrors.get(key) ?? 0) + 1;
+        dataErrors.set(key, count);
+        if (count < DATA_ERRORS_BEFORE_DOWNGRADE) throw error;
+      } else if (!code || !FATAL_CODES.has(code)) {
+        throw error;
+      }
       fallback = makeFallback();
       onDowngrade(error);
       return pick(fallback);
@@ -83,13 +102,13 @@ export function createResilientBundle(
 
   const gameState: GameStateRepository = {
     load: (id) => run((b) => b.gameState.load(id)),
-    save: (id, data) => run((b) => b.gameState.save(id, data)),
+    save: (id, data) => run((b) => b.gameState.save(id, data), 'gameState.save'),
     reset: (id) => run((b) => b.gameState.reset(id)),
   };
 
   const learning: LearningRepository = {
     loadStats: (id) => run((b) => b.learning.loadStats(id)),
-    saveStats: (id, stats) => run((b) => b.learning.saveStats(id, stats)),
+    saveStats: (id, stats) => run((b) => b.learning.saveStats(id, stats), 'learning.saveStats'),
   };
 
   return { player, classes, gameState, learning };
