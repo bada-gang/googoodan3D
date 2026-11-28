@@ -42,6 +42,8 @@ const SOUTH_PATH_X =
 /** 마당 꾸미기: 걸어 다니는 범위 안 어디든, 밭과 집 문 앞만 빼고 */
 const YARD_DECORATE_RULES: DecorateRules = {
   area: 'yard',
+  // 마당 장식(놀이기구 등) 그림자는 땅에 미리 굽는다 (태블릿 그리기 횟수 절약)
+  bakeShadows: true,
   bounds: { minX: YARD.bounds.minX + 0.5, maxX: YARD.bounds.maxX - 0.5, minZ: YARD.bounds.minZ + 0.5, maxZ: YARD.bounds.maxZ - 0.3 },
   blocked: (x, z, radius) => {
     // 밭 두 곳 전체 (밭 사이 길까지)

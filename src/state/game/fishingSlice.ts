@@ -1,12 +1,14 @@
-/** 낚시 (저장되는 것): 오늘 던진 횟수, 물고기 도감. 잡은 물고기는 가방에 들어간다. */
+/** 낚시 (저장되는 것): 오늘 던진 횟수, 물고기 도감, 쓰는 낚싯대. 잡은 물고기는 가방에 들어간다. */
 import { FISHING } from '@/config/fishing';
-import type { FishDexEntry, FishId, FishingDay } from '@/types/game';
+import { ROD_BY_ID, rodUnlockKey } from '@/config/rods';
+import type { FishDexEntry, FishId, FishingDay, RodId } from '@/types/game';
 import { todayKey } from './saveData';
 import type { GameSlice } from './types';
 
 export interface FishingSlice {
   fishDex: Partial<Record<FishId, FishDexEntry>>;
   fishingDay: FishingDay;
+  equippedRod: RodId | null;
 
   /** 오늘 더 던질 수 있는 횟수 */
   fishingCastsLeft: () => number;
@@ -14,11 +16,17 @@ export interface FishingSlice {
   spendFishingCast: () => boolean;
   /** 잡은 물고기를 가방에 넣고 도감에 올린다. 처음 잡은 물고기면 true */
   catchFish: (fish: FishId) => boolean;
+  /** 잡화 낚싯대를 산다 (돈을 낸다). 이미 있으면 true */
+  buyRod: (rod: RodId) => boolean;
+  hasRod: (rod: RodId) => boolean;
+  /** 가진 낚싯대 중 하나를 쓴다. null 이면 기본 낚싯대 */
+  equipRod: (rod: RodId | null) => void;
 }
 
 export const createFishingSlice: GameSlice<FishingSlice> = (set, get) => ({
   fishDex: {},
   fishingDay: { date: null, casts: 0 },
+  equippedRod: null,
 
   fishingCastsLeft: () => {
     const { date, casts } = get().fishingDay;
@@ -45,5 +53,19 @@ export const createFishingSlice: GameSlice<FishingSlice> = (set, get) => ({
       },
     }));
     return !before;
+  },
+
+  hasRod: (rod) => get().unlocked.includes(rodUnlockKey(rod)),
+
+  buyRod: (rod) => {
+    if (get().hasRod(rod)) return true;
+    if (!get().spendMoney(ROD_BY_ID[rod].price)) return false;
+    set((s) => ({ unlocked: [...new Set([...s.unlocked, rodUnlockKey(rod)])] }));
+    return true;
+  },
+
+  equipRod: (rod) => {
+    if (rod && !get().hasRod(rod)) return;
+    set({ equippedRod: rod });
   },
 });

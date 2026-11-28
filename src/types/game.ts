@@ -231,6 +231,9 @@ export interface FishDexEntry {
 }
 
 /** 오늘 낚시를 몇 번 던졌는지. 날이 바뀌면 다시 0 부터 */
+/** 잡화 낚싯대 (config/rods) */
+export type RodId = 'bamboo' | 'star' | 'dragon';
+
 export interface FishingDay {
   /** YYYY-MM-DD. 한 번도 안 던졌으면 null */
   date: string | null;
@@ -270,4 +273,6 @@ export interface GameSaveData {
   /** 물고기 도감 (물고기 id -> 기록). 잡은 적 없는 물고기는 없다 */
   fishDex: Partial<Record<FishId, FishDexEntry>>;
   fishingDay: FishingDay;
+  /** 쓰는 낚싯대. null 이면 기본 낚싯대 (가진 낚싯대는 unlocked 의 rod_<id>) */
+  equippedRod: RodId | null;
 }

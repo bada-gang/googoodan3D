@@ -160,12 +160,16 @@ export const FISHING = {
   escapeSeconds: 1.6,
 } as const;
 
-/** 걸리는 것을 무게(weight)에 따라 하나 고른다 */
-export function rollFish(random: () => number = Math.random): FishId {
-  const total = FISH_ORDER.reduce((sum, id) => sum + FISH[id].weight, 0);
+/**
+ * 걸리는 것을 무게(weight)에 따라 하나 고른다.
+ * rareScale: 레어템(전설)의 무게 배율 — 포세이돈의 낚싯대가 2 (config/rods)
+ */
+export function rollFish(random: () => number = Math.random, rareScale = 1): FishId {
+  const weightOf = (id: FishId) => FISH[id].weight * (FISH[id].size === 'legend' ? rareScale : 1);
+  const total = FISH_ORDER.reduce((sum, id) => sum + weightOf(id), 0);
   let pick = random() * total;
   for (const id of FISH_ORDER) {
-    pick -= FISH[id].weight;
+    pick -= weightOf(id);
     if (pick < 0) return id;
   }
   return FISH_ORDER[0];

@@ -10,6 +10,7 @@
  */
 import { create } from 'zustand';
 import { FANFARE, FISHING, isFishId, rollFish } from '@/config/fishing';
+import { rodAbility } from '@/config/rods';
 import type { FishId } from '@/types/game';
 import { audio } from '@/audio/sfx';
 import { useGameStore } from './gameStore';
@@ -70,7 +71,9 @@ export const useFishing = create<FishingState>()((set, get) => {
         go('waiting');
         const wait = FISHING.biteMinSeconds + Math.random() * (FISHING.biteMaxSeconds - FISHING.biteMinSeconds);
         later(wait, () => {
-          go('bite', { fish: DEV_FISH ?? rollFish() });
+          // 쓰는 낚싯대의 능력: 레어템이 잘 걸린다 (config/rods)
+          const { rareScale } = rodAbility(useGameStore.getState().equippedRod);
+          go('bite', { fish: DEV_FISH ?? rollFish(Math.random, rareScale) });
           audio.play('place');
         });
       });

@@ -41,6 +41,7 @@ function saveSnapshot(state: GameState): unknown[] {
     state.lastMiniGameRewardDate,
     state.fishDex,
     state.fishingDay,
+    state.equippedRod,
   ];
 }
 

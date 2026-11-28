@@ -75,9 +75,16 @@ export function StaticShadow({ children, receive = false }: { children: ReactNod
   return <group ref={group}>{children}</group>;
 }
 
-/** 정적 물체를 표시하고(그림자 레이어, 실시간 그림자 끔) 그 수를 센다 */
+/**
+ * 정적 물체를 표시하고(그림자 레이어, 실시간 그림자 끔) 그 목록을 글로 돌려준다.
+ * 자리 · 방향도 넣는다 — 꾸미기로 놓은 마당 물건은 돌리면 같은 물체가 방향만 바뀐다.
+ */
 function markStaticCasters(): string {
-  const ids: number[] = [];
+  const ids: string[] = [];
+  const key = (mesh: Mesh) => {
+    const e = mesh.matrixWorld.elements;
+    return `${mesh.id}@${e[12].toFixed(2)},${e[14].toFixed(2)},${e[0].toFixed(2)}`;
+  };
   for (const [root, { receive }] of staticRoots) {
     root.traverse((node) => {
       const mesh = node as Mesh;
@@ -89,7 +96,7 @@ function markStaticCasters(): string {
         for (const real of proxiedMeshes(mesh)) {
           real.userData.bakedShadow = true;
           real.layers.enable(BAKE_LAYER);
-          ids.push(real.id);
+          ids.push(key(real));
         }
         return;
       }
@@ -98,7 +105,7 @@ function markStaticCasters(): string {
         mesh.userData.bakedShadow = true;
         mesh.castShadow = false;
         mesh.layers.enable(BAKE_LAYER);
-        ids.push(mesh.id);
+        ids.push(key(mesh));
       }
     });
   }

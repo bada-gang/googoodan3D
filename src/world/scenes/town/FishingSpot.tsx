@@ -34,6 +34,7 @@ import {
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { ASSETS } from '@/config/assets';
 import { FISHING } from '@/config/fishing';
+import { rodLook } from '@/config/rods';
 import { TOWN } from '@/config/layout';
 import { useFishing } from '@/state/fishingStore';
 import { useGameStore } from '@/state/gameStore';
@@ -659,6 +660,8 @@ const ROD_REST = 0.8;
 const ROD_BACK = -0.55;
 
 function FishingGear(): React.ReactElement {
+  // 쓰는 낚싯대에 따라 색이 다르다 (config/rods)
+  const look = rodLook(useGameStore((s) => s.equippedRod));
   const rig = useRef<Group>(null);
   const rod = useRef<Group>(null);
   const bobber = useRef<Group>(null);
@@ -802,16 +805,22 @@ function FishingGear(): React.ReactElement {
         <group ref={rod}>
           <mesh position-y={ROD_LENGTH / 2} castShadow>
             <cylinderGeometry args={[0.012, 0.024, ROD_LENGTH, 6]} />
-            <meshStandardMaterial color="#7a5232" roughness={0.7} />
+            <meshStandardMaterial color={look.pole} roughness={0.7} />
           </mesh>
+          {look.tip && (
+            <mesh position-y={ROD_LENGTH}>
+              <sphereGeometry args={[0.035, 8, 6]} />
+              <meshStandardMaterial color={look.tip} emissive={look.tip} emissiveIntensity={0.35} roughness={0.4} />
+            </mesh>
+          )}
           {/* 손잡이 (손이 가운데를 쥔다) · 릴 */}
           <mesh position-y={0.01}>
             <cylinderGeometry args={[0.032, 0.032, 0.22, 8]} />
-            <meshStandardMaterial color="#3f6fa8" roughness={0.6} />
+            <meshStandardMaterial color={look.grip} roughness={0.6} />
           </mesh>
           <mesh position={[0.05, 0.17, 0]} rotation-z={Math.PI / 2}>
             <cylinderGeometry args={[0.045, 0.045, 0.04, 12]} />
-            <meshStandardMaterial color="#d9d4c8" roughness={0.5} />
+            <meshStandardMaterial color={look.reel} roughness={0.5} />
           </mesh>
         </group>
       </group>

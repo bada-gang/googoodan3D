@@ -25,6 +25,8 @@ export interface Furniture3D {
   glow?: { y: number; size: number };
   /** 위로 걸어 다닐 수 있는 물건 (카펫 · 돌길 · 꽃밭) */
   walkable?: boolean;
+  /** 모델 예산 (config/models MODEL_BUDGET). 없으면 medium. 태블릿 프레임을 위해 새 물건은 대부분 small */
+  budget?: 'small' | 'medium';
 }
 
 export const FURNITURE_3D: Record<string, Furniture3D> = {
@@ -46,6 +48,15 @@ export const FURNITURE_3D: Record<string, Furniture3D> = {
   carpet_colorful: { width: 2.2, radius: 1.1, walkable: true },
   bed_starlight: { height: 1.05, radius: 1.0 },
   lamp_starlight: { height: 1.6, radius: 0.35, glow: { y: 1.4, size: 1.2 } },
+  // 2026-11 추가 (small 예산)
+  beanbag: { height: 0.8, radius: 0.6, budget: 'small' },
+  rocking_chair: { height: 1.1, radius: 0.55, budget: 'small' },
+  toy_box: { height: 0.6, radius: 0.5, budget: 'small' },
+  cactus_pot: { height: 0.9, radius: 0.3, budget: 'small' },
+  big_bear: { height: 1.0, radius: 0.5, budget: 'small' },
+  fish_tank: { height: 1.0, radius: 0.55, budget: 'small' },
+  piano: { height: 1.2, radius: 0.8, budget: 'small' },
+  chalkboard: { height: 0.9, radius: 0.7, wall: true, budget: 'small' },
 
   // --- 마당 ---
   fence_wood: { height: 0.9, radius: 0.7 },
@@ -56,6 +67,17 @@ export const FURNITURE_3D: Record<string, Furniture3D> = {
   stonepath: { width: 1.3, radius: 0.65, walkable: true },
   streetlamp: { height: 2.4, radius: 0.3, glow: { y: 2.08, size: 1.8 } },
   fountain: { height: 1.4, radius: 1.0 },
+  // 2026-11 추가: 놀이터 (정글짐 · 그네는 코드로 만든다 — 모델 없음) · 정원 · 쉼터
+  sandbox: { height: 0.45, radius: 1.1, budget: 'small' },
+  seesaw: { height: 0.8, radius: 1.5, budget: 'small' },
+  swing: { height: 2.2, radius: 1.3 },
+  slide: { height: 2.0, radius: 1.4 },
+  jungle_gym: { height: 1.8, radius: 1.2 },
+  merry_go_round: { height: 1.2, radius: 1.3 },
+  birdhouse: { height: 1.6, radius: 0.35, budget: 'small' },
+  scarecrow: { height: 1.8, radius: 0.5, budget: 'small' },
+  mailbox: { height: 1.2, radius: 0.35, budget: 'small' },
+  tent: { height: 1.6, radius: 1.2, budget: 'small' },
 };
 
 // catalog 에 가구를 추가하고 여기를 빠뜨리면 바로 알 수 있게 한다

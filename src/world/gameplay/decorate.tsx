@@ -25,7 +25,9 @@ import type { PlacedItem, PlacementArea } from '@/types/game';
 import { audio } from '@/audio/sfx';
 import { GltfModel } from '../rendering/assets';
 import { DRAWN_RUGS, DrawnRug } from '../props/DrawnRug';
+import { CodeFurniture, isCodeFurniture } from '../props/CodeFurniture';
 import { NightGlow } from '../rendering/dayNight';
+import { StaticShadow } from '../rendering/bakedShadows';
 import { burstStars } from '../effects/effects';
 import { toast } from './gameplay';
 import { obstacles, player } from '../state/runtime';
@@ -42,6 +44,12 @@ export interface DecorateRules {
   wall?: { z: number; y: number; minX: number; maxX: number };
   /** 장면만의 금지 구역 (마당의 밭 등) */
   blocked?: (x: number, z: number, radius: number) => boolean;
+  /**
+   * 놓인 물건의 그림자를 땅에 미리 굽는다 (rendering/bakedShadows, 장면에 BakedShadows 가 있어야 한다).
+   * 실시간 그림자는 물건마다 한 번 더 그려서, 큰 놀이기구를 여러 개 놓으면 태블릿이 무거워진다.
+   * 놓기 · 옮기기 · 돌리기 때만 다시 굽는다.
+   */
+  bakeShadows?: boolean;
 }
 
 interface DecorateState {
@@ -293,11 +301,12 @@ export function PlacedFurnitureLayer({ rules: sceneRules }: { rules: DecorateRul
   const area = sceneRules.area;
   const placed = useGameStore((s) => (area === 'home' ? s.home.placed : s.yard.placed));
   const movingId = useDecorate((s) => s.movingId);
+  const items = placed.map((item) =>
+    item.instanceId === movingId ? null : <PlacedFurniture key={item.instanceId} item={item} wallY={sceneRules.wall?.y} />,
+  );
   return (
     <group>
-      {placed.map((item) =>
-        item.instanceId === movingId ? null : <PlacedFurniture key={item.instanceId} item={item} wallY={sceneRules.wall?.y} />,
-      )}
+      {sceneRules.bakeShadows ? <StaticShadow>{items}</StaticShadow> : items}
       <Ghost wallY={sceneRules.wall?.y} />
     </group>
   );
@@ -329,16 +338,7 @@ function PlacedFurniture({ item, wallY }: { item: PlacedItem; wallY: number | un
         if (tapPlaced(item)) event.stopPropagation();
       }}
     >
-      {/* 카펫은 3D 모델 대신 코드로 그린다 (무늬가 뭉개져서, props/DrawnRug) */}
-      {DRAWN_RUGS[item.itemId] ? (
-        <DrawnRug itemId={item.itemId} />
-      ) : (
-        <GltfModel
-          modelKey={furnitureModelKey(item.itemId)}
-          fallback={<FallbackFurniture itemId={item.itemId} />}
-          castShadow={!size?.walkable}
-        />
-      )}
+      <FurnitureBody itemId={item.itemId} castShadow={!size?.walkable} />
       {size?.glow && <NightGlow y={size.glow.y} size={size.glow.size} />}
     </group>
   );
@@ -385,23 +385,42 @@ function Ghost({ wallY }: { wallY: number | undefined }): React.ReactElement | n
   if (!ghost || !itemId) return null;
   return (
     <group position={[ghost.x, heightOf(itemId, wallY), ghost.z]} rotation-y={rotation * (Math.PI / 2)}>
-      {DRAWN_RUGS[itemId] ? (
-        <DrawnRug itemId={itemId} ghost tint={tint} />
-      ) : (
-        <GltfModel
-          key={itemId}
-          modelKey={furnitureModelKey(itemId)}
-          castShadow={false}
-          onLoaded={onLoaded}
-          fallback={<FallbackFurniture itemId={itemId} ghost tint={tint} />}
-        />
-      )}
+      <FurnitureBody key={itemId} itemId={itemId} ghost tint={tint} onLoaded={onLoaded} />
       {/* 놓일 자리 표시 */}
       <mesh rotation-x={-Math.PI / 2} position-y={0.04}>
         <ringGeometry args={[FURNITURE_3D[itemId].radius * 0.85, FURNITURE_3D[itemId].radius, 32]} />
         <meshBasicMaterial color={valid ? PALETTE.leaf : '#e8524a'} transparent opacity={0.7} depthWrite={false} />
       </mesh>
     </group>
+  );
+}
+
+/**
+ * 가구 모양 고르기: 카펫은 코드로 그린 판(무늬가 뭉개져서, props/DrawnRug),
+ * 정글짐 · 그네는 코드로 만든 막대(props/CodeFurniture), 나머지는 3D 모델.
+ */
+function FurnitureBody({
+  itemId,
+  ghost = false,
+  tint,
+  castShadow = true,
+  onLoaded,
+}: {
+  itemId: string;
+  ghost?: boolean;
+  tint?: string;
+  castShadow?: boolean;
+  onLoaded?: (object: Object3D | null) => void;
+}): React.ReactElement {
+  if (DRAWN_RUGS[itemId]) return <DrawnRug itemId={itemId} ghost={ghost} tint={tint} />;
+  if (isCodeFurniture(itemId)) return <CodeFurniture itemId={itemId} ghost={ghost} tint={tint} />;
+  return (
+    <GltfModel
+      modelKey={furnitureModelKey(itemId)}
+      castShadow={!ghost && castShadow}
+      onLoaded={onLoaded}
+      fallback={<FallbackFurniture itemId={itemId} ghost={ghost} tint={tint} />}
+    />
   );
 }
 

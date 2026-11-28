@@ -9,7 +9,7 @@
  * public/assets/art-manifest.json 의 `ready` 배열에 키를 추가한다.
  * 준비되지 않은 키는 UI 가 임시 그림(fallback)으로 그린다.
  */
-import { FURNITURE } from './catalog';
+import { FURNITURE, type SurfacePattern } from './catalog';
 import type { AvatarId, CharacterId } from '@/types/game';
 
 export const CHARACTER_IDS: CharacterId[] = ['boy', 'girl', 'farmer', 'dino', 'bunny', 'astro'];
@@ -95,6 +95,12 @@ export const ASSETS = {
     // 꿀벌은 양봉 통 그림 (models.ts 의 beehive 가 만든다)
     bee: 'icon_bee',
   },
+  /** 잡화: 낚싯대 (config/rods) */
+  tools: {
+    rodBamboo: 'tool_rod_bamboo',
+    rodStar: 'tool_rod_star',
+    rodDragon: 'tool_rod_dragon',
+  },
   ui: {
     coin: 'ui_coin',
     star: 'ui_star',
@@ -114,6 +120,13 @@ export const ASSETS = {
     floor: 'tex_floor',
     floorCheck: 'tex_floor_check',
     floorCarpet: 'tex_floor_carpet',
+    // 2026-11 추가 무늬 (색까지 그려진 질감)
+    wallCloud: 'tex_wall_cloud',
+    wallStripe: 'tex_wall_stripe',
+    wallHeart: 'tex_wall_heart',
+    wallLeaf: 'tex_wall_leaf',
+    wallStrawberry: 'tex_wall_strawberry',
+    floorMarble: 'tex_floor_marble',
     /** 시장 낚시터 연못 물 (분수대 물과 같은 느낌) */
     water: 'tex_water',
   },
@@ -152,12 +165,19 @@ export function furnitureTextureKey(itemId: string): string {
  * 방과 상점 미리보기가 반드시 같은 키를 봐야 사고 나서 다르게 보이지 않는다.
  */
 export function surfaceTextureKey(
-  surface: { pattern?: 'star' | 'check' | 'carpet' },
+  surface: { pattern?: SurfacePattern },
   kind: 'wall' | 'floor',
 ): string {
   if (surface.pattern === 'star') return ASSETS.textures.wallStar;
   if (surface.pattern === 'check') return ASSETS.textures.floorCheck;
   if (surface.pattern === 'carpet') return ASSETS.textures.floorCarpet;
+  if (surface.pattern === 'cloud') return ASSETS.textures.wallCloud;
+  if (surface.pattern === 'stripe') return ASSETS.textures.wallStripe;
+  if (surface.pattern === 'heart') return ASSETS.textures.wallHeart;
+  if (surface.pattern === 'leaf') return ASSETS.textures.wallLeaf;
+  if (surface.pattern === 'strawberry') return ASSETS.textures.wallStrawberry;
+  if (surface.pattern === 'marble') return ASSETS.textures.floorMarble;
+  if (surface.pattern === 'grass') return ASSETS.textures.grass;
   return kind === 'wall' ? ASSETS.textures.wall : ASSETS.textures.floor;
 }
 
@@ -191,6 +211,7 @@ export const ASSET_MANIFEST: AssetSpec[] = [
   ...Object.entries(ASSETS.crops).map(([id, key]) => img(key, `crops/${id}.png`, 'icon')),
   ...Object.entries(ASSETS.seeds).map(([id, key]) => img(key, `crops/seedbag_${id}.png`, 'icon')),
   ...Object.entries(ASSETS.ui).map(([id, key]) => img(key, `ui/${id}.png`, 'icon')),
+  ...Object.values(ASSETS.tools).map((key) => img(key, `ui/${key}.png`, 'icon')),
   ...Object.values(ASSETS.textures).map((key) => img(key, `textures/${key}.png`, 'texture')),
   ...Object.entries(ASSETS.environment).map(([id, key]) =>
     img(key, `environment/${id}.webp`, 'background'),
@@ -198,7 +219,8 @@ export const ASSET_MANIFEST: AssetSpec[] = [
   ...Object.entries(ASSETS.particles).map(([id, key]) => img(key, `particles/${id}.png`, 'particle')),
 
   // 3D 모델 원본 그림에서 만드는 아이콘
-  ...FURNITURE.map((f) => img(furnitureTextureKey(f.id), `furniture/${f.id}.png`, 'thumbnail')),
+  // 코드로 만드는 가구(정글짐 · 그네)는 모델이 없어 가게 그림을 따로 그린다
+  ...FURNITURE.map((f) => img(furnitureTextureKey(f.id), `furniture/${f.id}.png`, f.codeBuilt ? 'icon' : 'thumbnail')),
   ...Object.entries(ASSETS.icons).map(([id, key]) => img(key, `ui/icon_${id}.png`, 'thumbnail')),
   ...Object.entries(ASSETS.portraits).map(([id, key]) => img(key, `characters/portrait_${id}.png`, 'thumbnail')),
 ];

@@ -8,7 +8,7 @@
  */
 import { useEffect, useMemo, useRef } from 'react';
 import { useFrame, type ThreeEvent } from '@react-three/fiber';
-import { Color, type MeshStandardMaterial } from 'three';
+import { Color, type Material, type MeshStandardMaterial } from 'three';
 import { PALETTE } from '@/config/artTokens';
 import { surfaceTextureKey } from '@/config/assets';
 import { SURFACE_BY_ID } from '@/config/catalog';
@@ -16,6 +16,8 @@ import { YARD } from '@/config/layout';
 import { useGameStore } from '@/state/gameStore';
 import { ArtTexture } from '../../rendering/assets';
 import { daylight } from '../../rendering/dayNight';
+import { BakedShadows } from '../../rendering/bakedShadows';
+import { applyGroundShadow } from '../../rendering/groundShadow';
 import { DecorateSystem, PlacedFurnitureLayer, decorateFloorHover, decorateFloorTap, type DecorateRules } from '../../gameplay/decorate';
 import { useInteractable } from '../../systems/interaction';
 import { placePlayer } from '../../systems/movement';
@@ -55,12 +57,17 @@ const GLASS_GLOW = new Color(PALETTE.window);
  * (예전에는 방 깊이 끝 3.5m 까지만이라 화면 아래쪽 마루에 아무것도 못 놓았다. 넓히기만 해서 이미 놓은 가구는 그대로다)
  */
 const USABLE_FRONT_Z = HALF_D + 0.9;
+/** 가구 그림자를 굽는 바닥 범위와 색 (나무 바닥 위 따뜻한 갈색) */
+const HOME_SHADOW_BOUNDS = { minX: -HALF_W - 1, maxX: HALF_W + 1, minZ: BACK_Z - 1, maxZ: HALF_D + FRONT_EXTENSION + 1 };
+const HOME_SHADOW = { color: new Color('#2a1a10'), opacity: 0.42 };
 
 /** 가구를 놓을 수 있는 바닥 (벽에서 조금 띄운다) */
 const PLACE_BOUNDS = { minX: -HALF_W + 0.25, maxX: HALF_W - 0.25, minZ: BACK_Z + 0.25, maxZ: USABLE_FRONT_Z };
 
 const RULES: DecorateRules = {
   area: 'home',
+  // 가구 그림자는 바닥에 미리 굽는다 (가구 하나당 그리기 1번 절약, 헛간과 같은 방식)
+  bakeShadows: true,
   bounds: PLACE_BOUNDS,
   // 액자 · 시계는 뒷벽에 건다. 창문 자리는 피한다.
   // 거는 높이 1.0m: 카메라를 낮춘 뒤 1.35m 는 화면 위쪽 레벨 막대에 윗부분이 가렸다 (이미 건 것도 같이 내려온다)
@@ -123,8 +130,10 @@ export function HomeWorld(): React.ReactElement {
           textureKey={surfaceTextureKey(floor, 'floor')}
           color={floor.color}
           repeat={[ROOM.width / 2, (ROOM.depth + FRONT_EXTENSION) / 2]}
+          bakedShadow
         />
       </mesh>
+      <BakedShadows bounds={HOME_SHADOW_BOUNDS} color={HOME_SHADOW.color} opacity={HOME_SHADOW.opacity} />
 
       {/* 벽: 뒤 · 왼쪽 · 오른쪽 */}
       <Wall
@@ -154,14 +163,24 @@ function SurfaceMaterial({
   textureKey,
   color,
   repeat,
+  bakedShadow = false,
 }: {
   textureKey: string;
   color: string;
   repeat: [number, number];
+  /** 바닥: 미리 그린 가구 그림자를 칠한다 (rendering/groundShadow) */
+  bakedShadow?: boolean;
 }): React.ReactElement {
   return (
     <ArtTexture assetKey={textureKey} repeat={repeat}>
-      {(map) => <meshStandardMaterial map={map} color={color} roughness={0.95} />}
+      {(map) => (
+        <meshStandardMaterial
+          ref={bakedShadow ? (material: Material | null) => material && applyGroundShadow(material) : undefined}
+          map={map}
+          color={color}
+          roughness={0.95}
+        />
+      )}
     </ArtTexture>
   );
 }

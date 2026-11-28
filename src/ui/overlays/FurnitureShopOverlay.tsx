@@ -1,5 +1,5 @@
 /**
- * 가구 가게. 칸은 집 안(가구 · 벽지 · 바닥재) · 마당 · 잡화, 칸 안에서는 종류별로 묶는다. (명세 52)
+ * 가구 가게. 칸은 집 안(가구 · 벽지 · 바닥재) · 마당 · 잡화(낚싯대, RodShelf), 칸 안에서는 종류별로 묶는다. (명세 52)
  * 구입할 때만 문제를 풀고, 배치는 자유롭게 한다. (명세 29)
  * 꾸미기 물건은 레벨 해금이 없다 — 레벨 1부터 다 살 수 있다 (config/decor).
  */
@@ -12,13 +12,15 @@ import { useUiStore } from '@/state/uiStore';
 import { furnitureIcon, surfaceStyle } from '../common/icons';
 import { GameButton, ItemCard, MoneyTag, OverlayShell } from '../common/ui';
 import { askMath, awardCorrect } from '../mathFlow';
+import { RodShelf } from './RodShelf';
 import { audio } from '@/audio/sfx';
 
-type Tab = 'home' | 'yard';
+type Tab = 'home' | 'yard' | 'goods';
 
 const TAB_LABEL: Record<Tab, string> = {
   home: '집 안',
   yard: '마당',
+  goods: '잡화',
 };
 
 export function FurnitureShopOverlay(): React.ReactElement {
@@ -66,7 +68,10 @@ export function FurnitureShopOverlay(): React.ReactElement {
         ))}
       </div>
 
-      {furnitureByCategory(tab).map(({ category, items }) => (
+      {/* 잡화: 낚싯대 (RodShelf) */}
+      {tab === 'goods' && <RodShelf />}
+
+      {tab !== 'goods' && furnitureByCategory(tab).map(({ category, items }) => (
         <Section key={category} title={CATEGORY_NAME[category]}>
           {items.map((item) => (
             <ItemCard

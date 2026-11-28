@@ -5,7 +5,7 @@
  * 규칙은 ART_DIRECTION.md 6번. 프롬프트는 영어로 쓴다 (생성 품질이 더 안정적이다).
  * 각 항목에는 "무엇"만 쓰고, 화풍·빛·배경은 종류(kind)별 공통 문장이 붙인다.
  */
-import { ASSETS } from '@/config/assets';
+import { ASSETS, furnitureTextureKey } from '@/config/assets';
 import type { AssetKind } from '@/config/assets';
 
 /** 모든 그림에 붙는 화풍 문장. ART_DIRECTION 1, 4 */
@@ -120,6 +120,16 @@ export const ART_PROMPTS: Record<string, string> = {
   [ASSETS.seeds.tangerine]: 'a small kraft-paper seed packet, folded at the top, with a picture of an orange tangerine with a green leaf printed on the front',
   [ASSETS.seeds.kiwi]: 'a small kraft-paper seed packet, folded at the top, with a picture of a green kiwi fruit cut in half printed on the front',
 
+  /* ---- 코드로 만드는 놀이기구의 가게 그림 (3D 모델이 없어 따로 그린다) ---- */
+  [furnitureTextureKey('jungle_gym')]: 'a small cube-shaped playground climbing frame (jungle gym) made of thick rounded bars in bright red (#e8524a), yellow and sky blue, two levels high',
+  [furnitureTextureKey('swing')]: 'a playground swing set: a sky-blue (#7fb8e6) A-frame with two swings hanging on chains, each with a yellow seat',
+
+  /* ---- 잡화: 낚싯대 (config/rods) ---- */
+  [ASSETS.tools.rodBamboo]: 'a sturdy fishing rod made of thick light-green bamboo (#9cc46a) with visible joints, a wooden reel and a line with a red-and-white float, lying diagonally',
+  [ASSETS.tools.rodStar]: 'a sparkly fishing rod in soft lavender and sky blue (#a996d8) with a little gold star on its tip, a round silver reel and tiny twinkles, lying diagonally',
+  // 포세이돈의 낚싯대 (키는 옛 이름 rodDragon 그대로)
+  [ASSETS.tools.rodDragon]: 'a magnificent golden fishing rod of Poseidon, the sea god (#f6c453): the tip of the rod ends in a small golden trident head with three prongs, the handle wrapped in sea-blue cloth and decorated with small seashells, pearls and a curling sea-wave pattern, a soft golden glow and a few sparkles, lying diagonally',
+
   /* ---- UI ---- */
   [ASSETS.ui.coin]: 'one thick shiny gold coin (#f6c453) with a simple embossed star in the middle, tilted slightly',
   [ASSETS.ui.star]: 'one chunky puffy gold star (#f6c453) with rounded points',
@@ -140,6 +150,13 @@ export const ART_PROMPTS: Record<string, string> = {
   [ASSETS.textures.water]:
     'clear stylized pond water surface like the water in a cozy toy fountain: bright clear turquoise (#4fc3e0) with soft lighter cyan wavy ripple highlights and gentle rounded caustic light patterns, a few tiny white sparkles',
   [ASSETS.textures.floorCarpet]: 'a soft woven carpet, near-white (#f4f4f4) with a subtle light-gray diamond weave pattern',
+  // 2026-11 추가 벽지 · 바닥재. 색까지 그린다 (방에서는 흰색으로 곱해 그대로 보인다)
+  [ASSETS.textures.wallCloud]: 'children room wallpaper: a soft pale sky-blue (#d9ecfa) background with a scattered pattern of small fluffy white clouds',
+  [ASSETS.textures.wallStripe]: 'children room wallpaper with even vertical stripes, alternating soft cream (#fbf3e6) and pale coral pink (#f3c9c4), 6 stripes across',
+  [ASSETS.textures.wallHeart]: 'a simple wallpaper pattern made ONLY of small plain pastel pink heart shapes (#f6b8c8) evenly scattered on a plain soft cream-white background (#fdf5f2). Nothing else at all: no animals, no buildings, no objects, no other shapes, only hearts',
+  [ASSETS.textures.wallLeaf]: 'children room wallpaper: a soft pale mint (#eef7ea) background with a scattered pattern of small simple green leaves (#9dcf8f) at different angles',
+  [ASSETS.textures.wallStrawberry]: 'children room wallpaper: a soft cream-white (#fff8f2) background with a scattered pattern of small cute red strawberries (#ea6a6a) with green tops',
+  [ASSETS.textures.floorMarble]: 'polished white marble floor tiles (#f4f4f2) with very soft pale gray veins and thin light-gray grout lines, 2 by 2 tiles',
 
   /* ---- 배경 ---- */
   [ASSETS.environment.title]:

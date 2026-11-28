@@ -41,7 +41,8 @@ art-src/         생성 원본 (git 에 안 들어감 — 아래 "백업" 참고
 | --- | --- |
 | 돈 · 경험치 · 레벨 · 수확량 · 상자 보상 · 출제 비율 | `src/config/balance.ts` |
 | 나무 · 동물 · 물/먹이 · 판매 값 | `src/config/catalog.ts` |
-| 가구 · 마당 장식 · 벽지 · 바닥재 (종류 · 값, 레벨 해금 없음) | `src/config/decor.ts` |
+| 가구 · 마당 장식 · 벽지 · 바닥재 (종류 · 값, 레벨 해금 없음, 코드로 만드는 것은 `codeBuilt`) | `src/config/decor.ts` |
+| 잡화 낚싯대 (값 · 능력 · 손에 든 색) | `src/config/rods.ts` |
 | 물고기 (이름 · 값 · 무는 정도 · 막대 빠르기와 칸 너비) · 하루 낚시 횟수 | `src/config/fishing.ts` |
 | 마당 · 시장 배치 (밭 자리, 우리 크기, 건물 위치) | `src/config/layout.ts` |
 | 가구의 3D 크기와 놓는 방식 (바닥/벽) | `src/config/furniture3d.ts` |
@@ -62,7 +63,7 @@ art-src/         생성 원본 (git 에 안 들어감 — 아래 "백업" 참고
 | 먹이 주기 · 생산물 규칙 (상태 변화) | `src/state/game/animalSlice.ts` |
 | 동물에게 뜨는 버튼 · 문제 내기 · 연출 | `src/world/scenes/yard/pen/animalActions.ts` |
 | 사고팔기 · 가방 | `src/state/game/inventorySlice.ts` |
-| 낚시 횟수 · 물고기 도감 (저장되는 것) | `src/state/game/fishingSlice.ts` |
+| 낚시 횟수 · 물고기 도감 · 낚싯대 사기 · 쓰는 낚싯대 (저장되는 것) | `src/state/game/fishingSlice.ts` |
 | 낚시 한 번의 진행 (던지기 → 입질 → 끌어올리기) | `src/state/fishingStore.ts` |
 | 돈 · 경험치 · 레벨업 · 상자 | `src/state/game/progressSlice.ts` |
 | 가구 놓기 · 옮기기 · 돌리기 · 치우기 (저장되는 것) | `src/state/game/decorateSlice.ts` |
@@ -103,6 +104,8 @@ art-src/         생성 원본 (git 에 안 들어감 — 아래 "백업" 참고
 | 시장 낚시터 (연못 · 데크 · 낚싯대 · 찌) | `src/world/scenes/town/FishingSpot.tsx` (자리: `config/layout.ts` 의 `TOWN.pond`) |
 | 땅 · 흙길 | `src/world/props/Ground.tsx` |
 | 카펫 (3D 모델 대신 코드로 그린 무늬: 포근한 · 알록달록) | `src/world/props/DrawnRug.tsx` |
+| 정글짐 · 그네 (3D 모델 대신 코드로 만든 막대, 물건 하나가 그리기 호출 1번) | `src/world/props/CodeFurniture.tsx` |
+| 놓은 가구 모양 고르기 (카펫 / 코드 가구 / 3D 모델) | `src/world/gameplay/decorate.tsx` 의 `FurnitureBody` |
 | 맵을 둘러싼 숲 벽 (앞줄 3D 나무 · 뒷줄 침엽수 모델, 12m 토막으로 화면 밖 안 그림 · 어두워지는 잔디 숲 바닥, 길 틈) | `src/world/props/ForestWall.tsx` |
 | 표지판 | `src/world/props/SignBoard.tsx` |
 | 내 캐릭터 (걷는 동작 · 밭 위 높이) | `src/world/player/Player.tsx` |
@@ -112,7 +115,7 @@ art-src/         생성 원본 (git 에 안 들어감 — 아래 "백업" 참고
 | 별 터지기 · 물방울 개수 | `src/world/effects/particles.tsx` |
 | 떠오르는 글자 · 느낌표 | `src/world/effects/effects.tsx` |
 | 해 · 그림자 범위 · 환경맵 | `src/world/rendering/lighting.tsx` |
-| 미리 그린 그림자 (건물 · 울타리 · 덤불) | `src/world/rendering/bakedShadows.tsx`, `groundShadow.ts` |
+| 미리 그린 그림자 (건물 · 울타리 · 덤불 · 꾸미기로 놓은 가구) | `src/world/rendering/bakedShadows.tsx`, `groundShadow.ts`. 가구는 `DecorateRules.bakeShadows` (집 안 · 마당 켜짐, 집 안 그림자 색은 `HomeWorld.tsx` 의 `HOME_SHADOW`) |
 | 그림자용 저해상도 사본 | `src/world/rendering/shadowProxies.ts` (만드는 쪽: `scripts/lib/shadowProxy.ts`) |
 | 밤낮 색 · 별 · 밤 불빛 | `src/world/rendering/dayNight.tsx` |
 | 모델 · 질감 불러오기 | `src/world/rendering/assets.tsx` |
@@ -133,6 +136,7 @@ art-src/         생성 원본 (git 에 안 들어감 — 아래 "백업" 참고
 | 조이스틱 · 행동 버튼 | `src/ui/hud/TouchControls.tsx` |
 | 문제 팝업 | `src/ui/overlays/MathQuestionOverlay.tsx` |
 | 농장 가게 · 가구 가게 · 가방 · 꾸미기 · 설정 창 | `src/ui/overlays/` 의 같은 이름 파일 |
+| 가구 가게의 잡화 칸 (낚싯대 사기 · 고르기) | `src/ui/overlays/RodShelf.tsx` |
 | 낚시 창 (막대 멈추기 · 잡은 물고기 카드) · 물고기 도감(가방 안) | `src/ui/overlays/FishingOverlay.tsx` · `InventoryOverlay.tsx` |
 | 알림(토스트) | `src/ui/overlays/ToastLayer.tsx` |
 | 공통 버튼 · 창 틀 | `src/ui/common/ui.tsx` |

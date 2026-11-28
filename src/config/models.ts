@@ -206,10 +206,11 @@ export const MODEL_MANIFEST: ModelSpec[] = [
   })),
 
   // 가구 · 장식. 크기는 furniture3d.ts
-  ...FURNITURE.map((item) => {
+  // 코드로 만드는 가구(정글짐 · 그네, decor.ts codeBuilt)는 모델이 없다
+  ...FURNITURE.filter((item) => !item.codeBuilt).map((item) => {
     const size = FURNITURE_3D[item.id];
     return {
-      ...model(furnitureModelKey(item.id), `models/furniture/${item.id}.glb`, 'medium', size.height ?? 0.1),
+      ...model(furnitureModelKey(item.id), `models/furniture/${item.id}.glb`, size.budget ?? 'medium', size.height ?? 0.1),
       width: size.width,
       depth: size.wall ? WALL_ITEM_DEPTH : undefined,
       thumbnail: furnitureTextureKey(item.id),

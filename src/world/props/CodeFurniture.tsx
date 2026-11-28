@@ -1,0 +1,173 @@
+/**
+ * 코드로 만드는 가구: 정글짐 · 그네 (config/decor 의 codeBuilt).
+ * 가는 막대가 많아 3D 변환(Hunyuan)으로 만들면 막대가 부러지고 면이 많아진다.
+ * 막대 · 판을 모두 한 모양으로 합치고 색은 꼭짓점 색으로 넣어, 물건 하나가 그리기 호출 1번(+그림자 1번)이다.
+ * 모양은 물건마다 한 번만 만들어 같은 물건끼리 나눠 쓴다.
+ */
+import { useMemo } from 'react';
+import {
+  BoxGeometry,
+  type BufferGeometry,
+  Color,
+  CylinderGeometry,
+  Float32BufferAttribute,
+  Quaternion,
+  Vector3,
+  Matrix4,
+} from 'three';
+import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
+
+/** 막대: from 에서 to 까지 (m) */
+interface Bar {
+  from: [number, number, number];
+  to: [number, number, number];
+  radius: number;
+  color: string;
+}
+
+/** 상자: 가운데 · 크기 (m) */
+interface Block {
+  at: [number, number, number];
+  size: [number, number, number];
+  color: string;
+}
+
+type Part = Bar | Block;
+
+const UP = new Vector3(0, 1, 0);
+
+function partGeometry(part: Part): BufferGeometry {
+  let geometry: BufferGeometry;
+  if ('from' in part) {
+    const from = new Vector3(...part.from);
+    const to = new Vector3(...part.to);
+    const length = from.distanceTo(to);
+    // 막대는 면 8개면 둥글어 보인다 (태블릿용으로 적게)
+    geometry = new CylinderGeometry(part.radius, part.radius, length, 8, 1, false);
+    const rotation = new Quaternion().setFromUnitVectors(UP, to.clone().sub(from).normalize());
+    geometry.applyMatrix4(new Matrix4().compose(from.clone().add(to).multiplyScalar(0.5), rotation, new Vector3(1, 1, 1)));
+  } else {
+    geometry = new BoxGeometry(...part.size);
+    geometry.translate(...part.at);
+  }
+  // 합치려면 속성이 같아야 한다: 꼭짓점 색을 넣고 uv 는 뺀다
+  geometry.deleteAttribute('uv');
+  const color = new Color(part.color);
+  const count = geometry.getAttribute('position').count;
+  const colors = new Float32Array(count * 3);
+  for (let i = 0; i < count; i++) colors.set([color.r, color.g, color.b], i * 3);
+  geometry.setAttribute('color', new Float32BufferAttribute(colors, 3));
+  return geometry.index ? geometry.toNonIndexed() : geometry;
+}
+
+function build(parts: Part[]): BufferGeometry {
+  const pieces = parts.map(partGeometry);
+  const merged = mergeGeometries(pieces, false);
+  for (const piece of pieces) piece.dispose();
+  return merged;
+}
+
+/* ------------------------------- 정글짐 ------------------------------- */
+
+const GYM_RED = '#e8524a';
+const GYM_YELLOW = '#f6d24a';
+const GYM_BLUE = '#7fb8e6';
+
+/** 3×3 기둥, 2층 가로대. 가로 · 세로 1.7m, 높이 1.7m (FURNITURE_3D.jungle_gym) */
+function jungleGym(): Part[] {
+  const parts: Part[] = [];
+  const grid = [-0.85, 0, 0.85];
+  const levels = [0.85, 1.7];
+  for (const x of grid) {
+    for (const z of grid) {
+      parts.push({ from: [x, 0, z], to: [x, 1.76, z], radius: 0.075, color: GYM_RED });
+      // 기둥 꼭대기 둥근 마개 대신 작은 상자 (면 수 절약)
+      parts.push({ at: [x, 1.78, z], size: [0.18, 0.07, 0.18], color: GYM_YELLOW });
+    }
+  }
+  levels.forEach((y, level) => {
+    const color = level === 0 ? GYM_YELLOW : GYM_BLUE;
+    for (const line of grid) {
+      for (let i = 0; i < grid.length - 1; i++) {
+        parts.push({ from: [grid[i], y, line], to: [grid[i + 1], y, line], radius: 0.06, color });
+        parts.push({ from: [line, y, grid[i]], to: [line, y, grid[i + 1]], radius: 0.06, color });
+      }
+    }
+  });
+  return parts;
+}
+
+/* -------------------------------- 그네 -------------------------------- */
+
+const SWING_FRAME = '#7fb8e6';
+const SWING_ROPE = '#8a6a4a';
+const SWING_SEAT = '#f6d24a';
+
+/** A자 기둥 둘, 위 가로대, 그네 2개. 폭 2.1m, 높이 2.2m (FURNITURE_3D.swing) */
+function swing(): Part[] {
+  const top = 2.15;
+  const parts: Part[] = [];
+  for (const x of [-1.0, 1.0]) {
+    parts.push({ from: [x, 0, -0.6], to: [x, top, 0], radius: 0.085, color: SWING_FRAME });
+    parts.push({ from: [x, 0, 0.6], to: [x, top, 0], radius: 0.085, color: SWING_FRAME });
+    // A자 가운데 버팀대
+    parts.push({ from: [x, 0.7, -0.4], to: [x, 0.7, 0.4], radius: 0.045, color: SWING_FRAME });
+  }
+  parts.push({ from: [-1.1, top, 0], to: [1.1, top, 0], radius: 0.08, color: SWING_FRAME });
+  for (const x of [-0.48, 0.48]) {
+    for (const side of [-0.2, 0.2]) {
+      parts.push({ from: [x + side, top, 0], to: [x + side, 0.55, 0], radius: 0.018, color: SWING_ROPE });
+    }
+    parts.push({ at: [x, 0.52, 0], size: [0.52, 0.07, 0.28], color: SWING_SEAT });
+  }
+  return parts;
+}
+
+const BUILDERS: Record<string, () => Part[]> = {
+  jungle_gym: jungleGym,
+  swing,
+};
+
+/** 코드로 만드는 가구인가 */
+export function isCodeFurniture(itemId: string): boolean {
+  return itemId in BUILDERS;
+}
+
+const geometryCache = new Map<string, BufferGeometry>();
+
+function geometryOf(itemId: string): BufferGeometry | null {
+  const builder = BUILDERS[itemId];
+  if (!builder) return null;
+  let geometry = geometryCache.get(itemId);
+  if (!geometry) {
+    geometry = build(builder());
+    geometryCache.set(itemId, geometry);
+  }
+  return geometry;
+}
+
+export function CodeFurniture({
+  itemId,
+  ghost = false,
+  tint = '#ffffff',
+}: {
+  itemId: string;
+  /** 꾸미기 미리보기: 반투명, 놓을 수 없는 자리면 붉게 */
+  ghost?: boolean;
+  tint?: string;
+}): React.ReactElement | null {
+  const geometry = useMemo(() => geometryOf(itemId), [itemId]);
+  if (!geometry) return null;
+  return (
+    <mesh geometry={geometry} castShadow={!ghost} receiveShadow={!ghost}>
+      <meshStandardMaterial
+        vertexColors
+        color={ghost ? tint : '#ffffff'}
+        transparent={ghost}
+        opacity={ghost ? 0.55 : 1}
+        depthWrite={!ghost}
+        roughness={0.7}
+      />
+    </mesh>
+  );
+}

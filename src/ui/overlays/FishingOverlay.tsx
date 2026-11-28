@@ -12,6 +12,8 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { BITE_MESSAGE, FISH, caughtMessage, isRare } from '@/config/fishing';
 import { CURRENCY } from '@/config/strings';
 import { useFishing } from '@/state/fishingStore';
+import { useGameStore } from '@/state/gameStore';
+import { rodAbility } from '@/config/rods';
 import { cropIcon } from '../common/icons';
 import { GameButton, Icon } from '../common/ui';
 import { RareIcon } from '../common/RareIcon';
@@ -63,7 +65,10 @@ function BiteGame(): React.ReactElement {
   const [stopped, setStopped] = useState<{ at: number; hit: boolean } | null>(null);
   // 칸 자리: 막대 가운데쯤 어딘가 (처음 표시 자리인 왼쪽 끝에 붙지 않게)
   const [zoneCenter] = useState(() => 0.3 + Math.random() * 0.55);
-  const zone = def?.zone ?? 0.2;
+  // 쓰는 낚싯대의 능력: 칸이 넓어지거나 막대가 느려진다 (config/rods)
+  const ability = rodAbility(useGameStore((s) => s.equippedRod));
+  const zone = (def?.zone ?? 0.2) * ability.zoneScale;
+  const speed = (def?.speed ?? 1) * ability.speedScale;
 
   useEffect(() => {
     if (!def || stopped) return;
@@ -71,7 +76,7 @@ function BiteGame(): React.ReactElement {
     let frame = 0;
     const step = () => {
       // 왼쪽 끝 → 오른쪽 끝 → 왼쪽 끝 ... (삼각파)
-      const travel = ((performance.now() - startedAt) / 1000) * def.speed;
+      const travel = ((performance.now() - startedAt) / 1000) * speed;
       const k = travel % 2;
       position.current = k < 1 ? k : 2 - k;
       if (marker.current) marker.current.style.left = `${position.current * 100}%`;
@@ -79,7 +84,7 @@ function BiteGame(): React.ReactElement {
     };
     frame = requestAnimationFrame(step);
     return () => cancelAnimationFrame(frame);
-  }, [def, stopped]);
+  }, [def, speed, stopped]);
 
   // 화면 누르기와 버튼 누르기가 한 번에 같이 와도 한 번만 멈춘다
   const done = useRef(false);

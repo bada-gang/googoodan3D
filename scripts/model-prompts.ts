@@ -319,6 +319,66 @@ export const MODEL_PROMPTS: Record<string, string> = {
     'A small round stone garden fountain with two tiers, light blue water (#9ed4ea) in the basins and a water spout on top.',
   ),
 
+  /* ---- 2026-11 추가: 집 안 ---- */
+  [furnitureModelKey('beanbag')]: furniture(
+    'A big squishy round beanbag chair in sunny yellow (#f6c453), slumped into a comfy seat shape with a soft dent in the middle.',
+  ),
+  [furnitureModelKey('rocking_chair')]: furniture(
+    'A wooden rocking chair (#b57f4a) with two thick curved rockers on the floor, a tall slatted backrest, armrests and a small red checkered seat cushion.',
+  ),
+  [furnitureModelKey('toy_box')]: furniture(
+    'A chunky sky-blue (#7fb8e6) wooden toy chest with a rounded lid slightly open, a red ball, a yellow toy block and a teddy ear peeking out over the edge.',
+  ),
+  [furnitureModelKey('cactus_pot')]: furniture(
+    'A cute round green cactus (#7cbf6a) with two short rounded arms and one small pink flower on top, in a round white pot with a terracotta band.',
+  ),
+  [furnitureModelKey('big_bear')]: furniture(
+    'A big sitting plush teddy bear in light caramel brown (#c99a6a) with round ears, a cream muzzle and tummy, and a red bow tie, legs stretched forward.',
+  ),
+  [furnitureModelKey('fish_tank')]: furniture(
+    'A small rounded rectangular fish tank on a short wooden stand: thick light-blue tinted glass (#8fd3e8) filled with blue water, ' +
+      'two orange goldfish, green water plants and pebbles at the bottom, a wooden lid on top. The glass is clearly blue, not clear.',
+  ),
+  [furnitureModelKey('piano')]: furniture(
+    'A small cute upright piano in deep plum purple (#5a4a6a) with rounded corners, white and black keys at the front, ' +
+      'a small bench in front of it and a little music book on the stand.',
+  ),
+  [furnitureModelKey('chalkboard')]: wallItem(
+    'A rectangular green chalkboard (#3f6b55) in a light wooden frame with a small ledge at the bottom holding chalk and an eraser, ' +
+      'a simple white chalk drawing of a sun and a flower on it.',
+  ),
+
+  /* ---- 2026-11 추가: 마당 (놀이터 · 정원 · 쉼터) ---- */
+  [furnitureModelKey('sandbox')]: furniture(
+    'A low square wooden sandbox frame (#c08a52) filled with smooth pale sand (#e9cf8f), a red toy bucket and a yellow shovel and a small sand castle in it.',
+  ),
+  [furnitureModelKey('seesaw')]: furniture(
+    'A playground seesaw seen from the side: one long thick yellow (#f6d24a) plank balanced on a short sturdy red pivot in the middle, ' +
+      'a chunky round handle and a seat at each end. Simple solid shapes.',
+  ),
+  [furnitureModelKey('slide')]: furniture(
+    'A chunky playground slide: on the left a short wide staircase with solid steps up to a small platform with low solid side walls, ' +
+      'on the right a wide smooth orange (#f2a65a) slide with raised edges curving down to the ground. Solid thick shapes, no thin bars.',
+  ),
+  [furnitureModelKey('merry_go_round')]: furniture(
+    'A playground merry-go-round: a wide low round mint-green (#8fd8c4) spinning platform with colorful segments, ' +
+      'a thick central post and four chunky curved handle loops. Solid thick shapes.',
+  ),
+  [furnitureModelKey('birdhouse')]: furniture(
+    'A cute little orange (#f2a65a) wooden birdhouse with a red pointed roof, a round hole and a small perch, on top of one straight wooden post.',
+  ),
+  [furnitureModelKey('scarecrow')]: furniture(
+    'A friendly farm scarecrow standing on a wooden post with arms stretched out: a smiling burlap face, a wide straw hat (#e3bf68), ' +
+      'a patched blue shirt with straw poking out of the sleeves, a small crow-free happy look.',
+  ),
+  [furnitureModelKey('mailbox')]: furniture(
+    'A cute wooden mailbox with a rounded red top (#d65f4f), a small raised yellow flag on the side, on one thick wooden post.',
+  ),
+  [furnitureModelKey('tent')]: furniture(
+    'A small triangular camping tent in mint green (#8fd8c4) with the front door flaps tied open, a little orange pennant flag on top, ' +
+      'a cozy blanket and pillow visible inside.',
+  ),
+
   /* ---- 열매 ---- */
   [MODELS.fruits.tangerine]: item(
     'One small round bright orange mandarin tangerine fruit (#f59a2a), slightly flattened, with a perfectly smooth rounded surface ' +
