@@ -268,7 +268,8 @@ export const ANIMAL_SPECIES: Record<AnimalSpeciesId, AnimalSpecies> = {
     producePrice: 90,
     careGoal: 1,
     unlockLevel: 10,
-    maxCount: 2,
+    // 양봉 통은 우리 왼쪽 울타리 앞에 세로로 3개까지 (yard/apiary 의 HIVE_SLOTS)
+    maxCount: 3,
     careLabel: '아카시아꽃 주기',
     careQuestion: '꿀벌에게 아카시아꽃을 줄까요?',
     careText: '윙윙',
